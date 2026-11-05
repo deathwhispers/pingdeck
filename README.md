@@ -165,11 +165,14 @@ bash scripts/publish.sh
 
 | 触发条件 | 行为 |
 | --- | --- |
-| push 到 `main` / 提 PR 到 `main` | 构建 + 测试 + 打包 + 上传 Artifact |
-| 推送 `v*` 标签 | 同上，并额外创建 GitHub Release 附带 DMG |
-| 手动触发 | 同上 |
+| 提 PR 到 `main` | 构建 + 测试 + 打包，上传 Artifact（**不发布**） |
+| 手动触发（Actions → Build → Run workflow） | `version` 留空则只构建；填 `1.0.1` 则按该版本号打包并创建/更新 Release |
 
-流水线步骤：`xcodebuild build` → `swift test` → 导入签名证书 → `scripts/bundle.sh` 组装 `.app` → `notarytool` 公证并 `stapler` 装订 → `scripts/dmg.sh` 制作 DMG → 上传 Artifact →（打标签时）创建 Release。
+普通提交到 `main` **不会**触发构建——只有 PR 和手动触发会。发布版本的唯一入口是手动触发时填写版本号，这样版本号、DMG 文件名、Release 标签三者始终一致。
+
+流水线步骤：`xcodebuild build` → `swift test` → 导入签名证书 → `scripts/bundle.sh` 组装 `.app`（`CFBundleShortVersionString` 写入版本号）→ `notarytool` 公证并 `stapler` 装订 → `scripts/dmg.sh` 制作 `BatchPing-<版本号>.dmg` → 上传 Artifact →（填了版本号时）创建或更新 Release 并挂上 DMG。
+
+版本号会先做格式校验（必须是 `1.0.1` 这样的数字版本号，`v` 前缀可有可无），不合法会直接让流水线失败并提示。同一版本号重复发布时不会报错，而是覆盖 Release 里同名的 DMG。
 
 ### 可选 Secrets
 
@@ -198,8 +201,17 @@ openssl base64 -A -in DeveloperIDApplication.p12
 xcodebuild build -scheme BatchPing -configuration Release \
   -destination "generic/platform=macOS" -derivedDataPath .build/xcode CODE_SIGNING_ALLOWED=NO
 swift test
-BIN_PATH="$PWD/.build/xcode/Build/Products/Release/BatchPing" bash scripts/bundle.sh
-bash scripts/dmg.sh
+BIN_PATH="$PWD/.build/xcode/Build/Products/Release/BatchPing" \
+  VERSION=1.0.1 bash scripts/bundle.sh
+DMG_PATH="$PWD/dist/BatchPing-1.0.1.dmg" bash scripts/dmg.sh
 ```
 
 工作流里做了兼容处理：先用 `xcodebuild -list -json` 找 `BatchPing` scheme，找不到就自动回退到 `swift build -c release`，产物路径通过 `BIN_PATH` 传给打包脚本，两条路径都能出包。
+
+### 发布一个新版本
+
+1. 在 Actions 页打开 **Build** 工作流 → 右上角 **Run workflow**；
+2. 选择要发布的分支，`version` 填 `1.0.1`（或 `v1.0.1`）；
+3. 流水线跑完后，仓库的 Releases 页面会出现 `v1.0.1`，附带 `BatchPing-1.0.1.dmg`。
+
+没填 `version` 就只跑构建与测试，不产生 Release。

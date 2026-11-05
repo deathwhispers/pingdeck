@@ -1,12 +1,17 @@
 name: Build
 
 on:
-  push:
-    branches: [main]
-    tags: ["v*"]
+  # 只有 PR 才在每次提交代码时触发
   pull_request:
     branches: [main]
+  # 手动触发：填写版本号则打包并发布 Release，留空则只构建
   workflow_dispatch:
+    inputs:
+      version:
+        description: "要打包并发布的版本号，留空则只构建不发布。例：1.0.1 或 v1.0.1"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: write
@@ -27,10 +32,36 @@ jobs:
   build:
     name: Build & Package
     runs-on: macos-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      publish: ${{ steps.version.outputs.publish }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        env:
+          RAW_VERSION: ${{ inputs.version }}
+        run: |
+          VERSION="$(printf '%s' "$RAW_VERSION" | sed 's/^[vV]//' | tr -d '[:space:]')"
+          if [ -z "$VERSION" ]; then
+            echo "version=0.0.0" >> "$GITHUB_OUTPUT"
+            echo "tag=" >> "$GITHUB_OUTPUT"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "仅构建，不发布"
+            exit 0
+          fi
+          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+(\.[0-9]+){0,2}$'; then
+            echo "::error::版本号格式不正确：$VERSION，应形如 1.0.1"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+          echo "将构建并发布 v$VERSION"
 
       - name: Show toolchain
         run: |
@@ -84,10 +115,12 @@ jobs:
           rm -f "$CERTIFICATE_PATH"
 
       - name: Assemble .app
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: bash scripts/bundle.sh
 
       - name: Notarize and staple
-        if: ${{ env.APPLE_CERTIFICATE_P12_BASE64 != '' && env.APPLE_ID != '' }}
+        if: ${{ steps.version.outputs.publish == 'true' && env.APPLE_CERTIFICATE_P12_BASE64 != '' && env.APPLE_ID != '' }}
         run: |
           xcrun notarytool submit "dist/BatchPing.app" \
             --apple-id "$APPLE_ID" \
@@ -98,28 +131,54 @@ jobs:
           xcrun stapler validate "dist/BatchPing.app"
 
       - name: Build .dmg
+        env:
+          DMG_PATH: ${{ github.workspace }}/dist/BatchPing-${{ steps.version.outputs.version }}.dmg
         run: bash scripts/dmg.sh
 
       - name: Verify bundle
+        env:
+          DMG_PATH: ${{ github.workspace }}/dist/BatchPing-${{ steps.version.outputs.version }}.dmg
         run: |
           codesign --verify --deep --verbose=2 "dist/BatchPing.app"
-          hdiutil imageinfo "dist/BatchPing-1.0.0.dmg" | head -5
+          hdiutil imageinfo "$DMG_PATH" | head -5
           ls -lh dist
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: BatchPing-macOS
+          name: BatchPing-${{ steps.version.outputs.version }}-macOS
           path: |
-            dist/BatchPing-1.0.0.dmg
+            dist/BatchPing-${{ steps.version.outputs.version }}.dmg
             dist/BatchPing.app
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+  release:
+    name: Publish Release
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: BatchPing-${{ needs.build.outputs.version }}-macOS
+          path: dist
+
+      - name: Create or update Release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.build.outputs.tag }}
+          VERSION: ${{ needs.build.outputs.version }}
         run: |
-          gh release create "$GITHUB_REF_NAME" \
-            dist/BatchPing-1.0.0.dmg \
-            --title "BatchPing $GITHUB_REF_NAME" \
-            --generate-notes
+          DMG="dist/BatchPing-${VERSION}.dmg"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG 已存在，覆盖同名资源"
+            gh release upload "$TAG" "$DMG" --clobber
+          else
+            gh release create "$TAG" "$DMG" \
+              --title "BatchPing $TAG" \
+              --target "$GITHUB_SHA" \
+              --generate-notes
+          fi
+          gh release view "$TAG" --json url,tagName,assets
