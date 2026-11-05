@@ -64,7 +64,88 @@ final class EngineSchedulingTests: XCTestCase {
         XCTAssertTrue(covered, "轮换后所有目标都应该被探测到")
     }
 
-    /// 停止后保留最后一次测量结果，但不再停留在「探测中」
+    /// 停用某个目标应当立即终止该行的探测
+    func testDisablingTargetStopsProbing() {
+        let engine = PingEngine()
+        engine.updateSettings(PingEngine.Settings(interval: 0.3, timeout: 1, maxConcurrent: 2, rotationInterval: 0))
+
+        let target = PingTarget(host: "127.0.0.1")
+        let lock = NSLock()
+        var latest: [UUID: PingStats] = [:]
+        engine.onStats = { id, stats in
+            lock.lock()
+            latest[id] = stats
+            lock.unlock()
+        }
+        engine.setTargets([target])
+        engine.start()
+
+        let started = waitUntil({
+            lock.lock()
+            defer { lock.unlock() }
+            return (latest[target.id]?.sent ?? 0) > 1
+        }, timeout: 5.0)
+        XCTAssertTrue(started, "应当先收到环回地址的回包")
+
+        var disabled = target
+        disabled.enabled = false
+        engine.setTargets([disabled])
+
+        let stopped = waitUntil({
+            lock.lock()
+            defer { lock.unlock() }
+            return latest[target.id]?.status == .disabled
+        }, timeout: 3.0)
+        XCTAssertTrue(stopped, "停用后状态应变为已停用")
+
+        lock.lock()
+        let sentWhenDisabled = latest[target.id]?.sent ?? 0
+        lock.unlock()
+
+        Thread.sleep(forTimeInterval: 1.5)
+
+        lock.lock()
+        let sentAfter = latest[target.id]?.sent ?? 0
+        lock.unlock()
+
+        engine.stop()
+        XCTAssertEqual(sentAfter, sentWhenDisabled, "停用后不应再有新的探测")
+    }
+
+    /// 重新启用后应当恢复探测
+    func testReEnablingTargetResumesProbing() {
+        let engine = PingEngine()
+        engine.updateSettings(PingEngine.Settings(interval: 0.3, timeout: 1, maxConcurrent: 2, rotationInterval: 0))
+
+        var target = PingTarget(host: "127.0.0.1")
+        target.enabled = false
+        let lock = NSLock()
+        var latest: [UUID: PingStats] = [:]
+        engine.onStats = { id, stats in
+            lock.lock()
+            latest[id] = stats
+            lock.unlock()
+        }
+        engine.setTargets([target])
+        engine.start()
+
+        Thread.sleep(forTimeInterval: 0.5)
+        lock.lock()
+        XCTAssertEqual(latest[target.id]?.status, .disabled)
+        lock.unlock()
+
+        target.enabled = true
+        engine.setTargets([target])
+
+        let resumed = waitUntil({
+            lock.lock()
+            defer { lock.unlock() }
+            return (latest[target.id]?.sent ?? 0) > 0
+        }, timeout: 5.0)
+        engine.stop()
+
+        XCTAssertTrue(resumed, "重新启用后应恢复探测")
+    }
     func testStopKeepsLastResult() {
         let engine = PingEngine()
         engine.updateSettings(PingEngine.Settings(interval: 0.3, timeout: 1, maxConcurrent: 2, rotationInterval: 0))

@@ -39,22 +39,23 @@ final class SelectionTests: XCTestCase {
         XCTAssertEqual(model.selection, [ids[1]])
     }
 
-    /// 导出：没有选中时导出全部
-    func testExportIncludesAllWhenNothingSelected() {
-        let model = makeModel(["a.com", "b.com", "c.com"])
-        model.clearSelection()
-
-        XCTAssertEqual(model.exportEntries.count, 3)
-    }
-
-    /// 导出：有选中时只导出选中项
-    func testExportIncludesOnlySelectedRows() {
+    /// 导出全部：不受选中影响
+    func testAllEntriesIgnoreSelection() {
         let model = makeModel(["a.com", "b.com", "c.com"])
         let ids = model.targets.map { $0.id }
-        model.selection = Set([ids[1]])
+        model.selection = [ids[1]]
 
-        XCTAssertEqual(model.exportEntries.count, 1)
-        XCTAssertEqual(model.exportEntries.first?.target.host, "b.com")
+        XCTAssertEqual(model.allEntries.count, 3)
+    }
+
+    /// 导出选中：只包含选中的行
+    func testSelectedEntriesContainOnlySelectedRows() {
+        let model = makeModel(["a.com", "b.com", "c.com"])
+        let ids = model.targets.map { $0.id }
+        model.selection = [ids[1]]
+
+        XCTAssertEqual(model.selectedEntries.count, 1)
+        XCTAssertEqual(model.selectedEntries.first?.target.host, "b.com")
     }
 }
 

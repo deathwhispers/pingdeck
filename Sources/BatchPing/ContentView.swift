@@ -114,16 +114,21 @@ struct ContentView: View {
             }
             .help("从多行文本批量添加目标")
 
-            Button {
-                exportCSV()
+            Menu {
+                Button("导出全部 \(model.rows.count) 项") {
+                    exportCSV(entries: model.allEntries)
+                }
+                .disabled(model.rows.isEmpty)
+                Button("导出选中 \(model.selection.count) 项") {
+                    exportCSV(entries: model.selectedEntries)
+                }
+                .disabled(model.selection.isEmpty)
             } label: {
-                Label(
-                    model.selection.isEmpty ? "导出 CSV" : "导出选中 \(model.selection.count)",
-                    systemImage: "square.and.arrow.up"
-                )
+                Label("导出 CSV", systemImage: "square.and.arrow.up")
             }
-            .disabled(model.rows.isEmpty)
-            .help(model.selection.isEmpty ? "导出全部目标" : "只导出选中的目标")
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+            .help("导出为 CSV：可选择导出全部或仅选中项")
 
             Button {
                 model.openSettingsSheet()
@@ -170,7 +175,8 @@ struct ContentView: View {
         model.removeTargets(ids: model.selection)
     }
 
-    private func exportCSV() {
+    private func exportCSV(entries: [CsvExporter.Entry]) {
+        guard !entries.isEmpty else { return }
         let panel = NSSavePanel()
         panel.allowedContentTypes = [UTType.commaSeparatedText]
         panel.nameFieldStringValue = "batchping-\(Self.fileTimestamp()).csv"
@@ -178,7 +184,7 @@ struct ContentView: View {
 
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
-            let csv = CsvExporter.csv(for: model.exportEntries)
+            let csv = CsvExporter.csv(for: entries)
             do {
                 try csv.write(to: url, atomically: true, encoding: .utf8)
             } catch {

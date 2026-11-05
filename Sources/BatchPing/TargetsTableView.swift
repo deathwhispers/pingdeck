@@ -179,6 +179,7 @@ struct StatusBadge: View {
         case .alive: return .green
         case .timeout: return .orange
         case .unreachable, .error: return .red
+        case .disabled: return .secondary.opacity(0.6)
         case .running, .pending, .idle: return .secondary
         }
     }

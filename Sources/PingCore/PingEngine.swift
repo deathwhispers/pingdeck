@@ -126,12 +126,25 @@ public final class PingEngine {
         for target in newTargets { newMap[target.id] = target }
         targets = newMap
 
+        // 被停用的目标：终止进程并标记为已停用（包括从未启动过的目标）
+        for target in newTargets where !target.enabled {
+            if processes[target.id] != nil {
+                stopProcessLocked(id: target.id)
+            }
+            pending.removeAll { $0 == target.id }
+            var value = stats[target.id] ?? PingStats()
+            if value.status != .disabled {
+                value.status = .disabled
+                value.message = "已停用"
+                stats[target.id] = value
+                emitLocked(target.id)
+            }
+        }
+
+        // 被删除的目标：终止进程并清理统计
         let removed = processes.keys.filter { newMap[$0] == nil }
         for id in removed {
-            intentionalStops[id] = processes[id]
-            processes[id]?.stop()
-            processes.removeValue(forKey: id)
-            startedAt.removeValue(forKey: id)
+            stopProcessLocked(id: id)
         }
 
         let staleStats = stats.keys.filter { newMap[$0] == nil }
@@ -142,6 +155,7 @@ public final class PingEngine {
         pending.removeAll { newMap[$0] == nil }
 
         guard running else { return }
+        // 新启用或刚恢复启用的目标重新入队
         for target in newTargets where target.enabled && processes[target.id] == nil && !pending.contains(target.id) {
             pending.append(target.id)
         }

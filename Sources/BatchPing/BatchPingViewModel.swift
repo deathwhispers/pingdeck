@@ -278,10 +278,15 @@ final class BatchPingViewModel: ObservableObject {
         selection.removeAll()
     }
 
-    /// 导出条目：有选中时只导出选中项，否则导出全部
-    var exportEntries: [CsvExporter.Entry] {
-        let source = selection.isEmpty ? rows : rows.filter { selection.contains($0.id) }
-        return source.map { CsvExporter.Entry(target: $0.target, stats: $0.stats) }
+    /// 导出全部目标（不受选中影响）
+    var allEntries: [CsvExporter.Entry] {
+        rows.map { CsvExporter.Entry(target: $0.target, stats: $0.stats) }
+    }
+
+    /// 只导出选中的目标
+    var selectedEntries: [CsvExporter.Entry] {
+        rows.filter { selection.contains($0.id) }
+            .map { CsvExporter.Entry(target: $0.target, stats: $0.stats) }
     }
 
     // MARK: - 弹窗
