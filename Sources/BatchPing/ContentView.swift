@@ -60,7 +60,7 @@ struct ContentView: View {
             Button {
                 model.openEditTargetSheet()
             } label: {
-                Label("编辑", systemImage: "pencil")
+                Image(systemName: "pencil")
             }
             .disabled(model.selection.count != 1)
             .help("编辑选中的目标")
@@ -72,7 +72,7 @@ struct ContentView: View {
             }
             .disabled(model.selection.isEmpty)
             .keyboardShortcut(.delete, modifiers: [])
-            .help("删除选中的目标（可多选，⌘ 点击加选，⇧ 点击选区间，Delete 删除）")
+            .help("删除选中的目标（⌘ 点击加选、⇧ 点击选区间、Delete 删除）")
 
             Divider().frame(height: 18)
 
@@ -86,24 +86,24 @@ struct ContentView: View {
             Button {
                 model.refresh()
             } label: {
-                Label("刷新", systemImage: "arrow.clockwise")
+                Image(systemName: "arrow.clockwise")
             }
             .help("立即重新发起一轮探测")
 
-            Button {
-                model.clearResults()
+            Menu {
+                Button("清空结果（保留目标）") {
+                    model.clearResults()
+                }
+                Button("清空全部目标…", role: .destructive) {
+                    model.confirmingClearAllTargets = true
+                }
+                .disabled(model.targets.isEmpty)
             } label: {
-                Label("清空结果", systemImage: "chart.line.flattrend.xyaxis")
+                Label("清空", systemImage: "trash")
             }
-            .help("清空统计数据，保留目标列表")
-
-            Button {
-                model.confirmingClearAllTargets = true
-            } label: {
-                Label("清空目标", systemImage: "trash")
-            }
-            .disabled(model.targets.isEmpty)
-            .help("删除全部目标")
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+            .help("清空统计结果，或删除全部目标")
 
             Spacer()
 
@@ -117,15 +117,20 @@ struct ContentView: View {
             Button {
                 exportCSV()
             } label: {
-                Label("导出 CSV", systemImage: "square.and.arrow.up")
+                Label(
+                    model.selection.isEmpty ? "导出 CSV" : "导出选中 \(model.selection.count)",
+                    systemImage: "square.and.arrow.up"
+                )
             }
             .disabled(model.rows.isEmpty)
+            .help(model.selection.isEmpty ? "导出全部目标" : "只导出选中的目标")
 
             Button {
                 model.openSettingsSheet()
             } label: {
-                Label("设置", systemImage: "gearshape")
+                Image(systemName: "gearshape")
             }
+            .help("设置")
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -173,7 +178,7 @@ struct ContentView: View {
 
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
-            let csv = CsvExporter.csv(for: model.csvEntries)
+            let csv = CsvExporter.csv(for: model.exportEntries)
             do {
                 try csv.write(to: url, atomically: true, encoding: .utf8)
             } catch {

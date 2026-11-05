@@ -1,15 +1,19 @@
 import SwiftUI
-import AppKit
 import PingCore
 
+/// 目标表格
+///
+/// 行容器用 `List(selection:)`，由 AppKit 提供原生的多选语义：
+/// 点击单选、⌘ 点击加选、⇧ 点击选区间，都不再自己判断修饰键。
+/// 「启用」开关放在最后一列并用 switch 样式，避免和「选中」混淆。
 struct TargetsTableView: View {
     @EnvironmentObject private var model: BatchPingViewModel
 
-    private let colEnable: CGFloat = 36
     private let colStatus: CGFloat = 92
     private let colValue: CGFloat = 80
     private let colLoss: CGFloat = 76
     private let colLast: CGFloat = 150
+    private let colEnable: CGFloat = 54
 
     var body: some View {
         VStack(spacing: 0) {
@@ -18,23 +22,20 @@ struct TargetsTableView: View {
             if model.rows.isEmpty {
                 emptyState
             } else {
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(model.rows) { row in
-                            rowView(row)
-                            Divider()
-                        }
+                List(selection: $model.selection) {
+                    ForEach(model.rows) { row in
+                        rowView(row)
+                            .tag(row.id)
                     }
                 }
+                .listStyle(.plain)
+                .environment(\.defaultMinListRowHeight, 26)
             }
         }
     }
 
     private var header: some View {
         HStack(spacing: 0) {
-            Text("")
-                .frame(width: colEnable)
-
             Button {
                 model.toggleSort(.target)
             } label: {
@@ -58,6 +59,8 @@ struct TargetsTableView: View {
             headerCell("最大(ms)", field: .maximum, width: colValue)
             headerCell("丢包率", field: .loss, width: colLoss)
             headerCell("最后响应时间", field: .lastResponse, width: colLast)
+            Text("启用")
+                .frame(width: colEnable, alignment: .trailing)
         }
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(.secondary)
@@ -94,14 +97,6 @@ struct TargetsTableView: View {
 
     private func rowView(_ row: TargetRow) -> some View {
         HStack(spacing: 0) {
-            Toggle("", isOn: Binding(
-                get: { row.target.enabled },
-                set: { model.setEnabled(id: row.id, enabled: $0) }
-            ))
-            .labelsHidden()
-            .help(row.target.enabled ? "点击停用该目标" : "点击启用该目标")
-            .frame(width: colEnable)
-
             HStack(spacing: 6) {
                 Text(row.target.host)
                     .font(.system(.body, design: .monospaced))
@@ -135,12 +130,17 @@ struct TargetsTableView: View {
             Text(model.formattedTime(row.stats.lastResponseAt))
                 .font(.system(size: 11, design: .monospaced))
                 .frame(width: colLast, alignment: .trailing)
+
+            Toggle("", isOn: Binding(
+                get: { row.target.enabled },
+                set: { model.setEnabled(id: row.id, enabled: $0) }
+            ))
+            .labelsHidden()
+            .toggleStyle(.switch)
+            .help(row.target.enabled ? "点击停用该目标" : "点击启用该目标")
+            .frame(width: colEnable, alignment: .trailing)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 4)
-        .background(model.selection.contains(row.id) ? Color.accentColor.opacity(0.18) : Color.clear)
-        .contentShape(Rectangle())
-        .onTapGesture { handleTap(row) }
+        .padding(.vertical, 2)
         .help(row.stats.message.isEmpty ? row.stats.status.displayName : row.stats.message)
     }
 
@@ -156,17 +156,6 @@ struct TargetsTableView: View {
                 .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private func handleTap(_ row: TargetRow) {
-        let flags = NSEvent.modifierFlags
-        if flags.contains(.command) {
-            model.toggleSelection(row.id)
-        } else if flags.contains(.shift) {
-            model.selectRange(to: row.id)
-        } else {
-            model.selectOnly(row.id)
-        }
     }
 }
 

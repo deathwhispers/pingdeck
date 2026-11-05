@@ -107,8 +107,6 @@ final class BatchPingViewModel: ObservableObject {
     @Published private(set) var stats: [UUID: PingStats] = [:]
     @Published private(set) var isRunning = false
     @Published var selection: Set<UUID> = []
-    /// 上次交互的行，用于 ⇧ 点击时的区间选择
-    @Published private(set) var selectionAnchor: UUID?
     /// 清空全部目标前的确认弹窗
     @Published var confirmingClearAllTargets = false
     @Published var sheet: AppSheet?
@@ -209,10 +207,6 @@ final class BatchPingViewModel: ObservableObject {
         }
     }
 
-    var csvEntries: [CsvExporter.Entry] {
-        rows.map { CsvExporter.Entry(target: $0.target, stats: $0.stats) }
-    }
-
     var aliveCount: Int {
         rows.filter { $0.stats.status == .alive }.count
     }
@@ -275,42 +269,19 @@ final class BatchPingViewModel: ObservableObject {
 
     // MARK: - 选中状态
 
-    /// 单选：清空其它选中，只保留这一个
-    func selectOnly(_ id: UUID) {
-        selection = [id]
-        selectionAnchor = id
-    }
-
-    /// ⌘ 点击：切换某一项的选中状态
-    func toggleSelection(_ id: UUID) {
-        if selection.contains(id) {
-            selection.remove(id)
-        } else {
-            selection.insert(id)
-        }
-        selectionAnchor = id
-    }
-
-    /// ⇧ 点击：按当前表格顺序选中一段区间
-    func selectRange(to id: UUID) {
-        let order = rows.map { $0.id }
-        guard let anchor = selectionAnchor ?? selection.first,
-              let anchorIndex = order.firstIndex(of: anchor),
-              let targetIndex = order.firstIndex(of: id) else {
-            selectOnly(id)
-            return
-        }
-        let range = min(anchorIndex, targetIndex)...max(anchorIndex, targetIndex)
-        selection = Set(order[range])
-    }
-
+    /// 选中由 List 的原生语义维护（点击 / ⌘ 点击 / ⇧ 点击），这里只提供全选与清空
     func selectAll() {
         selection = Set(targets.map { $0.id })
     }
 
     func clearSelection() {
         selection.removeAll()
-        selectionAnchor = nil
+    }
+
+    /// 导出条目：有选中时只导出选中项，否则导出全部
+    var exportEntries: [CsvExporter.Entry] {
+        let source = selection.isEmpty ? rows : rows.filter { selection.contains($0.id) }
+        return source.map { CsvExporter.Entry(target: $0.target, stats: $0.stats) }
     }
 
     // MARK: - 弹窗

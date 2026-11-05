@@ -8,50 +8,6 @@ final class SelectionTests: XCTestCase {
         return BatchPingViewModel(configuration: configuration)
     }
 
-    func testSelectOnlyReplacesPreviousSelection() {
-        let model = makeModel(["a.com", "b.com", "c.com"])
-        let ids = model.targets.map { $0.id }
-
-        model.selectOnly(ids[0])
-        model.selectOnly(ids[2])
-
-        XCTAssertEqual(model.selection, [ids[2]])
-    }
-
-    func testToggleSelectionAddsAndRemoves() {
-        let model = makeModel(["a.com", "b.com", "c.com"])
-        let ids = model.targets.map { $0.id }
-
-        model.toggleSelection(ids[0])
-        model.toggleSelection(ids[2])
-        XCTAssertEqual(model.selection, Set([ids[0], ids[2]]))
-
-        model.toggleSelection(ids[0])
-        XCTAssertEqual(model.selection, [ids[2]])
-    }
-
-    /// ⇧ 点击按表格当前顺序选中一段区间
-    func testSelectRangeCoversIntervalInRowOrder() {
-        let model = makeModel(["a.com", "b.com", "c.com", "d.com"])
-        let rowIDs = model.rows.map { $0.id }
-
-        model.selectOnly(rowIDs[0])
-        model.selectRange(to: rowIDs[2])
-
-        XCTAssertEqual(model.selection, Set(rowIDs[0...2]))
-    }
-
-    /// 反向拖选同样成立
-    func testSelectRangeBackwards() {
-        let model = makeModel(["a.com", "b.com", "c.com", "d.com"])
-        let rowIDs = model.rows.map { $0.id }
-
-        model.selectOnly(rowIDs[3])
-        model.selectRange(to: rowIDs[1])
-
-        XCTAssertEqual(model.selection, Set(rowIDs[1...3]))
-    }
-
     func testSelectAllAndClearSelection() {
         let model = makeModel(["a.com", "b.com", "c.com"])
 
@@ -70,6 +26,35 @@ final class SelectionTests: XCTestCase {
 
         XCTAssertEqual(model.targets.map { $0.host }, ["b.com"])
         XCTAssertTrue(model.selection.isEmpty)
+    }
+
+    /// 批量删除后，选中集合不能残留已删除的 id
+    func testRemoveTargetsDropsStaleSelection() {
+        let model = makeModel(["a.com", "b.com"])
+        let ids = model.targets.map { $0.id }
+
+        model.selection = Set(ids)
+        model.removeTargets(ids: [ids[0]])
+
+        XCTAssertEqual(model.selection, [ids[1]])
+    }
+
+    /// 导出：没有选中时导出全部
+    func testExportIncludesAllWhenNothingSelected() {
+        let model = makeModel(["a.com", "b.com", "c.com"])
+        model.clearSelection()
+
+        XCTAssertEqual(model.exportEntries.count, 3)
+    }
+
+    /// 导出：有选中时只导出选中项
+    func testExportIncludesOnlySelectedRows() {
+        let model = makeModel(["a.com", "b.com", "c.com"])
+        let ids = model.targets.map { $0.id }
+        model.selection = Set([ids[1]])
+
+        XCTAssertEqual(model.exportEntries.count, 1)
+        XCTAssertEqual(model.exportEntries.first?.target.host, "b.com")
     }
 }
 
