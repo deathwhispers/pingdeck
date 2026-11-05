@@ -2,7 +2,6 @@ APP_NAME := PingDeck
 BUILD_DIR := .build/release
 DIST_DIR := dist
 APP_BUNDLE := $(DIST_DIR)/$(APP_NAME).app
-VERSION := 1.0.0
 
 .PHONY: all build debug run test check app dmg clean
 
