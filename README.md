@@ -190,10 +190,11 @@ bash scripts/publish.sh
 
 | 触发条件 | 行为 |
 | --- | --- |
-| 提 PR 到 `main` | 构建 + 测试 + 打包，上传 Artifact（**不发布**） |
+| 创建 PR 到 `main`（或重新打开） | 构建 + 测试 + 打包，上传 Artifact（**不发布**） |
+| 往已有 PR 的分支继续提交 | **不触发**，日常开发只提交不跑 CI |
 | 手动触发（Actions → Build → Run workflow） | `version` 留空则只构建；填 `1.0.1` 则按该版本号打包并创建/更新 Release |
 
-普通提交到 `main` **不会**触发构建——只有 PR 和手动触发会。发布版本的唯一入口是手动触发时填写版本号，这样版本号、DMG 文件名、Release 标签三者始终一致。
+日常在 `feat` 分支上提交不会触发任何构建；只有主动开 PR 时才跑一次完整验证。PR 之后如果又追加了提交、需要重新验证，可以关掉 PR 再重新打开，或直接手动 Run workflow。
 
 流水线步骤：`xcodebuild build` → `swift test` → 导入签名证书 → `scripts/bundle.sh` 组装 `.app`（`CFBundleShortVersionString` 写入版本号）→ `notarytool` 公证并 `stapler` 装订 → `scripts/dmg.sh` 制作 `BatchPing-<版本号>.dmg` → 上传 Artifact →（填了版本号时）创建或更新 Release 并挂上 DMG。
 
