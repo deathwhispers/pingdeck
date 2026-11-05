@@ -1,7 +1,8 @@
 import SwiftUI
+import PingCore
 
 struct TargetEditorSheet: View {
-    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var model: BatchPingViewModel
     @State private var host: String
     @State private var note: String
     @State private var enabled: Bool
@@ -46,7 +47,7 @@ struct TargetEditorSheet: View {
 
             HStack {
                 Spacer()
-                Button("取消") { dismiss() }
+                Button("取消") { model.closeSheet() }
                 Button("保存") { save() }
                     .keyboardShortcut(.defaultAction)
             }

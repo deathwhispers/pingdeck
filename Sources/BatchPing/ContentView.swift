@@ -18,19 +18,25 @@ struct ContentView: View {
             Divider()
             footerBar
         }
-        .sheet(item: $model.editorDraft) { draft in
-            TargetEditorSheet(draft: draft) { host, note, enabled in
-                model.editorDraft = nil
-                if draft.isNew {
-                    model.addTarget(host: host, note: note, enabled: enabled)
-                } else if let id = draft.targetID {
-                    model.updateTarget(id: id, host: host, note: note, enabled: enabled)
+        .sheet(item: $model.sheet) { sheet in
+            switch sheet {
+            case .editor(let draft):
+                TargetEditorSheet(draft: draft) { host, note, enabled in
+                    model.closeSheet()
+                    if draft.isNew {
+                        model.addTarget(host: host, note: note, enabled: enabled)
+                    } else if let id = draft.targetID {
+                        model.updateTarget(id: id, host: host, note: note, enabled: enabled)
+                    }
                 }
-            }
-        }
-        .sheet(isPresented: $model.showingSettings) {
-            SettingsSheet()
                 .environmentObject(model)
+            case .settings:
+                SettingsSheet()
+                    .environmentObject(model)
+            case .bulkImport:
+                BulkImportSheet()
+                    .environmentObject(model)
+            }
         }
     }
 
@@ -39,14 +45,14 @@ struct ContentView: View {
     private var toolbarBar: some View {
         HStack(spacing: 8) {
             Button {
-                model.editorDraft = .new()
+                model.openNewTargetSheet()
             } label: {
                 Label("添加", systemImage: "plus")
             }
             .help("添加一个 IP 或域名")
 
             Button {
-                editSelected()
+                model.openEditTargetSheet()
             } label: {
                 Label("编辑", systemImage: "pencil")
             }
@@ -86,22 +92,12 @@ struct ContentView: View {
 
             Spacer()
 
-            Menu {
-                ForEach(SortMode.allCases) { mode in
-                    Button {
-                        model.sortMode = mode
-                    } label: {
-                        if model.sortMode == mode {
-                            Label(mode.title, systemImage: "checkmark")
-                        } else {
-                            Text(mode.title)
-                        }
-                    }
-                }
+            Button {
+                model.openBulkImportSheet()
             } label: {
-                Label("排序", systemImage: "arrow.up.arrow.down")
+                Label("批量导入", systemImage: "text.badge.plus")
             }
-            .help("选择表格排序方式")
+            .help("从多行文本批量添加目标")
 
             Button {
                 exportCSV()
@@ -111,7 +107,7 @@ struct ContentView: View {
             .disabled(model.rows.isEmpty)
 
             Button {
-                model.showingSettings = true
+                model.openSettingsSheet()
             } label: {
                 Label("设置", systemImage: "gearshape")
             }
@@ -143,12 +139,6 @@ struct ContentView: View {
     }
 
     // MARK: - 动作
-
-    private func editSelected() {
-        guard let id = model.selection.first,
-              let target = model.targets.first(where: { $0.id == id }) else { return }
-        model.editorDraft = .edit(target)
-    }
 
     private func removeSelected() {
         guard !model.selection.isEmpty else { return }

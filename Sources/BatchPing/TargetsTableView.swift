@@ -34,29 +34,62 @@ struct TargetsTableView: View {
         HStack(spacing: 0) {
             Text("")
                 .frame(width: colEnable)
-            Text("目标")
+
+            Button {
+                model.toggleSort(.target)
+            } label: {
+                HStack(spacing: 2) {
+                    Text("目标")
+                    if model.sort.field == .target {
+                        sortIndicator
+                    }
+                }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, 6)
-            Text("状态")
-                .frame(width: colStatus, alignment: .leading)
-            Text("最新(ms)")
-                .frame(width: colValue, alignment: .trailing)
-            Text("平均(ms)")
-                .frame(width: colValue, alignment: .trailing)
-            Text("最小(ms)")
-                .frame(width: colValue, alignment: .trailing)
-            Text("最大(ms)")
-                .frame(width: colValue, alignment: .trailing)
-            Text("丢包率")
-                .frame(width: colLoss, alignment: .trailing)
-            Text("最后响应时间")
-                .frame(width: colLast, alignment: .trailing)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .padding(.leading, 6)
+            .help("点击按「\(SortSpec.Field.target.title)」排序")
+
+            headerCell("状态", field: nil, width: colStatus, alignment: .leading)
+            headerCell("最新(ms)", field: .last, width: colValue)
+            headerCell("平均(ms)", field: .average, width: colValue)
+            headerCell("最小(ms)", field: .minimum, width: colValue)
+            headerCell("最大(ms)", field: .maximum, width: colValue)
+            headerCell("丢包率", field: .loss, width: colLoss)
+            headerCell("最后响应时间", field: .lastResponse, width: colLast)
         }
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(.secondary)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(Color(nsColor: .controlBackgroundColor))
+    }
+
+    private func headerCell(_ title: String, field: SortSpec.Field?, width: CGFloat, alignment: Alignment = .trailing) -> some View {
+        Button {
+            if let field {
+                model.toggleSort(field)
+            }
+        } label: {
+            HStack(spacing: 2) {
+                Text(title)
+                if let field, model.sort.field == field {
+                    sortIndicator
+                }
+            }
+            .frame(width: width, alignment: alignment)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(field == nil)
+        .help(field == nil ? title : "点击按「\(field?.title ?? title)」排序")
+    }
+
+    private var sortIndicator: some View {
+        Image(systemName: model.sort.ascending ? "chevron.up" : "chevron.down")
+            .font(.system(size: 8, weight: .bold))
+            .foregroundStyle(.secondary)
     }
 
     private func rowView(_ row: TargetRow) -> some View {

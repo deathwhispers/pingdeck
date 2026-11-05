@@ -9,20 +9,54 @@ struct TargetRow: Identifiable {
     let stats: PingStats
 }
 
-enum SortMode: String, CaseIterable, Identifiable {
-    case original
-    case host
-    case latency
-    case loss
+/// 表格排序：字段 + 方向
+struct SortSpec: Equatable {
+    enum Field: String, CaseIterable {
+        case target
+        case last
+        case average
+        case minimum
+        case maximum
+        case loss
+        case lastResponse
 
-    var id: String { rawValue }
+        var title: String {
+            switch self {
+            case .target: return "目标"
+            case .last: return "最新延迟"
+            case .average: return "平均延迟"
+            case .minimum: return "最小延迟"
+            case .maximum: return "最大延迟"
+            case .loss: return "丢包率"
+            case .lastResponse: return "最后响应时间"
+            }
+        }
 
-    var title: String {
+        /// 首次点击该列时的默认方向：目标升序，其余降序（最差的排前面）
+        var defaultAscending: Bool {
+            self == .target
+        }
+    }
+
+    var field: Field
+    var ascending: Bool
+
+    static let `default` = SortSpec(field: .target, ascending: true)
+}
+
+/// 当前要呈现的弹窗
+///
+/// 只用一个 sheet 承载三种弹窗，避免多个 `.sheet` 修饰符挂在同一视图上互相抢占。
+enum AppSheet: Identifiable {
+    case editor(TargetEditorDraft)
+    case settings
+    case bulkImport
+
+    var id: String {
         switch self {
-        case .original: return "添加顺序"
-        case .host: return "目标名称"
-        case .latency: return "延迟从高到低"
-        case .loss: return "丢包率从高到低"
+        case .editor(let draft): return "editor-\(draft.id.uuidString)"
+        case .settings: return "settings"
+        case .bulkImport: return "bulkImport"
         }
     }
 }
@@ -51,30 +85,14 @@ struct TargetEditorDraft: Identifiable {
     }
 }
 
-enum TargetValidator {
-    static func validate(_ host: String) -> String? {
-        let trimmed = host.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty { return "目标不能为空" }
-        if trimmed.contains("://") { return "请不要填写协议前缀，例如 http://" }
-        if trimmed.contains("/") { return "请只填写主机名或 IP，不要带路径" }
-        if trimmed.contains(" ") { return "目标不能包含空格" }
-        let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_:[]%")
-        if trimmed.rangeOfCharacter(from: allowed.inverted) != nil {
-            return "目标包含非法字符"
-        }
-        return nil
-    }
-}
-
 final class BatchPingViewModel: ObservableObject {
     @Published private(set) var targets: [PingTarget] = []
     @Published private(set) var stats: [UUID: PingStats] = [:]
     @Published private(set) var isRunning = false
     @Published var selection: Set<UUID> = []
-    @Published var editorDraft: TargetEditorDraft?
-    @Published var showingSettings = false
+    @Published var sheet: AppSheet?
     @Published var alert: AppAlert?
-    @Published var sortMode: SortMode = .original
+    @Published var sort: SortSpec = .default
     @Published var settings: PingSettings = .default {
         didSet {
             guard settings != oldValue else { return }
@@ -121,25 +139,52 @@ final class BatchPingViewModel: ObservableObject {
 
     var rows: [TargetRow] {
         let list = targets.map { TargetRow(id: $0.id, target: $0, stats: stats[$0.id] ?? PingStats()) }
-        switch sortMode {
-        case .original:
-            return list
-        case .host:
-            return list.sorted { $0.target.host.localizedStandardCompare($1.target.host) == .orderedAscending }
-        case .latency:
-            return list.sorted { left, right in
-                switch (left.stats.lastLatency, right.stats.lastLatency) {
-                case let (a?, b?): return a == b ? left.target.host < right.target.host : a > b
-                case (nil, _?): return false
-                case (_?, nil): return true
-                default: return left.target.host < right.target.host
-                }
-            }
+        return list.sorted(by: compareRows)
+    }
+
+    /// 点击表头：同一列再次点击则反向，否则切换到该列（默认方向见 SortSpec.Field）
+    func toggleSort(_ field: SortSpec.Field) {
+        if sort.field == field {
+            sort.ascending.toggle()
+        } else {
+            sort = SortSpec(field: field, ascending: field.defaultAscending)
+        }
+    }
+
+    private func compareRows(_ left: TargetRow, _ right: TargetRow) -> Bool {
+        let ordering: ComparisonResult
+        switch sort.field {
+        case .target:
+            ordering = left.target.host.localizedStandardCompare(right.target.host)
+        case .last:
+            ordering = ordered(left.stats.lastLatency, right.stats.lastLatency)
+        case .average:
+            ordering = ordered(left.stats.averageLatency, right.stats.averageLatency)
+        case .minimum:
+            ordering = ordered(left.stats.minLatency, right.stats.minLatency)
+        case .maximum:
+            ordering = ordered(left.stats.maxLatency, right.stats.maxLatency)
         case .loss:
-            return list.sorted { left, right in
-                if left.stats.lossRate == right.stats.lossRate { return left.target.host < right.target.host }
-                return left.stats.lossRate > right.stats.lossRate
-            }
+            ordering = ordered(left.stats.lossRate, right.stats.lossRate)
+        case .lastResponse:
+            ordering = ordered(left.stats.lastResponseAt, right.stats.lastResponseAt)
+        }
+
+        if ordering == .orderedSame {
+            return left.target.host.localizedStandardCompare(right.target.host) == .orderedAscending
+        }
+        return sort.ascending ? ordering == .orderedAscending : ordering == .orderedDescending
+    }
+
+    /// 空值一律排在后面，不随升降序翻转
+    private func ordered<T: Comparable>(_ left: T?, _ right: T?) -> ComparisonResult {
+        switch (left, right) {
+        case (nil, nil): return .orderedSame
+        case (nil, _): return .orderedDescending
+        case (_, nil): return .orderedAscending
+        case let (left?, right?):
+            if left == right { return .orderedSame }
+            return left < right ? .orderedAscending : .orderedDescending
         }
     }
 
@@ -198,6 +243,50 @@ final class BatchPingViewModel: ObservableObject {
         targets = updated
         engine.setTargets(updated)
         scheduleSave()
+    }
+
+    // MARK: - 弹窗
+
+    func openNewTargetSheet() {
+        sheet = .editor(.new())
+    }
+
+    func openEditTargetSheet() {
+        guard let id = selection.first,
+              let target = targets.first(where: { $0.id == id }) else { return }
+        sheet = .editor(.edit(target))
+    }
+
+    func openSettingsSheet() {
+        sheet = .settings
+    }
+
+    func openBulkImportSheet() {
+        sheet = .bulkImport
+    }
+
+    func closeSheet() {
+        sheet = nil
+    }
+
+    // MARK: - 批量导入
+
+    /// 预览批量导入结果，不改动目标列表
+    func previewBulkImport(_ text: String) -> BulkImportParser.Result {
+        BulkImportParser.parse(text, existing: Set(targets.map { $0.host.lowercased() }))
+    }
+
+    /// 执行批量导入，返回可导入条目与被跳过的行
+    @discardableResult
+    func importTargets(_ text: String) -> BulkImportParser.Result {
+        let result = previewBulkImport(text)
+        guard !result.entries.isEmpty else { return result }
+        var updated = targets
+        for entry in result.entries {
+            updated.append(PingTarget(host: entry.host, note: entry.note, enabled: true))
+        }
+        applyTargets(updated)
+        return result
     }
 
     // MARK: - 运行控制

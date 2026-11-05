@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SettingsSheet: View {
     @EnvironmentObject private var model: BatchPingViewModel
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -74,7 +73,7 @@ struct SettingsSheet: View {
                 Spacer()
                 Button("完成") {
                     model.saveNow()
-                    dismiss()
+                    model.closeSheet()
                 }
                 .keyboardShortcut(.defaultAction)
             }
