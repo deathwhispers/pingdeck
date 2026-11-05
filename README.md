@@ -49,6 +49,8 @@
 .
 ├── Package.swift                  # SwiftPM 包定义（PingCore 库 + BatchPing 可执行 + 测试）
 ├── Makefile                       # build / run / test / app / dmg
+├── VERSION                        # 版本号唯一来源
+├── CHANGELOG.md
 ├── README.md
 ├── Sources/
 │   ├── PingCore/                  # 与界面无关的核心逻辑
@@ -57,18 +59,24 @@
 │   │   ├── PingProcess.swift      # ping 子进程封装 + 行缓冲
 │   │   ├── PingEngine.swift       # 并发调度器
 │   │   ├── ConfigStore.swift      # 配置持久化
+│   │   ├── BulkImport.swift       # 批量导入解析 + 目标校验
 │   │   └── CsvExporter.swift      # CSV 导出
 │   └── BatchPing/                 # SwiftUI 界面层
 │       ├── BatchPingApp.swift     # @main App
 │       ├── BatchPingViewModel.swift
 │       ├── ContentView.swift      # 工具栏 / 表格 / 状态栏 / CSV 导出
-│       ├── TargetsTableView.swift # 表格
+│       ├── TargetsTableView.swift # 表格（表头点击排序）
 │       ├── TargetEditorSheet.swift
+│       ├── BulkImportSheet.swift   # 批量导入
 │       └── SettingsSheet.swift
-├── Tests/PingCoreTests/           # 解析器、统计、CSV 单元测试
+├── Tests/
+│   ├── PingCoreTests/              # 解析器、统计、CSV、批量导入、引擎调度单元测试
+│   └── BatchPingTests/             # 界面层逻辑：多选、区间选择、清空、导入模式
 └── scripts/
     ├── bundle.sh                  # 生成 dist/BatchPing.app
-    └── dmg.sh                     # 生成 dist/BatchPing-1.0.0.dmg
+    ├── dmg.sh                     # 生成 dist/BatchPing-<版本号>.dmg
+    ├── make-icon.swift            # 脚本化渲染图标
+    └── publish.sh                 # 首次推送到 GitHub
 ```
 
 ## 四、构建与运行
@@ -106,7 +114,9 @@ open dist/BatchPing-1.0.0.dmg
 4. `codesign` 签名：默认 ad-hoc，设置 `DEVELOPER_ID_APPLICATION` 环境变量则改用该证书 + Hardened Runtime；
 5. `hdiutil create` 制作 DMG。
 
-脚本支持的环境变量：`BIN_PATH`（可执行文件路径）、`APP_PATH`（.app 输出路径）、`DMG_PATH`（DMG 输出路径）、`DEVELOPER_ID_APPLICATION`（签名证书）。
+脚本支持的环境变量：`BIN_PATH`（可执行文件路径）、`APP_PATH`（.app 输出路径）、`DMG_PATH`（DMG 输出路径）、`VERSION`（应用版本号）、`DEVELOPER_ID_APPLICATION`（签名证书）。
+
+**版本号的唯一来源是仓库根目录的 `VERSION` 文件**，打包脚本与 CI 都从这里读取；也可以用 `VERSION` 环境变量临时覆盖。`make app` / `make dmg` 默认产出 `BatchPing-<VERSION>.app` 与 `BatchPing-<VERSION>.dmg`。
 
 **正式分发（对外发布 / 免 Gatekeeper 拦截）**需要：
 
@@ -130,22 +140,38 @@ open dist/BatchPing-1.0.0.dmg
 | 需求 | 实现位置 |
 | --- | --- |
 | 添加 / 删除 / 编辑目标 | 工具栏「添加 / 编辑 / 删除」+ 每行启用开关 |
+| 批量删除 | ⌘ 点击加选、⇧ 点击选区间、⌘A 全选、Delete 键删除；按钮标题显示选中数量 |
+| 清空全部目标 | 工具栏「清空目标」（带确认弹窗），与「清空结果」区分 |
+| 批量添加目标 | 工具栏「批量导入」，每行一个目标，支持「目标 备注」，可选追加或替换 |
 | 批量 Ping、独立状态 | `PingEngine` 每目标一个进程，`TargetStatus` 独立状态 |
+| 单行启停 | 末列「启用」开关：关闭立即终止该目标的 ping 进程并显示「已停用」，重新打开恢复探测 |
 | 表格列 | 目标 / 状态 / 最新 / 平均 / 最小 / 最大 / 丢包率 / 最后响应时间 |
+| 排序 | 点击表头切换升降序，空值始终排在最后 |
 | 开始 / 停止 / 刷新 / 清空 | 工具栏按钮 |
 | 并发限制 | 设置项「最大并发数」+「轮换周期」 |
-| 导出 CSV | 工具栏「导出 CSV」，带 UTF-8 BOM |
+| 导出 CSV | 工具栏「导出 CSV」菜单，可选导出全部或仅选中项，带 UTF-8 BOM |
 | 深色模式 | 全部使用系统语义色，自动跟随系统外观 |
 | 后台低 CPU | 内核定时发包 + 250ms UI 合并刷新 |
 | 配置保存 | `ConfigStore` 写 JSON，启动自动加载 |
 | 使用系统能力 | 复用 `/sbin/ping` / `/sbin/ping6`，无第三方依赖 |
+
+### 快捷键与鼠标
+
+| 操作 | 效果 |
+| --- | --- |
+| 点击行 | 单选该行 |
+| ⌘ 点击 | 加选 / 取消选择该行 |
+| ⇧ 点击 | 按当前排序选中一段区间 |
+| ⌘A | 由系统「编辑 → 全选」按焦点生效：输入框里全选文字，表格里全选目标 |
+| Delete | 删除选中的目标 |
+| 点击表头 | 按该列排序，同列再点反向 |
 
 ## 八、本机验证结果
 
 | 项目 | 结果 |
 | --- | --- |
 | `swift build` | 通过，0 error / 0 warning |
-| `swift test` | 13 个用例全部通过（解析器、统计、CSV、配置序列化、真实 ping 集成） |
+| `swift test` | 33 个用例全部通过（解析器、统计、CSV、配置序列化、批量导入、引擎调度、界面层选择与导入模式） |
 | 真实环境验证 | 环回 8 包 8 通；`192.0.2.1` 7 发包 0 回包、丢包率 100%；`nope.invalid` 正确报 `cannot resolve` |
 | `make app` / `make dmg` | 生成 `BatchPing.app`（ad-hoc 签名）与 `BatchPing-1.0.0.dmg` |
 | 运行资源 | 空闲 CPU **0.0%**，内存 footprint **28MB**（RSS 约 100MB，含共享框架页） |
@@ -165,14 +191,17 @@ bash scripts/publish.sh
 
 | 触发条件 | 行为 |
 | --- | --- |
-| 提 PR 到 `main` | 构建 + 测试 + 打包，上传 Artifact（**不发布**） |
+| 创建 PR 到 `main`（或重新打开） | 构建 + 测试 + 打包，上传 Artifact（**不发布**） |
+| 往已有 PR 的分支继续提交 | **不触发**，日常开发只提交不跑 CI |
 | 手动触发（Actions → Build → Run workflow） | `version` 留空则只构建；填 `1.0.1` 则按该版本号打包并创建/更新 Release |
 
-普通提交到 `main` **不会**触发构建——只有 PR 和手动触发会。发布版本的唯一入口是手动触发时填写版本号，这样版本号、DMG 文件名、Release 标签三者始终一致。
+日常在 `feat` 分支上提交不会触发任何构建；只有主动开 PR 时才跑一次完整验证。PR 之后如果又追加了提交、需要重新验证，可以关掉 PR 再重新打开，或直接手动 Run workflow。
 
 流水线步骤：`xcodebuild build` → `swift test` → 导入签名证书 → `scripts/bundle.sh` 组装 `.app`（`CFBundleShortVersionString` 写入版本号）→ `notarytool` 公证并 `stapler` 装订 → `scripts/dmg.sh` 制作 `BatchPing-<版本号>.dmg` → 上传 Artifact →（填了版本号时）创建或更新 Release 并挂上 DMG。
 
 版本号会先做格式校验（必须是 `1.0.1` 这样的数字版本号，`v` 前缀可有可无），不合法会直接让流水线失败并提示。同一版本号重复发布时不会报错，而是覆盖 Release 里同名的 DMG。
+
+不填 `version` 时使用仓库根目录 `VERSION` 文件里的版本号，只构建不发布；手动填的版本号与 `VERSION` 文件不一致时，流水线会给出 warning 提醒（不阻断）。
 
 ### 可选 Secrets
 

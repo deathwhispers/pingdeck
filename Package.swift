@@ -14,5 +14,7 @@ let package = Package(
         // SwiftUI 界面层
         .executableTarget(name: "BatchPing", dependencies: ["PingCore"]),
         .testTarget(name: "PingCoreTests", dependencies: ["PingCore"]),
+        // 界面层逻辑（选择、清空、导入模式）
+        .testTarget(name: "BatchPingTests", dependencies: ["BatchPing", "PingCore"], path: "Tests/BatchPingTests"),
     ]
 )

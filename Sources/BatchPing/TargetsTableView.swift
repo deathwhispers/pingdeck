@@ -1,15 +1,19 @@
 import SwiftUI
-import AppKit
 import PingCore
 
+/// 目标表格
+///
+/// 行容器用 `List(selection:)`，由 AppKit 提供原生的多选语义：
+/// 点击单选、⌘ 点击加选、⇧ 点击选区间，都不再自己判断修饰键。
+/// 「启用」开关放在最后一列并用 switch 样式，避免和「选中」混淆。
 struct TargetsTableView: View {
     @EnvironmentObject private var model: BatchPingViewModel
 
-    private let colEnable: CGFloat = 36
     private let colStatus: CGFloat = 92
     private let colValue: CGFloat = 80
     private let colLoss: CGFloat = 76
     private let colLast: CGFloat = 150
+    private let colEnable: CGFloat = 54
 
     var body: some View {
         VStack(spacing: 0) {
@@ -18,39 +22,45 @@ struct TargetsTableView: View {
             if model.rows.isEmpty {
                 emptyState
             } else {
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(model.rows) { row in
-                            rowView(row)
-                            Divider()
-                        }
+                List(selection: $model.selection) {
+                    ForEach(model.rows) { row in
+                        rowView(row)
+                            .tag(row.id)
                     }
                 }
+                .listStyle(.plain)
+                .environment(\.defaultMinListRowHeight, 26)
             }
         }
     }
 
     private var header: some View {
         HStack(spacing: 0) {
-            Text("")
-                .frame(width: colEnable)
-            Text("目标")
+            Button {
+                model.toggleSort(.target)
+            } label: {
+                HStack(spacing: 2) {
+                    Text("目标")
+                    if model.sort.field == .target {
+                        sortIndicator
+                    }
+                }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, 6)
-            Text("状态")
-                .frame(width: colStatus, alignment: .leading)
-            Text("最新(ms)")
-                .frame(width: colValue, alignment: .trailing)
-            Text("平均(ms)")
-                .frame(width: colValue, alignment: .trailing)
-            Text("最小(ms)")
-                .frame(width: colValue, alignment: .trailing)
-            Text("最大(ms)")
-                .frame(width: colValue, alignment: .trailing)
-            Text("丢包率")
-                .frame(width: colLoss, alignment: .trailing)
-            Text("最后响应时间")
-                .frame(width: colLast, alignment: .trailing)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .padding(.leading, 6)
+            .help("点击按「\(SortSpec.Field.target.title)」排序")
+
+            headerCell("状态", field: nil, width: colStatus, alignment: .leading)
+            headerCell("最新(ms)", field: .last, width: colValue)
+            headerCell("平均(ms)", field: .average, width: colValue)
+            headerCell("最小(ms)", field: .minimum, width: colValue)
+            headerCell("最大(ms)", field: .maximum, width: colValue)
+            headerCell("丢包率", field: .loss, width: colLoss)
+            headerCell("最后响应时间", field: .lastResponse, width: colLast)
+            Text("启用")
+                .frame(width: colEnable, alignment: .trailing)
         }
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(.secondary)
@@ -59,16 +69,34 @@ struct TargetsTableView: View {
         .background(Color(nsColor: .controlBackgroundColor))
     }
 
+    private func headerCell(_ title: String, field: SortSpec.Field?, width: CGFloat, alignment: Alignment = .trailing) -> some View {
+        Button {
+            if let field {
+                model.toggleSort(field)
+            }
+        } label: {
+            HStack(spacing: 2) {
+                Text(title)
+                if let field, model.sort.field == field {
+                    sortIndicator
+                }
+            }
+            .frame(width: width, alignment: alignment)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(field == nil)
+        .help(field == nil ? title : "点击按「\(field?.title ?? title)」排序")
+    }
+
+    private var sortIndicator: some View {
+        Image(systemName: model.sort.ascending ? "chevron.up" : "chevron.down")
+            .font(.system(size: 8, weight: .bold))
+            .foregroundStyle(.secondary)
+    }
+
     private func rowView(_ row: TargetRow) -> some View {
         HStack(spacing: 0) {
-            Toggle("", isOn: Binding(
-                get: { row.target.enabled },
-                set: { model.setEnabled(id: row.id, enabled: $0) }
-            ))
-            .labelsHidden()
-            .help(row.target.enabled ? "点击停用该目标" : "点击启用该目标")
-            .frame(width: colEnable)
-
             HStack(spacing: 6) {
                 Text(row.target.host)
                     .font(.system(.body, design: .monospaced))
@@ -102,12 +130,17 @@ struct TargetsTableView: View {
             Text(model.formattedTime(row.stats.lastResponseAt))
                 .font(.system(size: 11, design: .monospaced))
                 .frame(width: colLast, alignment: .trailing)
+
+            Toggle("", isOn: Binding(
+                get: { row.target.enabled },
+                set: { model.setEnabled(id: row.id, enabled: $0) }
+            ))
+            .labelsHidden()
+            .toggleStyle(.switch)
+            .help(row.target.enabled ? "点击停用该目标" : "点击启用该目标")
+            .frame(width: colEnable, alignment: .trailing)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 4)
-        .background(model.selection.contains(row.id) ? Color.accentColor.opacity(0.18) : Color.clear)
-        .contentShape(Rectangle())
-        .onTapGesture { handleTap(row) }
+        .padding(.vertical, 2)
         .help(row.stats.message.isEmpty ? row.stats.status.displayName : row.stats.message)
     }
 
@@ -123,18 +156,6 @@ struct TargetsTableView: View {
                 .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private func handleTap(_ row: TargetRow) {
-        if NSEvent.modifierFlags.contains(.command) {
-            if model.selection.contains(row.id) {
-                model.selection.remove(row.id)
-            } else {
-                model.selection.insert(row.id)
-            }
-        } else {
-            model.selection = [row.id]
-        }
     }
 }
 
@@ -158,6 +179,7 @@ struct StatusBadge: View {
         case .alive: return .green
         case .timeout: return .orange
         case .unreachable, .error: return .red
+        case .disabled: return .secondary.opacity(0.6)
         case .running, .pending, .idle: return .secondary
         }
     }

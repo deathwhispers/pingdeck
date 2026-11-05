@@ -4,13 +4,14 @@
 # 环境变量：
 #   BIN_PATH              可执行文件路径，默认 .build/release/BatchPing
 #   APP_PATH              输出的 .app 路径，默认 dist/BatchPing.app
+#   VERSION               应用版本号，默认读取仓库根目录的 VERSION 文件
 #   DEVELOPER_ID_APPLICATION  设置后用该证书签名（CI 公证流程使用），否则 ad-hoc 签名
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BIN="${BIN_PATH:-$ROOT/.build/release/BatchPing}"
 APP="${APP_PATH:-$ROOT/dist/BatchPing.app}"
-VERSION="${VERSION:-1.0.0}"
+VERSION="${VERSION:-$(tr -d '[:space:]' < "$ROOT/VERSION" 2>/dev/null || echo 0.0.0)}"
 
 if [[ ! -x "$BIN" ]]; then
   echo "未找到构建产物：$BIN" >&2

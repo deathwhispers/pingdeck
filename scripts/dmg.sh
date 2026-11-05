@@ -3,13 +3,15 @@
 #
 # 环境变量：
 #   APP_PATH   输入 .app 路径，默认 dist/BatchPing.app
-#   DMG_PATH   输出 DMG 路径，默认 dist/BatchPing-1.0.0.dmg
+#   DMG_PATH   输出 DMG 路径，默认 dist/BatchPing-<版本号>.dmg
+#   VERSION    版本号，默认读取仓库根目录的 VERSION 文件
 #   DEVELOPER_ID_APPLICATION  设置后用该证书签名 DMG
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+VERSION="${VERSION:-$(tr -d '[:space:]' < "$ROOT/VERSION" 2>/dev/null || echo 0.0.0)}"
 APP="${APP_PATH:-$ROOT/dist/BatchPing.app}"
-DMG="${DMG_PATH:-$ROOT/dist/BatchPing-1.0.0.dmg}"
+DMG="${DMG_PATH:-$ROOT/dist/BatchPing-$VERSION.dmg}"
 STAGE="$ROOT/dist/dmg-stage"
 
 if [[ ! -d "$APP" ]]; then

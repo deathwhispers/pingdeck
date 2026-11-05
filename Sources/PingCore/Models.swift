@@ -23,6 +23,7 @@ public enum TargetStatus: String, Codable, Sendable {
     case alive        // 正常
     case timeout      // 超时 / 丢包
     case unreachable  // 网络不可达
+    case disabled     // 目标被停用
     case error        // 错误（目标无效等）
 
     public var displayName: String {
@@ -33,6 +34,7 @@ public enum TargetStatus: String, Codable, Sendable {
         case .alive: return "正常"
         case .timeout: return "超时"
         case .unreachable: return "不可达"
+        case .disabled: return "已停用"
         case .error: return "错误"
         }
     }

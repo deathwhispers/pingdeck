@@ -18,37 +18,49 @@ struct ContentView: View {
             Divider()
             footerBar
         }
-        .sheet(item: $model.editorDraft) { draft in
-            TargetEditorSheet(draft: draft) { host, note, enabled in
-                model.editorDraft = nil
-                if draft.isNew {
-                    model.addTarget(host: host, note: note, enabled: enabled)
-                } else if let id = draft.targetID {
-                    model.updateTarget(id: id, host: host, note: note, enabled: enabled)
+        .sheet(item: $model.sheet) { sheet in
+            switch sheet {
+            case .editor(let draft):
+                TargetEditorSheet(draft: draft) { host, note, enabled in
+                    model.closeSheet()
+                    if draft.isNew {
+                        model.addTarget(host: host, note: note, enabled: enabled)
+                    } else if let id = draft.targetID {
+                        model.updateTarget(id: id, host: host, note: note, enabled: enabled)
+                    }
                 }
+                .environmentObject(model)
+            case .settings:
+                SettingsSheet()
+                    .environmentObject(model)
+            case .bulkImport:
+                BulkImportSheet()
+                    .environmentObject(model)
             }
         }
-        .sheet(isPresented: $model.showingSettings) {
-            SettingsSheet()
-                .environmentObject(model)
+        .confirmationDialog(
+            "确定要删除全部 \(model.targets.count) 个目标吗？此操作不可撤销。",
+            isPresented: $model.confirmingClearAllTargets,
+            titleVisibility: .visible
+        ) {
+            Button("全部删除", role: .destructive) { model.clearAllTargets() }
+            Button("取消", role: .cancel) { }
         }
     }
-
-    // MARK: - 工具栏
 
     private var toolbarBar: some View {
         HStack(spacing: 8) {
             Button {
-                model.editorDraft = .new()
+                model.openNewTargetSheet()
             } label: {
                 Label("添加", systemImage: "plus")
             }
             .help("添加一个 IP 或域名")
 
             Button {
-                editSelected()
+                model.openEditTargetSheet()
             } label: {
-                Label("编辑", systemImage: "pencil")
+                Image(systemName: "pencil")
             }
             .disabled(model.selection.count != 1)
             .help("编辑选中的目标")
@@ -56,10 +68,11 @@ struct ContentView: View {
             Button {
                 removeSelected()
             } label: {
-                Label("删除", systemImage: "minus")
+                Label(model.selection.count > 1 ? "删除 \(model.selection.count)" : "删除", systemImage: "minus")
             }
             .disabled(model.selection.isEmpty)
-            .help("删除选中的目标")
+            .keyboardShortcut(.delete, modifiers: [])
+            .help("删除选中的目标（⌘ 点击加选、⇧ 点击选区间、Delete 删除）")
 
             Divider().frame(height: 18)
 
@@ -73,48 +86,56 @@ struct ContentView: View {
             Button {
                 model.refresh()
             } label: {
-                Label("刷新", systemImage: "arrow.clockwise")
+                Image(systemName: "arrow.clockwise")
             }
             .help("立即重新发起一轮探测")
 
-            Button {
-                model.clearResults()
+            Menu {
+                Button("清空结果（保留目标）") {
+                    model.clearResults()
+                }
+                Button("清空全部目标…", role: .destructive) {
+                    model.confirmingClearAllTargets = true
+                }
+                .disabled(model.targets.isEmpty)
             } label: {
-                Label("清空结果", systemImage: "trash")
+                Label("清空", systemImage: "trash")
             }
-            .help("清空统计数据")
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+            .help("清空统计结果，或删除全部目标")
 
             Spacer()
 
-            Menu {
-                ForEach(SortMode.allCases) { mode in
-                    Button {
-                        model.sortMode = mode
-                    } label: {
-                        if model.sortMode == mode {
-                            Label(mode.title, systemImage: "checkmark")
-                        } else {
-                            Text(mode.title)
-                        }
-                    }
-                }
-            } label: {
-                Label("排序", systemImage: "arrow.up.arrow.down")
-            }
-            .help("选择表格排序方式")
-
             Button {
-                exportCSV()
+                model.openBulkImportSheet()
+            } label: {
+                Label("批量导入", systemImage: "text.badge.plus")
+            }
+            .help("从多行文本批量添加目标")
+
+            Menu {
+                Button("导出全部 \(model.rows.count) 项") {
+                    exportCSV(entries: model.allEntries)
+                }
+                .disabled(model.rows.isEmpty)
+                Button("导出选中 \(model.selection.count) 项") {
+                    exportCSV(entries: model.selectedEntries)
+                }
+                .disabled(model.selection.isEmpty)
             } label: {
                 Label("导出 CSV", systemImage: "square.and.arrow.up")
             }
-            .disabled(model.rows.isEmpty)
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+            .help("导出为 CSV：可选择导出全部或仅选中项")
 
             Button {
-                model.showingSettings = true
+                model.openSettingsSheet()
             } label: {
-                Label("设置", systemImage: "gearshape")
+                Image(systemName: "gearshape")
             }
+            .help("设置")
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -129,6 +150,11 @@ struct ContentView: View {
             Text("异常 \(model.problemCount)")
             Text("累计发包 \(model.totalSent)")
             Spacer()
+            if !model.selection.isEmpty {
+                Text("已选 \(model.selection.count) 项")
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
             Text(statusSummary)
                 .foregroundStyle(.secondary)
         }
@@ -144,18 +170,13 @@ struct ContentView: View {
 
     // MARK: - 动作
 
-    private func editSelected() {
-        guard let id = model.selection.first,
-              let target = model.targets.first(where: { $0.id == id }) else { return }
-        model.editorDraft = .edit(target)
-    }
-
     private func removeSelected() {
         guard !model.selection.isEmpty else { return }
         model.removeTargets(ids: model.selection)
     }
 
-    private func exportCSV() {
+    private func exportCSV(entries: [CsvExporter.Entry]) {
+        guard !entries.isEmpty else { return }
         let panel = NSSavePanel()
         panel.allowedContentTypes = [UTType.commaSeparatedText]
         panel.nameFieldStringValue = "batchping-\(Self.fileTimestamp()).csv"
@@ -163,7 +184,7 @@ struct ContentView: View {
 
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
-            let csv = CsvExporter.csv(for: model.csvEntries)
+            let csv = CsvExporter.csv(for: entries)
             do {
                 try csv.write(to: url, atomically: true, encoding: .utf8)
             } catch {
