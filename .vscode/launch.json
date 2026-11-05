@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:pingman}",
+            "name": "Debug BatchPing",
+            "target": "BatchPing",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug BatchPing"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:pingman}",
+            "name": "Release BatchPing",
+            "target": "BatchPing",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release BatchPing"
+        }
+    ]
+}

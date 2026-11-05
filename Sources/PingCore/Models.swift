@@ -1,0 +1,152 @@
+import Foundation
+
+/// 一个 Ping 目标（IP 或域名）
+public struct PingTarget: Identifiable, Codable, Hashable, Sendable {
+    public var id: UUID
+    public var host: String
+    public var note: String
+    public var enabled: Bool
+
+    public init(id: UUID = UUID(), host: String, note: String = "", enabled: Bool = true) {
+        self.id = id
+        self.host = host
+        self.note = note
+        self.enabled = enabled
+    }
+}
+
+/// 单个目标当前的连通状态
+public enum TargetStatus: String, Codable, Sendable {
+    case idle         // 未开始
+    case pending      // 排队中（等待并发槽位）
+    case running      // 探测中，等待首个响应
+    case alive        // 正常
+    case timeout      // 超时 / 丢包
+    case unreachable  // 网络不可达
+    case error        // 错误（目标无效等）
+
+    public var displayName: String {
+        switch self {
+        case .idle: return "未开始"
+        case .pending: return "排队中"
+        case .running: return "探测中"
+        case .alive: return "正常"
+        case .timeout: return "超时"
+        case .unreachable: return "不可达"
+        case .error: return "错误"
+        }
+    }
+}
+
+/// 目标的统计结果
+///
+/// 收发包计数以 ping 输出的 `icmp_seq` 为准：seq 是每个目标内单调递增的包序号，
+/// 因此 `sent = seqBase + seq + 1` 可以准确反映实际发出的包数，回包序号出现跳号
+/// 即说明中间发生了丢包，不依赖 ping 是否输出超时行。
+public struct PingStats: Codable, Sendable, Equatable {
+    public var status: TargetStatus = .idle
+    public var message: String = ""
+    public var sent: Int = 0
+    public var received: Int = 0
+    public var lastLatency: Double?
+    public var minLatency: Double?
+    public var maxLatency: Double?
+    public var latencySum: Double = 0
+    public var lastResponseAt: Date?
+    /// 进程重启前的已发送包数，用于衔接新的 icmp_seq 序列
+    public var seqBase: Int = 0
+
+    public init() {}
+
+    public var averageLatency: Double? {
+        received > 0 ? latencySum / Double(received) : nil
+    }
+
+    public var lossRate: Double {
+        sent > 0 ? Double(sent - received) / Double(sent) : 0
+    }
+
+    /// 开始一段新的探测会话（ping 进程重启时调用）
+    public mutating func beginSession(sentBefore: Int) {
+        seqBase = sentBefore
+    }
+
+    public mutating func recordSuccess(_ latency: Double, at date: Date, seq: Int?) {
+        received += 1
+        countSent(seq: seq)
+        latencySum += latency
+        lastLatency = latency
+        if let current = minLatency {
+            minLatency = Swift.min(current, latency)
+        } else {
+            minLatency = latency
+        }
+        if let current = maxLatency {
+            maxLatency = Swift.max(current, latency)
+        } else {
+            maxLatency = latency
+        }
+        lastResponseAt = date
+        status = .alive
+        message = ""
+    }
+
+    public mutating func recordTimeout(seq: Int?) {
+        countSent(seq: seq)
+        status = .timeout
+    }
+
+    public mutating func recordUnreachable(_ text: String, seq: Int?) {
+        countSent(seq: seq)
+        status = .unreachable
+        message = text
+    }
+
+    public mutating func recordFailure(_ text: String) {
+        status = .error
+        message = text
+    }
+
+    private mutating func countSent(seq: Int?) {
+        if let seq {
+            sent = Swift.max(sent, seqBase + seq + 1)
+        } else {
+            sent += 1
+        }
+    }
+}
+
+/// 运行参数
+public struct PingSettings: Codable, Sendable, Equatable {
+    /// 发包间隔（秒），macOS 下非 root 建议 >= 0.2
+    public var interval: Double
+    /// 单包等待超时（秒）
+    public var timeout: Double
+    /// 同时运行的 ping 进程上限
+    public var maxConcurrent: Int
+    /// 目标数超过并发上限时的轮换周期（秒），0 表示不轮换
+    public var rotationInterval: Double
+
+    public init(interval: Double = 1.0,
+                timeout: Double = 2.0,
+                maxConcurrent: Int = 16,
+                rotationInterval: Double = 30) {
+        self.interval = interval
+        self.timeout = timeout
+        self.maxConcurrent = max(1, maxConcurrent)
+        self.rotationInterval = max(0, rotationInterval)
+    }
+
+    public static let `default` = PingSettings()
+}
+
+/// 持久化到磁盘的完整配置
+public struct AppConfiguration: Codable, Sendable {
+    public var targets: [PingTarget]
+    public var settings: PingSettings
+
+    public init(targets: [PingTarget] = [], settings: PingSettings = .default) {
+        self.targets = targets
+        self.settings = settings
+    }
+}
