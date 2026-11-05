@@ -4,7 +4,7 @@ import UniformTypeIdentifiers
 import PingCore
 
 struct ContentView: View {
-    @EnvironmentObject private var model: BatchPingViewModel
+    @EnvironmentObject private var model: PingDeckViewModel
 
     var body: some View {
         VStack(spacing: 0) {
@@ -179,7 +179,7 @@ struct ContentView: View {
         guard !entries.isEmpty else { return }
         let panel = NSSavePanel()
         panel.allowedContentTypes = [UTType.commaSeparatedText]
-        panel.nameFieldStringValue = "batchping-\(Self.fileTimestamp()).csv"
+        panel.nameFieldStringValue = "pingdeck-\(Self.fileTimestamp()).csv"
         panel.canCreateDirectories = true
 
         panel.begin { response in

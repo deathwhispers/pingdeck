@@ -1,4 +1,4 @@
-# BatchPing 开发说明
+# PingDeck 开发说明
 
 面向维护者的技术文档。产品介绍与使用方式见 [README](../README.md)。
 
@@ -20,9 +20,9 @@
 ## 架构
 
 ```text
-┌────────────────────────────── SwiftUI 界面层 (BatchPing) ──────────────────────────────┐
+┌────────────────────────────── SwiftUI 界面层 (PingDeck) ────────────────────────────────┐
 │  ContentView / TargetsTableView / TargetEditorSheet / BulkImportSheet / SettingsSheet  │
-│  BatchPingViewModel：目标列表、排序、选中、UI 节流刷新、配置持久化触发                   │
+│  PingDeckViewModel：目标列表、排序、选中、UI 节流刷新、配置持久化触发                     │
 └───────────────▲───────────────────────────────────────────────────────────┬───────────┘
                 │ onStats(id, PingStats) 回调（引擎队列 → 主队列，4Hz 合并）   │ 命令
 ┌───────────────┴────────────── 核心逻辑层 (PingCore，平台无关、可单测）───────────────┐
@@ -30,7 +30,7 @@
 │  PingProcess：单个目标的 /sbin/ping 子进程封装，异步读 stdout/stderr，按行解析             │
 │  PingLineParser：纯函数解析 ping 输出 → PingEvent（reply/timeout/unreachable/failure）   │
 │  BulkImportParser / TargetValidator：批量导入解析与目标校验                               │
-│  ConfigStore：JSON 配置读写 ~/Library/Application Support/BatchPing/config.json         │
+│  ConfigStore：JSON 配置读写 ~/Library/Application Support/PingDeck/config.json         │
 │  CsvExporter：结果导出（带 UTF-8 BOM，Excel 友好）                                       │
 └──────────────────────────────────────────────────────────────────────────────────────┘
                                   │
@@ -49,7 +49,7 @@
 
 ```text
 .
-├── Package.swift                  # SwiftPM：PingCore 库 + BatchPing 可执行 + 两个测试目标
+├── Package.swift                  # SwiftPM：PingCore 库 + PingDeck 可执行 + 两个测试目标
 ├── Makefile                       # build / run / test / app / dmg
 ├── VERSION                        # 版本号唯一来源
 ├── CHANGELOG.md
@@ -65,9 +65,9 @@
 │   │   ├── TargetValidator.swift  # 目标合法性校验
 │   │   ├── ConfigStore.swift      # 配置持久化
 │   │   └── CsvExporter.swift      # CSV 导出
-│   └── BatchPing/                 # SwiftUI 界面层
-│       ├── BatchPingApp.swift     # @main App + 菜单 + 单实例保护
-│       ├── BatchPingViewModel.swift
+│   └── PingDeck/                  # SwiftUI 界面层
+│       ├── PingDeckApp.swift      # @main App + 菜单 + 单实例保护
+│       ├── PingDeckViewModel.swift
 │       ├── ContentView.swift      # 工具栏 / 状态栏 / 导出
 │       ├── TargetsTableView.swift # 表格（List 原生多选 + 表头排序）
 │       ├── TargetEditorSheet.swift
@@ -75,7 +75,7 @@
 │       └── SettingsSheet.swift
 ├── Tests/
 │   ├── PingCoreTests/             # 解析、统计、CSV、批量导入、引擎调度
-│   └── BatchPingTests/            # 界面层逻辑：选中、清空、导出范围、导入模式
+│   └── PingDeckTests/             # 界面层逻辑：选中、清空、导出范围、导入模式
 └── scripts/
     ├── bundle.sh                  # 组装 .app（可指定 BIN_PATH / VERSION / 签名证书）
     ├── dmg.sh                     # 生成 DMG
@@ -91,8 +91,8 @@
 make build            # swift build -c release
 make run              # 直接运行（无 .app bundle）
 make test             # 单元测试
-make app              # 组装 dist/BatchPing.app
-make dmg              # 生成 dist/BatchPing-<VERSION>.dmg
+make app              # 组装 dist/PingDeck.app
+make dmg              # 生成 dist/PingDeck-<VERSION>.dmg
 ```
 
 打包脚本支持的环境变量：`BIN_PATH`、`APP_PATH`、`DMG_PATH`、`VERSION`、`DEVELOPER_ID_APPLICATION`。
@@ -114,7 +114,7 @@ CI 工作流：[.github/workflows/build.yml](../.github/workflows/build.yml)
 
 1. 更新 `VERSION` 与 `CHANGELOG.md`，合并到 `main`；
 2. Actions → **Build** → **Run workflow**，`version` 填目标版本号（如 `0.0.1`）；
-3. 流水线跑完后，Releases 页面会出现对应 tag，附带 `BatchPing-<版本>.dmg`。
+3. 流水线跑完后，Releases 页面会出现对应 tag，附带 `PingDeck-<版本>.dmg`。
 
 ### 可选 Secrets（开启 Apple 签名与公证）
 

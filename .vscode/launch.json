@@ -4,21 +4,21 @@
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:pingman}",
-            "name": "Debug BatchPing",
-            "target": "BatchPing",
+            "cwd": "${workspaceFolder:pingdeck}",
+            "name": "Debug PingDeck",
+            "target": "PingDeck",
             "configuration": "debug",
-            "preLaunchTask": "swift: Build Debug BatchPing"
+            "preLaunchTask": "swift: Build Debug PingDeck"
         },
         {
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:pingman}",
-            "name": "Release BatchPing",
-            "target": "BatchPing",
+            "cwd": "${workspaceFolder:pingdeck}",
+            "name": "Release PingDeck",
+            "target": "PingDeck",
             "configuration": "release",
-            "preLaunchTask": "swift: Build Release BatchPing"
+            "preLaunchTask": "swift: Build Release PingDeck"
         }
     ]
 }

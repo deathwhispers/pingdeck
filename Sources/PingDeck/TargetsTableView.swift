@@ -7,7 +7,7 @@ import PingCore
 /// 点击单选、⌘ 点击加选、⇧ 点击选区间，都不再自己判断修饰键。
 /// 「启用」开关放在最后一列并用 switch 样式，避免和「选中」混淆。
 struct TargetsTableView: View {
-    @EnvironmentObject private var model: BatchPingViewModel
+    @EnvironmentObject private var model: PingDeckViewModel
 
     private let colStatus: CGFloat = 92
     private let colValue: CGFloat = 80

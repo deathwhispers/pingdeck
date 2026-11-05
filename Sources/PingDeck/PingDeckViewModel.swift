@@ -102,7 +102,7 @@ enum ImportMode: String, CaseIterable, Identifiable {
     }
 }
 
-final class BatchPingViewModel: ObservableObject {
+final class PingDeckViewModel: ObservableObject {
     @Published private(set) var targets: [PingTarget] = []
     @Published private(set) var stats: [UUID: PingStats] = [:]
     @Published private(set) var isRunning = false

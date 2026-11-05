@@ -87,7 +87,7 @@ jobs:
               data = {}
           root = data.get("workspace") or data.get("project") or {}
           schemes = root.get("schemes") or []
-          match = [s for s in schemes if s.startswith("BatchPing")]
+          match = [s for s in schemes if s.startswith("PingDeck")]
           print(match[0] if match else "")
           ' || true)
           if [ -n "$SCHEME" ]; then
@@ -99,11 +99,11 @@ jobs:
               -derivedDataPath "$PWD/.build/xcode" \
               CODE_SIGNING_ALLOWED=NO \
               | tee xcodebuild.log
-            echo "BIN_PATH=$PWD/.build/xcode/Build/Products/Release/BatchPing" >> "$GITHUB_ENV"
+            echo "BIN_PATH=$PWD/.build/xcode/Build/Products/Release/PingDeck" >> "$GITHUB_ENV"
           else
-            echo "xcodebuild 未暴露 BatchPing scheme，回退到 swift build"
+            echo "xcodebuild 未暴露 PingDeck scheme，回退到 swift build"
             swift build -c release
-            echo "BIN_PATH=$PWD/.build/release/BatchPing" >> "$GITHUB_ENV"
+            echo "BIN_PATH=$PWD/.build/release/PingDeck" >> "$GITHUB_ENV"
           fi
 
       - name: Unit tests
@@ -130,36 +130,36 @@ jobs:
       - name: Notarize and staple
         if: ${{ steps.version.outputs.publish == 'true' && env.APPLE_CERTIFICATE_P12_BASE64 != '' && env.APPLE_ID != '' }}
         run: |
-          xcrun notarytool submit "dist/BatchPing.app" \
+          xcrun notarytool submit "dist/PingDeck.app" \
             --apple-id "$APPLE_ID" \
             --team-id "$APPLE_TEAM_ID" \
             --password "$APPLE_APP_SPECIFIC_PASSWORD" \
             --wait
-          xcrun stapler staple "dist/BatchPing.app"
-          xcrun stapler validate "dist/BatchPing.app"
+          xcrun stapler staple "dist/PingDeck.app"
+          xcrun stapler validate "dist/PingDeck.app"
 
       - name: Build .dmg
         env:
-          DMG_PATH: ${{ github.workspace }}/dist/BatchPing-${{ steps.version.outputs.version }}.dmg
+          DMG_PATH: ${{ github.workspace }}/dist/PingDeck-${{ steps.version.outputs.version }}.dmg
         run: bash scripts/dmg.sh
 
       - name: Verify bundle
         env:
-          DMG_PATH: ${{ github.workspace }}/dist/BatchPing-${{ steps.version.outputs.version }}.dmg
+          DMG_PATH: ${{ github.workspace }}/dist/PingDeck-${{ steps.version.outputs.version }}.dmg
         run: |
-          codesign --verify --deep --verbose=2 "dist/BatchPing.app"
+          codesign --verify --deep --verbose=2 "dist/PingDeck.app"
           hdiutil imageinfo "$DMG_PATH" | head -5
           ls -lh dist
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: BatchPing-${{ steps.version.outputs.version }}-macOS
+          name: PingDeck-${{ steps.version.outputs.version }}-macOS
           # artifact 在 v4 之后不可变，重复发布同一版本号时必须允许覆盖
           overwrite: true
           path: |
-            dist/BatchPing-${{ steps.version.outputs.version }}.dmg
-            dist/BatchPing.app
+            dist/PingDeck-${{ steps.version.outputs.version }}.dmg
+            dist/PingDeck.app
 
   release:
     name: Publish Release
@@ -176,7 +176,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v8
         with:
-          name: BatchPing-${{ needs.build.outputs.version }}-macOS
+          name: PingDeck-${{ needs.build.outputs.version }}-macOS
           path: dist
 
       - name: Create or update Release
@@ -185,13 +185,13 @@ jobs:
           TAG: ${{ needs.build.outputs.tag }}
           VERSION: ${{ needs.build.outputs.version }}
         run: |
-          DMG="dist/BatchPing-${VERSION}.dmg"
+          DMG="dist/PingDeck-${VERSION}.dmg"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG 已存在，覆盖同名资源"
             gh release upload "$TAG" "$DMG" --clobber
           else
             gh release create "$TAG" "$DMG" \
-              --title "BatchPing $TAG" \
+              --title "PingDeck $TAG" \
               --target "$GITHUB_SHA" \
               --generate-notes
           fi

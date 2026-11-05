@@ -21,7 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// 返回 true 表示已存在其它实例，本进程应当退出
     private static func activateRunningInstance() -> Bool {
-        let bundleID = Bundle.main.bundleIdentifier ?? "com.batchping.app"
+        let bundleID = Bundle.main.bundleIdentifier ?? "com.pingdeck.app"
         let current = NSRunningApplication.current
         let others = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
             .filter { $0 != current && !$0.isTerminated }
@@ -32,9 +32,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 @main
-struct BatchPingApp: App {
+struct PingDeckApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
-    @StateObject private var model = BatchPingViewModel()
+    @StateObject private var model = PingDeckViewModel()
 
     var body: some Scene {
         WindowGroup {

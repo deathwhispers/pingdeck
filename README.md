@@ -1,12 +1,16 @@
-# BatchPing
+# PingDeck
 
 **把一堆 IP 和域名丢进一张表，一眼看清谁在线、谁在丢包、谁在抖。**
 
-BatchPing 是一个轻量的 macOS 批量 Ping 工具。它像 Windows 上的 PingInfoView 一样，把多个目标的连通状态、延迟和丢包率并排放在一张表格里，让你不用在终端里开一堆窗口。
+PingDeck 是一个轻量的 macOS 批量 Ping 工具。它像 Windows 上的 PingInfoView 一样，把多个目标的连通状态、延迟和丢包率并排放在一张表格里，让你不用在终端里开一堆窗口。
 
 ![平台](https://img.shields.io/badge/macOS-13%2B-blue)
 ![版本](https://img.shields.io/badge/version-0.0.1-green)
 ![依赖](https://img.shields.io/badge/dependencies-none-lightgrey)
+
+## 截图
+
+![PingDeck 主界面](docs/images/main-window.png)
 
 ## 为什么用它
 
@@ -18,9 +22,9 @@ BatchPing 是一个轻量的 macOS 批量 Ping 工具。它像 Windows 上的 Pi
 
 ## 安装
 
-1. 到 [Releases](https://github.com/deathwhispers/pingman/releases) 下载最新的 `BatchPing-x.y.z.dmg`
-2. 打开 DMG，把 BatchPing 拖进「应用程序」
-3. 首次打开如果提示「无法验证开发者」，在 Finder 里右键点 BatchPing → 选择「打开」，之后就不会再提示
+1. 到 [Releases](https://github.com/deathwhispers/pingdeck/releases) 下载最新的 `PingDeck-x.y.z.dmg`
+2. 打开 DMG，把 PingDeck 拖进「应用程序」
+3. 首次打开如果提示「无法验证开发者」，在 Finder 里右键点 PingDeck → 选择「打开」，之后就不会再提示
 
 > 需要 macOS 13 或更高版本，支持 Apple 芯片与 Intel。
 
@@ -91,27 +95,27 @@ BatchPing 是一个轻量的 macOS 批量 Ping 工具。它像 Windows 上的 Pi
 常见原因：对方防火墙屏蔽了 ICMP、目标只开了 TCP 端口（ICMP 不响应不代表服务不可用）、或者本地路由不通。
 
 **数据存放在哪里？**
-`~/Library/Application Support/BatchPing/config.json`，删除该文件即可恢复初始状态。
+`~/Library/Application Support/PingDeck/config.json`，删除该文件即可恢复初始状态。
 
 **支持 IPv6 吗？**
 支持。目标里包含 `:` 时会自动改用 `ping6`。
 
 **为什么不能在 App Store 下载？**
-App Sandbox 禁止创建子进程，也就无法调用系统 `ping`。BatchPing 因此采用直接分发（DMG）的方式。
+App Sandbox 禁止创建子进程，也就无法调用系统 `ping`。PingDeck 因此采用直接分发（DMG）的方式。
 
 ## 更新日志
 
-见 [CHANGELOG.md](CHANGELOG.md) 或 [Releases](https://github.com/deathwhispers/pingman/releases)。
+见 [CHANGELOG.md](CHANGELOG.md) 或 [Releases](https://github.com/deathwhispers/pingdeck/releases)。
 
 ## 从源码构建
 
 需要 Xcode Command Line Tools。
 
 ```bash
-git clone https://github.com/deathwhispers/pingman.git
-cd pingman
+git clone https://github.com/deathwhispers/pingdeck.git
+cd pingdeck
 make run     # 直接运行
-make dmg     # 生成 dist/BatchPing-<版本号>.dmg
+make dmg     # 生成 dist/PingDeck-<版本号>.dmg
 ```
 
 技术细节、目录结构、CI 流程和签名配置见 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)。

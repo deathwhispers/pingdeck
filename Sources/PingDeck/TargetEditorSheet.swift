@@ -2,7 +2,7 @@ import SwiftUI
 import PingCore
 
 struct TargetEditorSheet: View {
-    @EnvironmentObject private var model: BatchPingViewModel
+    @EnvironmentObject private var model: PingDeckViewModel
     @State private var host: String
     @State private var note: String
     @State private var enabled: Bool

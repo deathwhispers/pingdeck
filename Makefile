@@ -1,4 +1,4 @@
-APP_NAME := BatchPing
+APP_NAME := PingDeck
 BUILD_DIR := .build/release
 DIST_DIR := dist
 APP_BUNDLE := $(DIST_DIR)/$(APP_NAME).app

@@ -1,11 +1,11 @@
 import Foundation
 
-/// 配置持久化：~/Library/Application Support/BatchPing/config.json
+/// 配置持久化：~/Library/Application Support/PingDeck/config.json
 public enum ConfigStore {
     public static var directoryURL: URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
-        return base.appendingPathComponent("BatchPing", isDirectory: true)
+        return base.appendingPathComponent("PingDeck", isDirectory: true)
     }
 
     public static var configURL: URL {

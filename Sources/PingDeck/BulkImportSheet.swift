@@ -3,7 +3,7 @@ import PingCore
 
 /// 批量导入：每行一个目标，支持「目标」或「目标 备注」
 struct BulkImportSheet: View {
-    @EnvironmentObject private var model: BatchPingViewModel
+    @EnvironmentObject private var model: PingDeckViewModel
     @State private var text = ""
     @State private var mode: ImportMode = .append
 

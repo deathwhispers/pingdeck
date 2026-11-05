@@ -2,15 +2,15 @@
 # 将构建产物组装成可双击运行的 .app
 #
 # 环境变量：
-#   BIN_PATH              可执行文件路径，默认 .build/release/BatchPing
-#   APP_PATH              输出的 .app 路径，默认 dist/BatchPing.app
+#   BIN_PATH              可执行文件路径，默认 .build/release/PingDeck
+#   APP_PATH              输出的 .app 路径，默认 dist/PingDeck.app
 #   VERSION               应用版本号，默认读取仓库根目录的 VERSION 文件
 #   DEVELOPER_ID_APPLICATION  设置后用该证书签名（CI 公证流程使用），否则 ad-hoc 签名
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BIN="${BIN_PATH:-$ROOT/.build/release/BatchPing}"
-APP="${APP_PATH:-$ROOT/dist/BatchPing.app}"
+BIN="${BIN_PATH:-$ROOT/.build/release/PingDeck}"
+APP="${APP_PATH:-$ROOT/dist/PingDeck.app}"
 VERSION="${VERSION:-$(tr -d '[:space:]' < "$ROOT/VERSION" 2>/dev/null || echo 0.0.0)}"
 
 if [[ ! -x "$BIN" ]]; then
@@ -21,7 +21,7 @@ fi
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN" "$APP/Contents/MacOS/BatchPing"
+cp "$BIN" "$APP/Contents/MacOS/PingDeck"
 
 # 生成图标（脚本化渲染，仓库里不放二进制资源）
 if command -v swift >/dev/null 2>&1 && command -v iconutil >/dev/null 2>&1; then
@@ -42,13 +42,13 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>BatchPing</string>
+    <string>PingDeck</string>
     <key>CFBundleDisplayName</key>
-    <string>BatchPing</string>
+    <string>PingDeck</string>
     <key>CFBundleIdentifier</key>
-    <string>com.batchping.app</string>
+    <string>com.pingdeck.app</string>
     <key>CFBundleExecutable</key>
-    <string>BatchPing</string>
+    <string>PingDeck</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsSheet: View {
-    @EnvironmentObject private var model: BatchPingViewModel
+    @EnvironmentObject private var model: PingDeckViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {

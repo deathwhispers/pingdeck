@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 首次推送到 GitHub：个人账号 / pingman / 公开仓库
+# 首次推送到 GitHub：个人账号 / pingdeck / 公开仓库
 #
 #   bash scripts/publish.sh
 #
@@ -20,7 +20,7 @@ git status --short
 
 echo "==> 提交"
 git commit -F - <<'MSG'
-feat: BatchPing 首个版本
+feat: PingDeck 首个版本
 
 macOS 批量 Ping 工具（SwiftUI），用于网络调试与运维监控。
 
@@ -32,10 +32,10 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 MSG
 
 echo "==> 创建公开仓库并推送"
-gh repo create pingman --public --source=. --remote=origin --push
+gh repo create pingdeck --public --source=. --remote=origin --push
 
 echo "==> 结果"
 git log --oneline -3
 git remote -v
 git ls-remote --heads origin
-echo "仓库地址：https://github.com/$(gh api user --jq .login)/pingman"
+echo "仓库地址：https://github.com/$(gh api user --jq .login)/pingdeck"

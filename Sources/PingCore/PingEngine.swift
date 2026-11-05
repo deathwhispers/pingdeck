@@ -23,7 +23,7 @@ public final class PingEngine {
         }
     }
 
-    private let queue = DispatchQueue(label: "com.batchping.engine")
+    private let queue = DispatchQueue(label: "com.pingdeck.engine")
     private var settings = Settings()
     private var targets: [UUID: PingTarget] = [:]
     private var processes: [UUID: PingProcess] = [:]
