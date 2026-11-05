@@ -5,9 +5,10 @@ import PingCore
 struct BulkImportSheet: View {
     @EnvironmentObject private var model: BatchPingViewModel
     @State private var text = ""
+    @State private var mode: ImportMode = .append
 
     private var preview: BulkImportParser.Result {
-        model.previewBulkImport(text)
+        model.previewBulkImport(text, mode: mode)
     }
 
     var body: some View {
@@ -15,13 +16,25 @@ struct BulkImportSheet: View {
             Text("批量导入目标")
                 .font(.headline)
 
+            Picker("导入方式", selection: $mode) {
+                ForEach(ImportMode.allCases) { item in
+                    Text(item.title).tag(item)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+
+            Text(modeHint)
+                .font(.caption)
+                .foregroundStyle(mode == .replace && !model.targets.isEmpty ? .red : .secondary)
+
             Text("每行一个目标，可写成「目标」或「目标 备注」。以 # 开头的行会被忽略；重复或格式非法的行会被跳过并列出原因。")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
             TextEditor(text: $text)
                 .font(.system(.body, design: .monospaced))
-                .frame(height: 190)
+                .frame(height: 180)
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color.secondary.opacity(0.4))
@@ -32,13 +45,31 @@ struct BulkImportSheet: View {
             HStack {
                 Spacer()
                 Button("取消") { model.closeSheet() }
-                Button("导入 \(preview.entries.count) 个目标") { importNow() }
+                Button(confirmTitle) { importNow() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(preview.entries.isEmpty)
             }
         }
         .padding(20)
         .frame(width: 540)
+    }
+
+    private var modeHint: String {
+        switch mode {
+        case .append:
+            return "保留现有 \(model.targets.count) 个目标，把导入的内容追加到末尾。"
+        case .replace:
+            return model.targets.isEmpty
+                ? "用导入的内容作为完整目标列表。"
+                : "⚠️ 将丢弃现有 \(model.targets.count) 个目标（含备注与启用状态），只保留导入的内容。"
+        }
+    }
+
+    private var confirmTitle: String {
+        switch mode {
+        case .append: return "追加 \(preview.entries.count) 个"
+        case .replace: return "替换为 \(preview.entries.count) 个"
+        }
     }
 
     @ViewBuilder
@@ -70,7 +101,7 @@ struct BulkImportSheet: View {
     }
 
     private func importNow() {
-        let result = model.importTargets(text)
+        let result = model.importTargets(text, mode: mode)
         model.closeSheet()
         var message = "已导入 \(result.entries.count) 个目标。"
         if !result.rejected.isEmpty {

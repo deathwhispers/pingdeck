@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Resolve version
         id: version
@@ -150,9 +150,11 @@ jobs:
           ls -lh dist
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: BatchPing-${{ steps.version.outputs.version }}-macOS
+          # artifact 在 v4 之后不可变，重复发布同一版本号时必须允许覆盖
+          overwrite: true
           path: |
             dist/BatchPing-${{ steps.version.outputs.version }}.dmg
             dist/BatchPing.app
@@ -166,7 +168,7 @@ jobs:
       contents: write
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: BatchPing-${{ needs.build.outputs.version }}-macOS
           path: dist

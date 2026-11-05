@@ -38,9 +38,15 @@ struct ContentView: View {
                     .environmentObject(model)
             }
         }
+        .confirmationDialog(
+            "确定要删除全部 \(model.targets.count) 个目标吗？此操作不可撤销。",
+            isPresented: $model.confirmingClearAllTargets,
+            titleVisibility: .visible
+        ) {
+            Button("全部删除", role: .destructive) { model.clearAllTargets() }
+            Button("取消", role: .cancel) { }
+        }
     }
-
-    // MARK: - 工具栏
 
     private var toolbarBar: some View {
         HStack(spacing: 8) {
@@ -62,10 +68,11 @@ struct ContentView: View {
             Button {
                 removeSelected()
             } label: {
-                Label("删除", systemImage: "minus")
+                Label(model.selection.count > 1 ? "删除 \(model.selection.count)" : "删除", systemImage: "minus")
             }
             .disabled(model.selection.isEmpty)
-            .help("删除选中的目标")
+            .keyboardShortcut(.delete, modifiers: [])
+            .help("删除选中的目标（可多选，⌘ 点击加选，⇧ 点击选区间，Delete 删除）")
 
             Divider().frame(height: 18)
 
@@ -86,9 +93,17 @@ struct ContentView: View {
             Button {
                 model.clearResults()
             } label: {
-                Label("清空结果", systemImage: "trash")
+                Label("清空结果", systemImage: "chart.line.flattrend.xyaxis")
             }
-            .help("清空统计数据")
+            .help("清空统计数据，保留目标列表")
+
+            Button {
+                model.confirmingClearAllTargets = true
+            } label: {
+                Label("清空目标", systemImage: "trash")
+            }
+            .disabled(model.targets.isEmpty)
+            .help("删除全部目标")
 
             Spacer()
 
@@ -125,6 +140,11 @@ struct ContentView: View {
             Text("异常 \(model.problemCount)")
             Text("累计发包 \(model.totalSent)")
             Spacer()
+            if !model.selection.isEmpty {
+                Text("已选 \(model.selection.count) 项")
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
             Text(statusSummary)
                 .foregroundStyle(.secondary)
         }

@@ -42,5 +42,17 @@ struct BatchPingApp: App {
                 .environmentObject(model)
                 .frame(minWidth: 940, minHeight: 480)
         }
+        .commands {
+            CommandMenu("目标") {
+                Button("全选") { model.selectAll() }
+                    .keyboardShortcut("a", modifiers: .command)
+                    .disabled(model.targets.isEmpty)
+                Button("取消选择") { model.clearSelection() }
+                    .disabled(model.selection.isEmpty)
+                Divider()
+                Button("清空全部目标") { model.confirmingClearAllTargets = true }
+                    .disabled(model.targets.isEmpty)
+            }
+        }
     }
 }

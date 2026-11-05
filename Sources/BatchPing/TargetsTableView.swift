@@ -159,14 +159,13 @@ struct TargetsTableView: View {
     }
 
     private func handleTap(_ row: TargetRow) {
-        if NSEvent.modifierFlags.contains(.command) {
-            if model.selection.contains(row.id) {
-                model.selection.remove(row.id)
-            } else {
-                model.selection.insert(row.id)
-            }
+        let flags = NSEvent.modifierFlags
+        if flags.contains(.command) {
+            model.toggleSelection(row.id)
+        } else if flags.contains(.shift) {
+            model.selectRange(to: row.id)
         } else {
-            model.selection = [row.id]
+            model.selectOnly(row.id)
         }
     }
 }

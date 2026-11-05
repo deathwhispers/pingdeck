@@ -85,11 +85,32 @@ struct TargetEditorDraft: Identifiable {
     }
 }
 
+/// 批量导入时的处理方式
+enum ImportMode: String, CaseIterable, Identifiable {
+    /// 保留现有目标，追加新目标
+    case append
+    /// 丢弃现有目标，用导入内容整体替换
+    case replace
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .append: return "追加"
+        case .replace: return "替换"
+        }
+    }
+}
+
 final class BatchPingViewModel: ObservableObject {
     @Published private(set) var targets: [PingTarget] = []
     @Published private(set) var stats: [UUID: PingStats] = [:]
     @Published private(set) var isRunning = false
     @Published var selection: Set<UUID> = []
+    /// 上次交互的行，用于 ⇧ 点击时的区间选择
+    @Published private(set) var selectionAnchor: UUID?
+    /// 清空全部目标前的确认弹窗
+    @Published var confirmingClearAllTargets = false
     @Published var sheet: AppSheet?
     @Published var alert: AppAlert?
     @Published var sort: SortSpec = .default
@@ -112,8 +133,8 @@ final class BatchPingViewModel: ObservableObject {
         return formatter
     }()
 
-    init() {
-        let configuration = ConfigStore.load()
+    init(configuration: AppConfiguration? = nil) {
+        let configuration = configuration ?? ConfigStore.load()
         targets = configuration.targets
         settings = configuration.settings
 
@@ -232,6 +253,13 @@ final class BatchPingViewModel: ObservableObject {
         applyTargets(updated)
     }
 
+    /// 清空全部目标（与「清空结果」不同：这里连目标本身也删掉）
+    func clearAllTargets() {
+        clearSelection()
+        applyTargets([])
+        stats = [:]
+    }
+
     func setEnabled(id: UUID, enabled: Bool) {
         var updated = targets
         guard let index = updated.firstIndex(where: { $0.id == id }) else { return }
@@ -243,6 +271,46 @@ final class BatchPingViewModel: ObservableObject {
         targets = updated
         engine.setTargets(updated)
         scheduleSave()
+    }
+
+    // MARK: - 选中状态
+
+    /// 单选：清空其它选中，只保留这一个
+    func selectOnly(_ id: UUID) {
+        selection = [id]
+        selectionAnchor = id
+    }
+
+    /// ⌘ 点击：切换某一项的选中状态
+    func toggleSelection(_ id: UUID) {
+        if selection.contains(id) {
+            selection.remove(id)
+        } else {
+            selection.insert(id)
+        }
+        selectionAnchor = id
+    }
+
+    /// ⇧ 点击：按当前表格顺序选中一段区间
+    func selectRange(to id: UUID) {
+        let order = rows.map { $0.id }
+        guard let anchor = selectionAnchor ?? selection.first,
+              let anchorIndex = order.firstIndex(of: anchor),
+              let targetIndex = order.firstIndex(of: id) else {
+            selectOnly(id)
+            return
+        }
+        let range = min(anchorIndex, targetIndex)...max(anchorIndex, targetIndex)
+        selection = Set(order[range])
+    }
+
+    func selectAll() {
+        selection = Set(targets.map { $0.id })
+    }
+
+    func clearSelection() {
+        selection.removeAll()
+        selectionAnchor = nil
     }
 
     // MARK: - 弹窗
@@ -272,19 +340,22 @@ final class BatchPingViewModel: ObservableObject {
     // MARK: - 批量导入
 
     /// 预览批量导入结果，不改动目标列表
-    func previewBulkImport(_ text: String) -> BulkImportParser.Result {
-        BulkImportParser.parse(text, existing: Set(targets.map { $0.host.lowercased() }))
+    func previewBulkImport(_ text: String, mode: ImportMode = .append) -> BulkImportParser.Result {
+        // 替换模式不与现有目标去重，因为现有目标本来就会被丢弃
+        let existing = mode == .append ? Set(targets.map { $0.host.lowercased() }) : []
+        return BulkImportParser.parse(text, existing: existing)
     }
 
     /// 执行批量导入，返回可导入条目与被跳过的行
     @discardableResult
-    func importTargets(_ text: String) -> BulkImportParser.Result {
-        let result = previewBulkImport(text)
+    func importTargets(_ text: String, mode: ImportMode = .append) -> BulkImportParser.Result {
+        let result = previewBulkImport(text, mode: mode)
         guard !result.entries.isEmpty else { return result }
-        var updated = targets
+        var updated = mode == .append ? targets : []
         for entry in result.entries {
             updated.append(PingTarget(host: entry.host, note: entry.note, enabled: true))
         }
+        clearSelection()
         applyTargets(updated)
         return result
     }

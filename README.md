@@ -69,7 +69,9 @@
 │       ├── TargetEditorSheet.swift
 │       ├── BulkImportSheet.swift   # 批量导入
 │       └── SettingsSheet.swift
-├── Tests/PingCoreTests/           # 解析器、统计、CSV、批量导入、引擎调度单元测试
+├── Tests/
+│   ├── PingCoreTests/              # 解析器、统计、CSV、批量导入、引擎调度单元测试
+│   └── BatchPingTests/             # 界面层逻辑：多选、区间选择、清空、导入模式
 └── scripts/
     ├── bundle.sh                  # 生成 dist/BatchPing.app
     ├── dmg.sh                     # 生成 dist/BatchPing-<版本号>.dmg
@@ -138,7 +140,9 @@ open dist/BatchPing-1.0.0.dmg
 | 需求 | 实现位置 |
 | --- | --- |
 | 添加 / 删除 / 编辑目标 | 工具栏「添加 / 编辑 / 删除」+ 每行启用开关 |
-| 批量添加目标 | 工具栏「批量导入」，每行一个目标，支持「目标 备注」 |
+| 批量删除 | ⌘ 点击加选、⇧ 点击选区间、⌘A 全选、Delete 键删除；按钮标题显示选中数量 |
+| 清空全部目标 | 工具栏「清空目标」（带确认弹窗），与「清空结果」区分 |
+| 批量添加目标 | 工具栏「批量导入」，每行一个目标，支持「目标 备注」，可选追加或替换 |
 | 批量 Ping、独立状态 | `PingEngine` 每目标一个进程，`TargetStatus` 独立状态 |
 | 表格列 | 目标 / 状态 / 最新 / 平均 / 最小 / 最大 / 丢包率 / 最后响应时间 |
 | 排序 | 点击表头切换升降序，空值始终排在最后 |
@@ -150,12 +154,23 @@ open dist/BatchPing-1.0.0.dmg
 | 配置保存 | `ConfigStore` 写 JSON，启动自动加载 |
 | 使用系统能力 | 复用 `/sbin/ping` / `/sbin/ping6`，无第三方依赖 |
 
+### 快捷键与鼠标
+
+| 操作 | 效果 |
+| --- | --- |
+| 点击行 | 单选该行 |
+| ⌘ 点击 | 加选 / 取消选择该行 |
+| ⇧ 点击 | 按当前排序选中一段区间 |
+| ⌘A | 全选（菜单栏「目标 → 全选」） |
+| Delete | 删除选中的目标 |
+| ⌘ 点击表头 | 按该列排序，同列再点反向 |
+
 ## 八、本机验证结果
 
 | 项目 | 结果 |
 | --- | --- |
 | `swift build` | 通过，0 error / 0 warning |
-| `swift test` | 13 个用例全部通过（解析器、统计、CSV、配置序列化、真实 ping 集成） |
+| `swift test` | 33 个用例全部通过（解析器、统计、CSV、配置序列化、批量导入、引擎调度、界面层选择与导入模式） |
 | 真实环境验证 | 环回 8 包 8 通；`192.0.2.1` 7 发包 0 回包、丢包率 100%；`nope.invalid` 正确报 `cannot resolve` |
 | `make app` / `make dmg` | 生成 `BatchPing.app`（ad-hoc 签名）与 `BatchPing-1.0.0.dmg` |
 | 运行资源 | 空闲 CPU **0.0%**，内存 footprint **28MB**（RSS 约 100MB，含共享框架页） |
