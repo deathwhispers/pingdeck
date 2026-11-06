@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="docs/images/icon.png" width="120" alt="PingDeck 图标">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/icon-dark.png">
+    <img src="docs/images/icon-light.png" width="120" alt="PingDeck 图标">
+  </picture>
 </p>
 
 <h1 align="center">PingDeck</h1>
@@ -12,7 +15,7 @@
 <p align="center">
   <a href="https://github.com/deathwhispers/pingdeck/releases/latest"><img alt="版本" src="https://img.shields.io/badge/version-0.0.4-green"></a>
   <img alt="平台" src="https://img.shields.io/badge/macOS-14.4%2B-blue">
-  <img alt="体积" src="https://img.shields.io/badge/app-1.5%20MB-lightgrey">
+  <img alt="体积" src="https://img.shields.io/badge/app-1.9%20MB-lightgrey">
   <img alt="依赖" src="https://img.shields.io/badge/dependencies-none-lightgrey">
   <img alt="权限" src="https://img.shields.io/badge/root-not%20required-brightgreen">
 </p>
@@ -80,7 +83,7 @@ PingDeck 把这件事变成一张表：**粘贴目标，点开始，状态、延
 
 ## 为什么这么轻
 
-原生 Swift + SwiftUI 实现，不打包任何运行时。探测直接复用系统 `ping`：每个目标一个常驻子进程，发包节奏由内核控制；界面只做 4 Hz 的合并刷新。因此体积只有 1.5 MB，常驻内存约 28 MB，空闲 CPU 0%。
+原生 Swift + SwiftUI 实现，不打包任何运行时。探测直接复用系统 `ping`：每个目标一个常驻子进程，发包节奏由内核控制；界面只做 4 Hz 的合并刷新。因此体积不到 2 MB，常驻内存约 28 MB，空闲 CPU 0%。
 
 ## 安装
 
