@@ -162,17 +162,29 @@ public final class PingEngine {
         pumpLocked()
     }
 
+    /// 已运行达到轮换周期的目标
+    static func expiredTargets(startedAt: [UUID: Date], now: Date, interval: TimeInterval) -> [UUID] {
+        startedAt.compactMap { id, date in
+            now.timeIntervalSince(date) >= interval ? id : nil
+        }
+    }
+
     private func pumpLocked() {
         guard running else { return }
         let limit = settings.maxConcurrent
 
-        // 目标数超过并发上限：把最早启动的目标轮换下来，让排队目标获得探测机会
+        // 目标数超过并发上限：把所有到期目标一起轮换下来，让排队目标获得探测机会。
+        // 一次只换一个目标会让大量目标等待过久（256 个目标、16 并发时约需 128 分钟）。
         if !pending.isEmpty, processes.count >= limit, settings.rotationInterval > 0 {
-            if let oldest = startedAt.min(by: { $0.value < $1.value }),
-               Date().timeIntervalSince(oldest.value) >= settings.rotationInterval {
-                stopProcessLocked(id: oldest.key)
-                pending.removeAll { $0 == oldest.key }
-                pending.append(oldest.key)
+            let expired = Self.expiredTargets(
+                startedAt: startedAt,
+                now: Date(),
+                interval: settings.rotationInterval
+            )
+            for id in expired {
+                stopProcessLocked(id: id)
+                pending.removeAll { $0 == id }
+                pending.append(id)
             }
         }
 

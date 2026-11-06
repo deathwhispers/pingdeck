@@ -22,10 +22,22 @@ struct ContentView: View {
             switch sheet {
             case .editor(let draft):
                 TargetEditorSheet(draft: draft) { host, note, enabled in
-                    model.closeSheet()
                     if draft.isNew {
-                        model.addTarget(host: host, note: note, enabled: enabled)
+                        let result = model.addTargets(host: host, note: note, enabled: enabled)
+                        model.closeSheet()
+                        if result.entries.count > 1 {
+                            model.alert = AppAlert(
+                                title: "已添加 \(result.entries.count) 个目标",
+                                message: "网段已展开并加入列表。"
+                            )
+                        } else if result.entries.isEmpty {
+                            model.alert = AppAlert(
+                                title: "添加失败",
+                                message: result.rejected.first?.reason ?? "目标格式不正确"
+                            )
+                        }
                     } else if let id = draft.targetID {
+                        model.closeSheet()
                         model.updateTarget(id: id, host: host, note: note, enabled: enabled)
                     }
                 }
@@ -80,6 +92,7 @@ struct ContentView: View {
                 model.toggleRun()
             } label: {
                 Label(model.isRunning ? "停止" : "开始", systemImage: model.isRunning ? "stop.fill" : "play.fill")
+                    .foregroundStyle(model.isRunning ? Color.red : Color.green)
             }
             .help(model.isRunning ? "停止全部探测" : "开始批量探测")
 
@@ -170,7 +183,10 @@ struct ContentView: View {
     }
 
     private var statusSummary: String {
-        let base = "间隔 \(String(format: "%.1f", model.settings.interval))s · 超时 \(String(format: "%.1f", model.settings.timeout))s · 并发上限 \(model.settings.maxConcurrent)"
+        var base = "间隔 \(String(format: "%.1f", model.settings.interval))s · 超时 \(String(format: "%.1f", model.settings.timeout))s · 并发 \(model.settings.maxConcurrent)"
+        if model.isRunning, model.queuedTargetCount > 0 {
+            base += " · 排队 \(model.queuedTargetCount)"
+        }
         return model.isRunning ? "运行中 · " + base : "已停止 · " + base
     }
 

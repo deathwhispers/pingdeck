@@ -177,3 +177,22 @@ final class EngineSchedulingTests: XCTestCase {
         XCTAssertEqual(finalStatus, .alive, "停止后保留最后一次测量结果")
     }
 }
+
+/// 轮换应当一次返回所有到期目标
+extension EngineSchedulingTests {
+    func testExpiredTargetsReturnsAllExpired() {
+        let now = Date()
+        let ids = (0..<5).map { _ in UUID() }
+        let startedAt: [UUID: Date] = [
+            ids[0]: now.addingTimeInterval(-10),
+            ids[1]: now.addingTimeInterval(-6),
+            ids[2]: now.addingTimeInterval(-1),
+            ids[3]: now.addingTimeInterval(-30),
+            ids[4]: now.addingTimeInterval(-2),
+        ]
+
+        let expired = PingEngine.expiredTargets(startedAt: startedAt, now: now, interval: 5)
+
+        XCTAssertEqual(Set(expired), Set([ids[0], ids[1], ids[3]]))
+    }
+}

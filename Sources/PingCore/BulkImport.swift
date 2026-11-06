@@ -159,6 +159,7 @@ public enum BulkImportParser {
         }
     }
 
+    /// 解析多行文本
     /// - Parameter existing: 已存在的目标（用于去重），比较时忽略大小写
     public static func parse(_ text: String, existing: Set<String> = []) -> Result {
         var entries: [Entry] = []
@@ -171,51 +172,94 @@ public enum BulkImportParser {
             let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
             if line.isEmpty || line.hasPrefix("#") { continue }
 
-            // 第一个空白字符之前是目标，之后整体作为备注
-            let host: String
-            let note: String
-            if let boundary = line.firstIndex(where: { $0 == " " || $0 == "\t" }) {
-                host = String(line[line.startIndex..<boundary])
-                note = String(line[line.index(after: boundary)...]).trimmingCharacters(in: .whitespaces)
-            } else {
-                host = line
-                note = ""
-            }
-
-            switch IPv4Range.parse(host) {
-            case .range(let range):
-                var added = 0
-                for address in range.addresses {
-                    let key = address.lowercased()
-                    guard !seen.contains(key) else { continue }
-                    seen.insert(key)
-                    entries.append(Entry(host: address, note: note))
-                    added += 1
-                }
-                if added == 0 {
-                    rejected.append(Rejected(line: index + 1, text: line, reason: "与已有目标重复"))
-                }
-                continue
-            case .invalid(let reason):
-                rejected.append(Rejected(line: index + 1, text: line, reason: reason))
-                continue
-            case .notARange:
-                break
-            }
-
-            if let error = TargetValidator.validate(host) {
-                rejected.append(Rejected(line: index + 1, text: line, reason: error))
-                continue
-            }
-            let key = host.lowercased()
-            if seen.contains(key) {
-                rejected.append(Rejected(line: index + 1, text: line, reason: "与已有目标重复"))
-                continue
-            }
-            seen.insert(key)
-            entries.append(Entry(host: host, note: note))
+            let (host, note) = split(line)
+            append(
+                host: host,
+                note: note,
+                lineNumber: index + 1,
+                rawLine: line,
+                seen: &seen,
+                entries: &entries,
+                rejected: &rejected
+            )
         }
 
         return Result(entries: entries, rejected: rejected)
+    }
+
+    /// 解析单个输入（目标或网段），供「添加」弹窗使用
+    /// - Parameter existing: 已存在的目标（用于去重），比较时忽略大小写
+    public static func parse(host: String, note: String, existing: Set<String> = []) -> Result {
+        var entries: [Entry] = []
+        var rejected: [Rejected] = []
+        var seen = Set(existing.map { $0.lowercased() })
+
+        let trimmedHost = host.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedNote = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        let rawLine = trimmedNote.isEmpty ? trimmedHost : "\(trimmedHost) \(trimmedNote)"
+        append(
+            host: trimmedHost,
+            note: trimmedNote,
+            lineNumber: 1,
+            rawLine: rawLine,
+            seen: &seen,
+            entries: &entries,
+            rejected: &rejected
+        )
+        return Result(entries: entries, rejected: rejected)
+    }
+
+    /// 第一个空白字符之前是目标，之后整体作为备注
+    private static func split(_ line: String) -> (host: String, note: String) {
+        if let boundary = line.firstIndex(where: { $0 == " " || $0 == "\t" }) {
+            return (
+                String(line[line.startIndex..<boundary]),
+                String(line[line.index(after: boundary)...]).trimmingCharacters(in: .whitespaces)
+            )
+        }
+        return (line, "")
+    }
+
+    private static func append(
+        host: String,
+        note: String,
+        lineNumber: Int,
+        rawLine: String,
+        seen: inout Set<String>,
+        entries: inout [Entry],
+        rejected: inout [Rejected]
+    ) {
+        switch IPv4Range.parse(host) {
+        case .range(let range):
+            var added = 0
+            for address in range.addresses {
+                let key = address.lowercased()
+                guard !seen.contains(key) else { continue }
+                seen.insert(key)
+                entries.append(Entry(host: address, note: note))
+                added += 1
+            }
+            if added == 0 {
+                rejected.append(Rejected(line: lineNumber, text: rawLine, reason: "与已有目标重复"))
+            }
+            return
+        case .invalid(let reason):
+            rejected.append(Rejected(line: lineNumber, text: rawLine, reason: reason))
+            return
+        case .notARange:
+            break
+        }
+
+        if let error = TargetValidator.validate(host) {
+            rejected.append(Rejected(line: lineNumber, text: rawLine, reason: error))
+            return
+        }
+        let key = host.lowercased()
+        if seen.contains(key) {
+            rejected.append(Rejected(line: lineNumber, text: rawLine, reason: "与已有目标重复"))
+            return
+        }
+        seen.insert(key)
+        entries.append(Entry(host: host, note: note))
     }
 }
