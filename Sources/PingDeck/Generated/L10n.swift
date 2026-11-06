@@ -18,12 +18,39 @@ enum L10n {
     }
 
     /**
+     Generic error alert title
+     
+     Localized string for key “alert.error.title” in table “Localizable.xcstrings”.
+     */
+    static var alertErrorTitle: LocalizedStringResource {
+        LocalizedStringResource("alert.error.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Build-time smoke test for generated String Catalog symbols.
      
      Localized string for key “app.name.smoke” in table “Localizable.xcstrings”.
      */
     static var appNameSmoke: LocalizedStringResource {
         LocalizedStringResource("app.name.smoke", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Ping engine: failed to launch probe for host
+     
+     Localized string for key “engine.launchFailed” in table “Localizable.xcstrings”.
+     */
+    static func engineLaunchFailed(_ arg1: String, _ arg2: String) -> LocalizedStringResource {
+        LocalizedStringResource("engine.launchFailed", defaultValue: "\(arg1)\(arg2)", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Ping engine: ping process exited with non-zero code
+     
+     Localized string for key “engine.processExited” in table “Localizable.xcstrings”.
+     */
+    static func engineProcessExited(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("engine.processExited", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -42,6 +69,15 @@ enum L10n {
      */
     static func importRejectedLine(_ arg1: Int, _ arg2: String, _ arg3: String) -> LocalizedStringResource {
         LocalizedStringResource("import.rejected.line", defaultValue: "\(arg1, specifier: "%lld")\(arg2)\(arg3)", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Ping process: system ping executable not found
+     
+     Localized string for key “ping.error.executableNotFound” in table “Localizable.xcstrings”.
+     */
+    static func pingErrorExecutableNotFound(_ arg1: String) -> LocalizedStringResource {
+        LocalizedStringResource("ping.error.executableNotFound", defaultValue: "\(arg1)", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -96,6 +132,78 @@ enum L10n {
      */
     static func rangeTooLarge(_ arg1: Int) -> LocalizedStringResource {
         LocalizedStringResource("range.tooLarge", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target status: alive
+     
+     Localized string for key “status.alive” in table “Localizable.xcstrings”.
+     */
+    static var statusAlive: LocalizedStringResource {
+        LocalizedStringResource("status.alive", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target status: disabled
+     
+     Localized string for key “status.disabled” in table “Localizable.xcstrings”.
+     */
+    static var statusDisabled: LocalizedStringResource {
+        LocalizedStringResource("status.disabled", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target status: error
+     
+     Localized string for key “status.error” in table “Localizable.xcstrings”.
+     */
+    static var statusError: LocalizedStringResource {
+        LocalizedStringResource("status.error", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target status: idle
+     
+     Localized string for key “status.idle” in table “Localizable.xcstrings”.
+     */
+    static var statusIdle: LocalizedStringResource {
+        LocalizedStringResource("status.idle", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target status: queued
+     
+     Localized string for key “status.pending” in table “Localizable.xcstrings”.
+     */
+    static var statusPending: LocalizedStringResource {
+        LocalizedStringResource("status.pending", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target status: probing
+     
+     Localized string for key “status.running” in table “Localizable.xcstrings”.
+     */
+    static var statusRunning: LocalizedStringResource {
+        LocalizedStringResource("status.running", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target status: timeout
+     
+     Localized string for key “status.timeout” in table “Localizable.xcstrings”.
+     */
+    static var statusTimeout: LocalizedStringResource {
+        LocalizedStringResource("status.timeout", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target status: unreachable
+     
+     Localized string for key “status.unreachable” in table “Localizable.xcstrings”.
+     */
+    static var statusUnreachable: LocalizedStringResource {
+        LocalizedStringResource("status.unreachable", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**

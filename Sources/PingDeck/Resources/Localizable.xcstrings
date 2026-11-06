@@ -192,6 +192,150 @@
           }
         }
       }
+    },
+    "ping.error.executableNotFound": {
+      "comment": "Ping process: system ping executable not found",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到系统 ping 程序：%@"
+          }
+        }
+      }
+    },
+    "engine.launchFailed": {
+      "comment": "Ping engine: failed to launch probe for host",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法启动对 %1$@ 的探测：%2$@"
+          }
+        }
+      }
+    },
+    "engine.processExited": {
+      "comment": "Ping engine: ping process exited with non-zero code",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ping 进程异常退出（代码 %lld）"
+          }
+        }
+      }
+    },
+    "alert.error.title": {
+      "comment": "Generic error alert title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "错误"
+          }
+        }
+      }
+    },
+    "status.idle": {
+      "comment": "Target status: idle",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未开始"
+          }
+        }
+      }
+    },
+    "status.pending": {
+      "comment": "Target status: queued",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排队中"
+          }
+        }
+      }
+    },
+    "status.running": {
+      "comment": "Target status: probing",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "探测中"
+          }
+        }
+      }
+    },
+    "status.alive": {
+      "comment": "Target status: alive",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正常"
+          }
+        }
+      }
+    },
+    "status.timeout": {
+      "comment": "Target status: timeout",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超时"
+          }
+        }
+      }
+    },
+    "status.unreachable": {
+      "comment": "Target status: unreachable",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不可达"
+          }
+        }
+      }
+    },
+    "status.disabled": {
+      "comment": "Target status: disabled",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已停用"
+          }
+        }
+      }
+    },
+    "status.error": {
+      "comment": "Target status: error",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "错误"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

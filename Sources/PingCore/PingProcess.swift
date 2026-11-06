@@ -1,14 +1,8 @@
 import Foundation
 
-public enum PingError: LocalizedError {
-    case executableNotFound(String)
-
-    public var errorDescription: String? {
-        switch self {
-        case .executableNotFound(let path):
-            return "找不到系统 ping 程序：\(path)"
-        }
-    }
+public enum PingProcessError: Error, Equatable, Sendable, Codable {
+    case executableNotFound(path: String)
+    case launchFailed(message: String)
 }
 
 /// 按行切分来自管道的字节流
@@ -79,7 +73,7 @@ public final class PingProcess {
     public func start() throws {
         let isIPv6 = host.contains(":")
         guard let executable = Self.executableURL(forIPv6: isIPv6) else {
-            throw PingError.executableNotFound(isIPv6 ? "/sbin/ping6" : "/sbin/ping")
+            throw PingProcessError.executableNotFound(path: isIPv6 ? "/sbin/ping6" : "/sbin/ping")
         }
 
         let process = Process()
@@ -108,7 +102,11 @@ public final class PingProcess {
             self?.onExit?(finished.terminationStatus)
         }
 
-        try process.run()
+        do {
+            try process.run()
+        } catch {
+            throw PingProcessError.launchFailed(message: error.localizedDescription)
+        }
         lock.lock()
         self.process = process
         lock.unlock()

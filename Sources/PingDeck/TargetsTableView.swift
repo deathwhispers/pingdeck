@@ -190,11 +190,11 @@ struct TargetsTableView: View {
                             .lineLimit(1)
                     }
                 }
-                .help(row.stats.message.isEmpty ? row.stats.status.displayName : row.stats.message)
+                .help(row.stats.displayMessage.isEmpty ? row.stats.status.displayName : row.stats.displayMessage)
             }
 
             tableColumn(.status) { row in
-                StatusBadge(status: row.stats.status, message: row.stats.message)
+                StatusBadge(status: row.stats.status, message: row.stats.displayMessage)
             }
 
             tableColumn(.last) { row in

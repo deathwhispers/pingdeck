@@ -34,3 +34,45 @@ extension BulkImportParser.RejectionReason {
         }
     }
 }
+
+extension PingProcessError {
+    var message: String {
+        switch self {
+        case .executableNotFound(let path):
+            return String(localized: L10n.pingErrorExecutableNotFound(path))
+        case .launchFailed(let message):
+            return message
+        }
+    }
+}
+
+extension PingStatusDetail {
+    var message: String {
+        switch self {
+        case .disabled:
+            return String(localized: L10n.statusDisabled)
+        case .launchFailed(let host, let error):
+            return String(localized: L10n.engineLaunchFailed(host, error.message))
+        case .processExited(let code):
+            return String(localized: L10n.engineProcessExited(Int(code)))
+        }
+    }
+}
+
+extension PingEngineIssue {
+    var message: String {
+        switch self {
+        case .launchFailed(let host, let error):
+            return String(localized: L10n.engineLaunchFailed(host, error.message))
+        }
+    }
+}
+
+extension PingStats {
+    /// 应用生成的细节优先于 ping 原始输出
+    var displayMessage: String {
+        detail?.message ?? message
+    }
+}
+
+

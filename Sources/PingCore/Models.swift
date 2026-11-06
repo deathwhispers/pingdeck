@@ -52,6 +52,13 @@ public enum TargetStatus: String, Codable, Sendable {
     }
 }
 
+/// 由应用生成的状态细节；来自 ping 的原始输出仍放在 `message`
+public enum PingStatusDetail: Equatable, Sendable, Codable {
+    case disabled
+    case launchFailed(host: String, error: PingProcessError)
+    case processExited(code: Int32)
+}
+
 /// 目标的统计结果
 ///
 /// 收发包计数以 ping 输出的 `icmp_seq` 为准：seq 是每个目标内单调递增的包序号，
@@ -60,6 +67,7 @@ public enum TargetStatus: String, Codable, Sendable {
 public struct PingStats: Codable, Sendable, Equatable {
     public var status: TargetStatus = .idle
     public var message: String = ""
+    public var detail: PingStatusDetail?
     public var sent: Int = 0
     public var received: Int = 0
     public var lastLatency: Double?
@@ -103,22 +111,26 @@ public struct PingStats: Codable, Sendable, Equatable {
         lastResponseAt = date
         status = .alive
         message = ""
+        detail = nil
     }
 
     public mutating func recordTimeout(seq: Int?) {
         countSent(seq: seq)
         status = .timeout
+        detail = nil
     }
 
     public mutating func recordUnreachable(_ text: String, seq: Int?) {
         countSent(seq: seq)
         status = .unreachable
         message = text
+        detail = nil
     }
 
     public mutating func recordFailure(_ text: String) {
         status = .error
         message = text
+        detail = nil
     }
 
     private mutating func countSent(seq: Int?) {

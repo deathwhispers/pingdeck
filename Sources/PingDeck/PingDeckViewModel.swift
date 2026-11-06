@@ -129,9 +129,12 @@ final class PingDeckViewModel: ObservableObject {
                 self?.enqueue(id: id, stats: value)
             }
         }
-        engine.onError = { [weak self] message in
+        engine.onError = { [weak self] issue in
             DispatchQueue.main.async {
-                self?.alert = AppAlert(title: "错误", message: message)
+                self?.alert = AppAlert(
+                    title: String(localized: L10n.alertErrorTitle),
+                    message: issue.message
+                )
             }
         }
         engine.updateSettings(Self.engineSettings(from: settings))
