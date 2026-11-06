@@ -118,6 +118,24 @@ public struct PingStats: Codable, Sendable, Equatable {
     }
 }
 
+/// 界面外观
+public enum AppearanceMode: String, Codable, CaseIterable, Hashable, Sendable {
+    /// 跟随系统外观
+    case system
+    /// 始终浅色
+    case light
+    /// 始终深色
+    case dark
+
+    public var displayName: String {
+        switch self {
+        case .system: return "跟随系统"
+        case .light: return "浅色"
+        case .dark: return "深色"
+        }
+    }
+}
+
 /// 运行参数
 public struct PingSettings: Codable, Sendable, Equatable {
     /// 发包间隔（秒），macOS 下非 root 建议 >= 0.2
@@ -128,15 +146,38 @@ public struct PingSettings: Codable, Sendable, Equatable {
     public var maxConcurrent: Int
     /// 目标数超过并发上限时的轮换周期（秒），0 表示不轮换
     public var rotationInterval: Double
+    /// 界面外观
+    public var appearance: AppearanceMode
 
     public init(interval: Double = 1.0,
                 timeout: Double = 2.0,
                 maxConcurrent: Int = 16,
-                rotationInterval: Double = 30) {
+                rotationInterval: Double = 30,
+                appearance: AppearanceMode = .system) {
         self.interval = interval
         self.timeout = timeout
         self.maxConcurrent = max(1, maxConcurrent)
         self.rotationInterval = max(0, rotationInterval)
+        self.appearance = appearance
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case interval
+        case timeout
+        case maxConcurrent
+        case rotationInterval
+        case appearance
+    }
+
+    /// 手写解码：旧版本配置没有 appearance 字段（或值未知）时回落到跟随系统。
+    /// 不能让整个配置解码失败，否则用户保存的目标会全部丢失。
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        interval = try container.decode(Double.self, forKey: .interval)
+        timeout = try container.decode(Double.self, forKey: .timeout)
+        maxConcurrent = try container.decode(Int.self, forKey: .maxConcurrent)
+        rotationInterval = try container.decode(Double.self, forKey: .rotationInterval)
+        appearance = (try? container.decodeIfPresent(AppearanceMode.self, forKey: .appearance)) ?? .system
     }
 
     public static let `default` = PingSettings()

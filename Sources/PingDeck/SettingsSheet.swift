@@ -1,4 +1,5 @@
 import SwiftUI
+import PingCore
 
 struct SettingsSheet: View {
     @EnvironmentObject private var model: PingDeckViewModel
@@ -7,6 +8,20 @@ struct SettingsSheet: View {
         VStack(alignment: .leading, spacing: 18) {
             Text("设置")
                 .font(.headline)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("外观")
+                Picker("外观", selection: $model.settings.appearance) {
+                    ForEach(AppearanceMode.allCases, id: \.self) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                Text("跟随系统会随 macOS 外观自动切换")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {

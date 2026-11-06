@@ -46,6 +46,7 @@
 - **导出统一表格模型**：CSV / JSON / TXT / Markdown / XLSX 都从 `ExportTable` 派生，列定义只有一份，各格式不会出现列偏差；列值带类型（文本 / 状态 / 数字 / 时间），XLSX 才能写出真正的数值单元格而不是字符串。JSON 用英文字段名与英文状态值，缺失值写 `null`；汇总信息只出现在 JSON 与 Markdown 中，CSV / TXT / XLSX 保持纯明细以兼容既有脚本。
 - **XLSX 零依赖实现**：xlsx 本质是装了 XML 的 zip 包，用自实现的 `ZipArchive`（stored 模式 + CRC32）加最小 OOXML 部件生成，不引入第三方库；产出文件已用系统 QuickLook 与 Python `zipfile` 交叉验证可正常打开。
 - **配置读写可注入**：界面层通过 `ConfigStoring` 协议读写配置，默认实现写磁盘，单元测试注入内存实现——跑测试不会写坏用户真实配置。
+- **外观设置**：`AppearanceMode`（跟随系统 / 浅色 / 深色）随 `PingSettings` 持久化；旧配置缺少该字段时手写解码回落为跟随系统，避免整个配置解码失败导致目标丢失。
 - **错误处理**：解析 `ping` 的三类失败——目标无效（`cannot resolve host` → 状态「错误」并停止该目标进程）、网络不可达（`No route to host` → 状态「不可达」）、发包失败（`sendto:` → 计入丢包）。
 
 ## 目录结构

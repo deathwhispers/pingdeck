@@ -40,6 +40,7 @@ struct PingDeckApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(model)
+                .preferredColorScheme(model.settings.appearance.colorScheme)
                 .frame(minWidth: 940, minHeight: 480)
         }
         .commands {
@@ -54,6 +55,17 @@ struct PingDeckApp: App {
                 Button("清空全部目标") { model.confirmingClearAllTargets = true }
                     .disabled(model.targets.isEmpty)
             }
+        }
+    }
+}
+
+private extension AppearanceMode {
+    /// nil 表示跟随系统
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
         }
     }
 }

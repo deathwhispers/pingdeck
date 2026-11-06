@@ -39,3 +39,16 @@ final class ConfigStoreInjectionTests: XCTestCase {
         XCTAssertEqual(model.targets.map(\.host), ["9.9.9.9"])
     }
 }
+
+/// 外观设置需要随配置一起持久化
+final class AppearanceSettingTests: XCTestCase {
+    func testAppearanceChangeIsSaved() throws {
+        let store = InMemoryConfigStore()
+        let model = PingDeckViewModel(configuration: AppConfiguration(), store: store)
+
+        model.settings.appearance = .dark
+        model.saveNow()
+
+        XCTAssertEqual(try XCTUnwrap(store.saved).settings.appearance, .dark)
+    }
+}
