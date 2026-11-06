@@ -43,19 +43,6 @@ struct PingDeckApp: App {
                 .preferredColorScheme(model.settings.appearance.colorScheme)
                 .frame(minWidth: 940, minHeight: 480)
         }
-        .commands {
-            CommandMenu("目标") {
-                // 不绑定 ⌘A：让系统的「编辑 → 全选」按焦点生效，
-                // 否则会抢走批量导入输入框里的全选
-                Button("全选目标") { model.selectAll() }
-                    .disabled(model.targets.isEmpty)
-                Button("取消选择") { model.clearSelection() }
-                    .disabled(model.selection.isEmpty)
-                Divider()
-                Button("清空全部目标") { model.confirmingClearAllTargets = true }
-                    .disabled(model.targets.isEmpty)
-            }
-        }
     }
 }
 
