@@ -23,17 +23,58 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/PingDeck"
 
-# 生成图标（脚本化渲染，仓库里不放二进制资源）
-if command -v swift >/dev/null 2>&1 && command -v iconutil >/dev/null 2>&1; then
-  ICONSET="$ROOT/.build/AppIcon.iconset"
-  if swift "$ROOT/scripts/make-icon.swift" "$ICONSET" >/dev/null 2>&1 \
-     && iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"; then
-    rm -rf "$ICONSET"
-    echo "已生成应用图标"
-  else
-    echo "图标生成失败，使用系统默认图标"
-    rm -f "$APP/Contents/Resources/AppIcon.icns"
-  fi
+# 生成浅色/深色图标：从 docs/images 的源图裁出透明圆角，再打包成两个 .icns
+ICON_BUILD="$ROOT/.build/AppIcon"
+ICON_LIGHT_SRC="$ROOT/docs/images/light_icon.png"
+ICON_DARK_SRC="$ROOT/docs/images/dark_icon.png"
+rm -rf "$ICON_BUILD"
+
+if command -v swift >/dev/null 2>&1 \
+   && command -v iconutil >/dev/null 2>&1 \
+   && [[ -f "$ICON_LIGHT_SRC" && -f "$ICON_DARK_SRC" ]] \
+   && swift "$ROOT/scripts/prepare-icon.swift" "$ICON_LIGHT_SRC" "$ICON_DARK_SRC" "$ICON_BUILD" >/dev/null 2>&1; then
+  ICONSET="$ICON_BUILD/AppIcon.iconset"
+  variants=(
+    "icon_16x16.png 16"
+    "icon_16x16@2x.png 32"
+    "icon_32x32.png 32"
+    "icon_32x32@2x.png 64"
+    "icon_128x128.png 128"
+    "icon_128x128@2x.png 256"
+    "icon_256x256.png 256"
+    "icon_256x256@2x.png 512"
+    "icon_512x512.png 512"
+  )
+
+  # 默认 Finder 图标：浅色，最大 512px（1024 由系统缩放，避免 icns 过大）
+  rm -rf "$ICONSET"
+  mkdir -p "$ICONSET"
+  for spec in "${variants[@]}"; do
+    name="${spec%% *}"
+    px="${spec##* }"
+    out="$ICONSET/$name"
+    sips -z "$px" "$px" "$ICON_BUILD/icon-light-1024.png" --out "$out" >/dev/null
+    if command -v pngcrush >/dev/null 2>&1; then
+      pngcrush -q -ow "$out" >/dev/null 2>&1 || true
+    fi
+  done
+  iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
+
+  # 运行时图标：256px 足够 Dock 与 App Switcher 使用
+  for appearance in Light Dark; do
+    lower="$(echo "$appearance" | tr '[:upper:]' '[:lower:]')"
+    out="$APP/Contents/Resources/AppIcon-$appearance.png"
+    sips -z 256 256 "$ICON_BUILD/icon-$lower-1024.png" --out "$out" >/dev/null
+    if command -v pngcrush >/dev/null 2>&1; then
+      pngcrush -q -ow "$out" >/dev/null 2>&1 || true
+    fi
+  done
+
+  rm -rf "$ICON_BUILD"
+  echo "已生成应用图标（浅色 / 深色）"
+else
+  rm -rf "$ICON_BUILD"
+  echo "图标生成失败，使用系统默认图标"
 fi
 
 cat > "$APP/Contents/Info.plist" <<PLIST
@@ -58,7 +99,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
+    <string>14.4</string>
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.developer-tools</string>
     <key>NSHighResolutionCapable</key>

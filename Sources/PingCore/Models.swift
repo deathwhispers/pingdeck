@@ -38,6 +38,18 @@ public enum TargetStatus: String, Codable, Sendable {
         case .error: return "错误"
         }
     }
+
+    /// 排序用的严重程度：越靠前越健康
+    public var sortRank: Int {
+        switch self {
+        case .alive: return 0
+        case .running, .pending, .idle: return 1
+        case .timeout: return 2
+        case .unreachable: return 3
+        case .error: return 4
+        case .disabled: return 5
+        }
+    }
 }
 
 /// 目标的统计结果

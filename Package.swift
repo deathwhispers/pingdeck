@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "PingDeck",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS("14.4")],
     products: [
         .executable(name: "PingDeck", targets: ["PingDeck"]),
         .library(name: "PingCore", targets: ["PingCore"]),

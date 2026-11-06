@@ -4,6 +4,8 @@ import PingCore
 
 /// 直接用 `swift run` 启动时进程没有 App Bundle，需要手动激活才能显示窗口
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var appearanceObservation: NSKeyValueObservation?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // 已经有实例在跑时激活它并退出自己，避免出现两个窗口、两套配置互相覆盖
         if Self.activateRunningInstance() {
@@ -17,6 +19,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             NSApp.activate(ignoringOtherApps: true)
         }
+
+        applyAppearanceIcon()
+        // 系统浅色/深色切换时同步 Dock 与 App Switcher 图标
+        appearanceObservation = NSApp.observe(\.effectiveAppearance, options: [.new]) { [weak self] _, _ in
+            DispatchQueue.main.async {
+                self?.applyAppearanceIcon()
+            }
+        }
+    }
+
+    deinit {
+        appearanceObservation?.invalidate()
+    }
+
+    private func applyAppearanceIcon() {
+        let isDark = NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+        let name = isDark ? "AppIcon-Dark" : "AppIcon-Light"
+        guard let url = Bundle.main.url(forResource: name, withExtension: "png"),
+              let image = NSImage(contentsOf: url) else { return }
+        NSApp.applicationIconImage = image
     }
 
     /// 返回 true 表示已存在其它实例，本进程应当退出
@@ -41,7 +63,17 @@ struct PingDeckApp: App {
             ContentView()
                 .environmentObject(model)
                 .preferredColorScheme(model.settings.appearance.colorScheme)
-                .frame(minWidth: 940, minHeight: 480)
+                .frame(minWidth: 1000, minHeight: 560)
+        }
+        .defaultSize(width: 1280, height: 760)
+        .commands {
+            // App 菜单中的“设置…”项，⌘, 打开现有设置 sheet
+            CommandGroup(replacing: .appSettings) {
+                Button("设置…") {
+                    model.openSettingsSheet()
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
         }
     }
 }

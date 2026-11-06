@@ -5,6 +5,8 @@ import PingCore
 
 struct ContentView: View {
     @EnvironmentObject private var model: PingDeckViewModel
+    @AppStorage(ColumnCustomizationStore.storageKey)
+    private var columnCustomization = TableColumnCustomization<TargetRow>()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -14,7 +16,7 @@ struct ContentView: View {
             }
             toolbarBar
             Divider()
-            TargetsTableView()
+            TargetsTableView(columnCustomization: $columnCustomization)
             Divider()
             footerBar
         }
@@ -128,6 +130,23 @@ struct ContentView: View {
             .help("从多行文本批量添加目标")
 
             Menu {
+                ForEach(TargetColumn.allCases.filter { !$0.isRequired }) { column in
+                    Toggle(column.title, isOn: columnBinding(column))
+                }
+                Divider()
+                Button("显示全部列") {
+                    for column in TargetColumn.allCases {
+                        columnCustomization[visibility: column.rawValue] = .visible
+                    }
+                }
+            } label: {
+                Label("列", systemImage: "rectangle.split.3x1")
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+            .help("显示或隐藏表格列")
+
+            Menu {
                 ForEach(ExportFormat.allCases, id: \.self) { format in
                     Menu {
                         Button("导出全部 \(model.rows.count) 项") {
@@ -195,6 +214,15 @@ struct ContentView: View {
     private func removeSelected() {
         guard !model.selection.isEmpty else { return }
         model.removeTargets(ids: model.selection)
+    }
+
+    private func columnBinding(_ column: TargetColumn) -> Binding<Bool> {
+        Binding(
+            get: { columnCustomization[visibility: column.rawValue] != .hidden },
+            set: { isOn in
+                columnCustomization[visibility: column.rawValue] = isOn ? .visible : .hidden
+            }
+        )
     }
 
     private func export(entries: [ExportEntry], format: ExportFormat) {

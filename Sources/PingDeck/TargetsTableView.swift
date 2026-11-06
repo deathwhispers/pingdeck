@@ -1,147 +1,273 @@
 import SwiftUI
 import PingCore
 
+/// 表格列
+enum TargetColumn: String, CaseIterable, Identifiable {
+    case target
+    case status
+    case last
+    case average
+    case minimum
+    case maximum
+    case loss
+    case lastResponse
+    case enabled
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .target: return "目标"
+        case .status: return "状态"
+        case .last: return "最新(ms)"
+        case .average: return "平均(ms)"
+        case .minimum: return "最小(ms)"
+        case .maximum: return "最大(ms)"
+        case .loss: return "丢包率"
+        case .lastResponse: return "最后响应时间"
+        case .enabled: return "启用"
+        }
+    }
+
+    var sortField: SortSpec.Field {
+        switch self {
+        case .target: return .target
+        case .status: return .status
+        case .last: return .last
+        case .average: return .average
+        case .minimum: return .minimum
+        case .maximum: return .maximum
+        case .loss: return .loss
+        case .lastResponse: return .lastResponse
+        case .enabled: return .enabled
+        }
+    }
+
+    var alignment: TableColumnAlignment {
+        switch self {
+        case .target, .status: return .leading
+        default: return .trailing
+        }
+    }
+
+    /// 目标列固定显示，避免表格失去主标识
+    var isRequired: Bool { self == .target }
+
+    var minWidth: CGFloat {
+        switch self {
+        case .target: return 160
+        case .status: return 70
+        case .last, .average, .minimum, .maximum: return 60
+        case .loss: return 60
+        case .lastResponse: return 120
+        case .enabled: return 44
+        }
+    }
+
+    var idealWidth: CGFloat {
+        switch self {
+        case .target: return 320
+        case .status: return 92
+        case .last, .average, .minimum, .maximum: return 80
+        case .loss: return 76
+        case .lastResponse: return 150
+        case .enabled: return 54
+        }
+    }
+
+    var maxWidth: CGFloat {
+        switch self {
+        case .target: return 800
+        case .status: return 160
+        case .last, .average, .minimum, .maximum: return 140
+        case .loss: return 120
+        case .lastResponse: return 240
+        case .enabled: return 80
+        }
+    }
+}
+
+/// 列显隐的持久化 key
+enum ColumnCustomizationStore {
+    static let storageKey = "targets.columnCustomization"
+}
+
+/// 表格排序比较器：空值始终排在最后，不随升降序翻转
+struct TargetRowComparator: SortComparator {
+    let field: SortSpec.Field
+    var order: SortOrder = .forward
+
+    func compare(_ lhs: TargetRow, _ rhs: TargetRow) -> ComparisonResult {
+        let result: ComparisonResult
+        switch field {
+        case .target:
+            result = ordered(lhs.target.host.localizedStandardCompare(rhs.target.host))
+        case .status:
+            result = ordered(lhs.stats.status.sortRank, rhs.stats.status.sortRank)
+        case .last:
+            result = ordered(lhs.stats.lastLatency, rhs.stats.lastLatency)
+        case .average:
+            result = ordered(lhs.stats.averageLatency, rhs.stats.averageLatency)
+        case .minimum:
+            result = ordered(lhs.stats.minLatency, rhs.stats.minLatency)
+        case .maximum:
+            result = ordered(lhs.stats.maxLatency, rhs.stats.maxLatency)
+        case .loss:
+            result = ordered(lhs.stats.lossRate, rhs.stats.lossRate)
+        case .lastResponse:
+            result = ordered(lhs.stats.lastResponseAt, rhs.stats.lastResponseAt)
+        case .enabled:
+            result = ordered(lhs.target.enabled ? 1 : 0, rhs.target.enabled ? 1 : 0)
+        }
+
+        if result == .orderedSame {
+            return lhs.target.host.localizedStandardCompare(rhs.target.host)
+        }
+        return result
+    }
+
+    /// 空值固定排在最后，不随升降序翻转
+    private func ordered<T: Comparable>(_ lhs: T?, _ rhs: T?) -> ComparisonResult {
+        switch (lhs, rhs) {
+        case (nil, nil): return .orderedSame
+        case (nil, _): return .orderedDescending
+        case (_, nil): return .orderedAscending
+        case let (lhs?, rhs?): return ordered(lhs, rhs)
+        }
+    }
+
+    private func ordered<T: Comparable>(_ lhs: T, _ rhs: T) -> ComparisonResult {
+        if lhs == rhs { return .orderedSame }
+        let result: ComparisonResult = lhs < rhs ? .orderedAscending : .orderedDescending
+        return order == .forward ? result : reversed(result)
+    }
+
+    private func ordered(_ result: ComparisonResult) -> ComparisonResult {
+        order == .forward ? result : reversed(result)
+    }
+
+    private func reversed(_ result: ComparisonResult) -> ComparisonResult {
+        switch result {
+        case .orderedAscending: return .orderedDescending
+        case .orderedDescending: return .orderedAscending
+        case .orderedSame: return .orderedSame
+        }
+    }
+}
+
 /// 目标表格
 ///
-/// 行容器用 `List(selection:)`，由 AppKit 提供原生的多选语义：
-/// 点击单选、⌘ 点击加选、⇧ 点击选区间，都不再自己判断修饰键。
-/// 「启用」开关放在最后一列并用 switch 样式，避免和「选中」混淆。
+/// 使用 SwiftUI `Table`：原生列宽拖动、横向滚动、多选与表头排序。
+/// 列显隐与顺序通过 `TableColumnCustomization` 管理并持久化，「目标」列固定显示。
 struct TargetsTableView: View {
     @EnvironmentObject private var model: PingDeckViewModel
-
-    private let colStatus: CGFloat = 92
-    private let colValue: CGFloat = 80
-    private let colLoss: CGFloat = 76
-    private let colLast: CGFloat = 150
-    private let colEnable: CGFloat = 54
+    @Binding var columnCustomization: TableColumnCustomization<TargetRow>
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            Divider()
-            if model.rows.isEmpty {
-                emptyState
-            } else {
-                List(selection: $model.selection) {
-                    ForEach(model.rows) { row in
-                        rowView(row)
-                            .tag(row.id)
-                    }
-                }
-                .listStyle(.plain)
-                .environment(\.defaultMinListRowHeight, 26)
-            }
+        if model.rows.isEmpty {
+            emptyState
+        } else {
+            table
         }
     }
 
-    private var header: some View {
-        HStack(spacing: 0) {
-            Button {
-                model.toggleSort(.target)
-            } label: {
-                HStack(spacing: 2) {
-                    Text("目标")
-                    if model.sort.field == .target {
-                        sortIndicator
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .padding(.leading, 6)
-            .help("点击按「\(SortSpec.Field.target.title)」排序")
-
-            headerCell("状态", field: nil, width: colStatus, alignment: .leading)
-            headerCell("最新(ms)", field: .last, width: colValue)
-            headerCell("平均(ms)", field: .average, width: colValue)
-            headerCell("最小(ms)", field: .minimum, width: colValue)
-            headerCell("最大(ms)", field: .maximum, width: colValue)
-            headerCell("丢包率", field: .loss, width: colLoss)
-            headerCell("最后响应时间", field: .lastResponse, width: colLast)
-            Text("启用")
-                .frame(width: colEnable, alignment: .trailing)
-        }
-        .font(.system(size: 11, weight: .semibold))
-        .foregroundStyle(.secondary)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Color(nsColor: .controlBackgroundColor))
-    }
-
-    private func headerCell(_ title: String, field: SortSpec.Field?, width: CGFloat, alignment: Alignment = .trailing) -> some View {
-        Button {
-            if let field {
-                model.toggleSort(field)
-            }
-        } label: {
-            HStack(spacing: 2) {
-                Text(title)
-                if let field, model.sort.field == field {
-                    sortIndicator
-                }
-            }
-            .frame(width: width, alignment: alignment)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .disabled(field == nil)
-        .help(field == nil ? title : "点击按「\(field?.title ?? title)」排序")
-    }
-
-    private var sortIndicator: some View {
-        Image(systemName: model.sort.ascending ? "chevron.up" : "chevron.down")
-            .font(.system(size: 8, weight: .bold))
-            .foregroundStyle(.secondary)
-    }
-
-    private func rowView(_ row: TargetRow) -> some View {
-        HStack(spacing: 0) {
-            HStack(spacing: 6) {
-                Text(row.target.host)
-                    .font(.system(.body, design: .monospaced))
-                    .lineLimit(1)
-                if !row.target.note.isEmpty {
-                    Text(row.target.note)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+    private var table: some View {
+        Table(
+            model.rows,
+            selection: $model.selection,
+            sortOrder: sortOrder,
+            columnCustomization: $columnCustomization
+        ) {
+            tableColumn(.target) { row in
+                HStack(spacing: 6) {
+                    Text(row.target.host)
+                        .font(.system(.body, design: .monospaced))
                         .lineLimit(1)
+                    if !row.target.note.isEmpty {
+                        Text(row.target.note)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
                 }
+                .help(row.stats.message.isEmpty ? row.stats.status.displayName : row.stats.message)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.leading, 6)
 
-            StatusBadge(status: row.stats.status, message: row.stats.message)
-                .frame(width: colStatus, alignment: .leading)
+            tableColumn(.status) { row in
+                StatusBadge(status: row.stats.status, message: row.stats.message)
+            }
 
-            LatencyCell(value: row.stats.lastLatency)
-                .frame(width: colValue, alignment: .trailing)
-            LatencyCell(value: row.stats.averageLatency)
-                .frame(width: colValue, alignment: .trailing)
-            LatencyCell(value: row.stats.minLatency)
-                .frame(width: colValue, alignment: .trailing)
-            LatencyCell(value: row.stats.maxLatency)
-                .frame(width: colValue, alignment: .trailing)
+            tableColumn(.last) { row in
+                LatencyCell(value: row.stats.lastLatency)
+            }
 
-            Text(row.stats.sent > 0 ? String(format: "%.1f%%", row.stats.lossRate * 100) : "-")
-                .monospacedDigit()
-                .frame(width: colLoss, alignment: .trailing)
+            tableColumn(.average) { row in
+                LatencyCell(value: row.stats.averageLatency)
+            }
 
-            Text(model.formattedTime(row.stats.lastResponseAt))
-                .font(.system(size: 11, design: .monospaced))
-                .frame(width: colLast, alignment: .trailing)
+            tableColumn(.minimum) { row in
+                LatencyCell(value: row.stats.minLatency)
+            }
 
-            Toggle("", isOn: Binding(
-                get: { row.target.enabled },
-                set: { model.setEnabled(id: row.id, enabled: $0) }
-            ))
-            .labelsHidden()
-            .toggleStyle(.switch)
-            .help(row.target.enabled ? "点击停用该目标" : "点击启用该目标")
-            .frame(width: colEnable, alignment: .trailing)
+            tableColumn(.maximum) { row in
+                LatencyCell(value: row.stats.maxLatency)
+            }
+
+            tableColumn(.loss) { row in
+                Text(row.stats.sent > 0 ? String(format: "%.1f%%", row.stats.lossRate * 100) : "-")
+                    .monospacedDigit()
+            }
+
+            tableColumn(.lastResponse) { row in
+                Text(model.formattedTime(row.stats.lastResponseAt))
+                    .font(.system(size: 11, design: .monospaced))
+            }
+
+            tableColumn(.enabled) { row in
+                Toggle("", isOn: Binding(
+                    get: { row.target.enabled },
+                    set: { model.setEnabled(id: row.id, enabled: $0) }
+                ))
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .help(row.target.enabled ? "点击停用该目标" : "点击启用该目标")
+            }
         }
-        .padding(.vertical, 2)
-        .help(row.stats.message.isEmpty ? row.stats.status.displayName : row.stats.message)
+        .tableStyle(.inset(alternatesRowBackgrounds: false))
+    }
+
+    private func tableColumn<Content: View>(
+        _ column: TargetColumn,
+        @ViewBuilder content: @escaping (TargetRow) -> Content
+    ) -> some TableColumnContent<TargetRow, TargetRowComparator> {
+        TableColumn(column.title, sortUsing: TargetRowComparator(field: column.sortField)) { row in
+            content(row)
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: column.alignment == .trailing ? .trailing : .leading
+                )
+        }
+        .width(min: column.minWidth, ideal: column.idealWidth, max: column.maxWidth)
+        .alignment(column.alignment)
+        .customizationID(column.rawValue)
+        .disabledCustomizationBehavior(column.isRequired ? .visibility : [])
+    }
+
+    private var sortOrder: Binding<[TargetRowComparator]> {
+        Binding(
+            get: {
+                [
+                    TargetRowComparator(
+                        field: model.sort.field,
+                        order: model.sort.ascending ? .forward : .reverse
+                    )
+                ]
+            },
+            set: { newValue in
+                guard let first = newValue.first else { return }
+                model.sort = SortSpec(field: first.field, ascending: first.order == .forward)
+            }
+        )
     }
 
     private var emptyState: some View {

@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="docs/images/icon.png" width="120" alt="PingDeck 图标">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/icon-dark.png">
+    <img src="docs/images/icon-light.png" width="120" alt="PingDeck 图标">
+  </picture>
 </p>
 
 <h1 align="center">PingDeck</h1>
@@ -11,8 +14,8 @@
 
 <p align="center">
   <a href="https://github.com/deathwhispers/pingdeck/releases/latest"><img alt="版本" src="https://img.shields.io/badge/version-0.0.4-green"></a>
-  <img alt="平台" src="https://img.shields.io/badge/macOS-13%2B-blue">
-  <img alt="体积" src="https://img.shields.io/badge/app-1.5%20MB-lightgrey">
+  <img alt="平台" src="https://img.shields.io/badge/macOS-14.4%2B-blue">
+  <img alt="体积" src="https://img.shields.io/badge/app-1.9%20MB-lightgrey">
   <img alt="依赖" src="https://img.shields.io/badge/dependencies-none-lightgrey">
   <img alt="权限" src="https://img.shields.io/badge/root-not%20required-brightgreen">
 </p>
@@ -80,7 +83,7 @@ PingDeck 把这件事变成一张表：**粘贴目标，点开始，状态、延
 
 ## 为什么这么轻
 
-原生 Swift + SwiftUI 实现，不打包任何运行时。探测直接复用系统 `ping`：每个目标一个常驻子进程，发包节奏由内核控制；界面只做 4 Hz 的合并刷新。因此体积只有 1.5 MB，常驻内存约 28 MB，空闲 CPU 0%。
+原生 Swift + SwiftUI 实现，不打包任何运行时。探测直接复用系统 `ping`：每个目标一个常驻子进程，发包节奏由内核控制；界面只做 4 Hz 的合并刷新。因此体积不到 2 MB，常驻内存约 28 MB，空闲 CPU 0%。
 
 ## 安装
 
@@ -88,7 +91,7 @@ PingDeck 把这件事变成一张表：**粘贴目标，点开始，状态、延
 2. 打开 DMG，把 PingDeck 拖进「应用程序」
 3. 首次打开如果提示「无法验证开发者」，在 Finder 里右键点 PingDeck → 选择「打开」，之后就不会再提示
 
-> 需要 macOS 13 或更高版本，支持 Apple 芯片与 Intel。
+> 需要 macOS 14.4 或更高版本，支持 Apple 芯片与 Intel。
 
 ## 快速上手
 
@@ -107,6 +110,7 @@ PingDeck 把这件事变成一张表：**粘贴目标，点开始，状态、延
 | **批量导入** | 粘贴多行文本或网段即可建目标，支持「目标 备注」写法，自动跳过重复与非法行；可选择追加或整体替换 |
 | **单个添加** | 添加弹窗同样支持 IP、域名与网段，网段会展开为多个目标 |
 | **多选操作** | ⌘ 点击加选、⇧ 点击选区间、Delete 批量删除、一键清空全部 |
+| **列管理** | 拖动调整列宽、显示/隐藏列，内容超宽时横向滚动 |
 | **单行启停** | 关掉某行的「启用」开关会立即终止它的探测，不占资源 |
 | **并发控制** | 启动时自动匹配目标数量（最多 512），也可手动限制；超出上限按轮换周期覆盖 |
 | **多格式导出** | 导出全部或仅选中项，支持 CSV / JSON / TXT / Markdown / Excel(XLSX) |
@@ -128,7 +132,7 @@ PingDeck 把这件事变成一张表：**粘贴目标，点开始，状态、延
 | 最后响应时间 | 最近一次收到回包的本地时间 |
 | 启用 | 该目标是否参与探测 |
 
-点击任意表头可按该列排序，再点一次反向；没有数据的行始终排在最后。
+点击任意表头可按该列排序，再点一次反向；没有数据的行始终排在最后。列宽可以直接拖动表头分隔线调整；工具栏「列」菜单可以显示或隐藏列，设置会自动保存；列总宽超出窗口时可左右滚动。
 
 **状态含义**
 
