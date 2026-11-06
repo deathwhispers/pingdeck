@@ -27,6 +27,33 @@ enum L10n {
     }
 
     /**
+     Concurrency adjustment message at limit
+     
+     Localized string for key “alert.concurrency.atLimit” in table “Localizable.xcstrings”.
+     */
+    static func alertConcurrencyAtLimit(_ arg1: Int, _ arg2: Int, _ arg3: Int, _ arg4: Int) -> LocalizedStringResource {
+        LocalizedStringResource("alert.concurrency.atLimit", defaultValue: "\(arg1, specifier: "%lld")\(arg2, specifier: "%lld")\(arg3, specifier: "%lld")\(arg4, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Concurrency adjustment message below limit
+     
+     Localized string for key “alert.concurrency.belowLimit” in table “Localizable.xcstrings”.
+     */
+    static func alertConcurrencyBelowLimit(_ arg1: Int, _ arg2: Int, _ arg3: Int) -> LocalizedStringResource {
+        LocalizedStringResource("alert.concurrency.belowLimit", defaultValue: "\(arg1, specifier: "%lld")\(arg2, specifier: "%lld")\(arg3, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Concurrency adjustment alert title
+     
+     Localized string for key “alert.concurrency.title” in table “Localizable.xcstrings”.
+     */
+    static var alertConcurrencyTitle: LocalizedStringResource {
+        LocalizedStringResource("alert.concurrency.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Alert banner dismiss button help
      
      Localized string for key “alert.dismiss.help” in table “Localizable.xcstrings”.
@@ -54,6 +81,33 @@ enum L10n {
     }
 
     /**
+     Bulk import completion message
+     
+     Localized string for key “alert.import.completed.message” in table “Localizable.xcstrings”.
+     */
+    static func alertImportCompletedMessage(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("alert.import.completed.message", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import completion skipped message
+     
+     Localized string for key “alert.import.completed.skipped” in table “Localizable.xcstrings”.
+     */
+    static func alertImportCompletedSkipped(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("alert.import.completed.skipped", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import completion alert title
+     
+     Localized string for key “alert.import.completed.title” in table “Localizable.xcstrings”.
+     */
+    static var alertImportCompletedTitle: LocalizedStringResource {
+        LocalizedStringResource("alert.import.completed.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Language change alert message
      
      Localized string for key “alert.language.restart” in table “Localizable.xcstrings”.
@@ -69,6 +123,15 @@ enum L10n {
      */
     static var alertLanguageTitle: LocalizedStringResource {
         LocalizedStringResource("alert.language.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Save configuration failure alert title
+     
+     Localized string for key “alert.saveFailed.title” in table “Localizable.xcstrings”.
+     */
+    static var alertSaveFailedTitle: LocalizedStringResource {
+        LocalizedStringResource("alert.saveFailed.title", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -99,12 +162,66 @@ enum L10n {
     }
 
     /**
+     Appearance option: dark
+     
+     Localized string for key “appearance.dark” in table “Localizable.xcstrings”.
+     */
+    static var appearanceDark: LocalizedStringResource {
+        LocalizedStringResource("appearance.dark", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Appearance option: light
+     
+     Localized string for key “appearance.light” in table “Localizable.xcstrings”.
+     */
+    static var appearanceLight: LocalizedStringResource {
+        LocalizedStringResource("appearance.light", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Appearance option: follow system
+     
+     Localized string for key “appearance.system” in table “Localizable.xcstrings”.
+     */
+    static var appearanceSystem: LocalizedStringResource {
+        LocalizedStringResource("appearance.system", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Generic cancel button
      
      Localized string for key “common.cancel” in table “Localizable.xcstrings”.
      */
     static var commonCancel: LocalizedStringResource {
         LocalizedStringResource("common.cancel", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Generic done button
+     
+     Localized string for key “common.done” in table “Localizable.xcstrings”.
+     */
+    static var commonDone: LocalizedStringResource {
+        LocalizedStringResource("common.done", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Generic off state
+     
+     Localized string for key “common.off” in table “Localizable.xcstrings”.
+     */
+    static var commonOff: LocalizedStringResource {
+        LocalizedStringResource("common.off", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Generic save button
+     
+     Localized string for key “common.save” in table “Localizable.xcstrings”.
+     */
+    static var commonSave: LocalizedStringResource {
+        LocalizedStringResource("common.save", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -123,6 +240,105 @@ enum L10n {
      */
     static func confirmClearAllTitle(_ arg1: Int) -> LocalizedStringResource {
         LocalizedStringResource("confirm.clearAll.title", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor enabled toggle
+     
+     Localized string for key “editor.enabled” in table “Localizable.xcstrings”.
+     */
+    static var editorEnabled: LocalizedStringResource {
+        LocalizedStringResource("editor.enabled", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor host label when ranges allowed
+     
+     Localized string for key “editor.host.label.range” in table “Localizable.xcstrings”.
+     */
+    static var editorHostLabelRange: LocalizedStringResource {
+        LocalizedStringResource("editor.host.label.range", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor host label when editing
+     
+     Localized string for key “editor.host.label.single” in table “Localizable.xcstrings”.
+     */
+    static var editorHostLabelSingle: LocalizedStringResource {
+        LocalizedStringResource("editor.host.label.single", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor host placeholder when ranges allowed
+     
+     Localized string for key “editor.host.placeholder.range” in table “Localizable.xcstrings”.
+     */
+    static var editorHostPlaceholderRange: LocalizedStringResource {
+        LocalizedStringResource("editor.host.placeholder.range", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor host placeholder when editing
+     
+     Localized string for key “editor.host.placeholder.single” in table “Localizable.xcstrings”.
+     */
+    static var editorHostPlaceholderSingle: LocalizedStringResource {
+        LocalizedStringResource("editor.host.placeholder.single", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor note label
+     
+     Localized string for key “editor.note” in table “Localizable.xcstrings”.
+     */
+    static var editorNote: LocalizedStringResource {
+        LocalizedStringResource("editor.note", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor note placeholder
+     
+     Localized string for key “editor.note.placeholder” in table “Localizable.xcstrings”.
+     */
+    static var editorNotePlaceholder: LocalizedStringResource {
+        LocalizedStringResource("editor.note.placeholder", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor range expansion preview
+     
+     Localized string for key “editor.preview.count” in table “Localizable.xcstrings”.
+     */
+    static func editorPreviewCount(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("editor.preview.count", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor range input rejection in edit mode
+     
+     Localized string for key “editor.rangeNotAllowed” in table “Localizable.xcstrings”.
+     */
+    static var editorRangeNotAllowed: LocalizedStringResource {
+        LocalizedStringResource("editor.rangeNotAllowed", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor title when adding
+     
+     Localized string for key “editor.title.add” in table “Localizable.xcstrings”.
+     */
+    static var editorTitleAdd: LocalizedStringResource {
+        LocalizedStringResource("editor.title.add", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Target editor title when editing
+     
+     Localized string for key “editor.title.edit” in table “Localizable.xcstrings”.
+     */
+    static var editorTitleEdit: LocalizedStringResource {
+        LocalizedStringResource("editor.title.edit", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -252,6 +468,96 @@ enum L10n {
     }
 
     /**
+     Bulk import confirm button for append
+     
+     Localized string for key “import.confirm.append” in table “Localizable.xcstrings”.
+     */
+    static func importConfirmAppend(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("import.confirm.append", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import confirm button for replace
+     
+     Localized string for key “import.confirm.replace” in table “Localizable.xcstrings”.
+     */
+    static func importConfirmReplace(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("import.confirm.replace", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import help text
+     
+     Localized string for key “import.description” in table “Localizable.xcstrings”.
+     */
+    static var importDescription: LocalizedStringResource {
+        LocalizedStringResource("import.description", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import example text
+     
+     Localized string for key “import.example” in table “Localizable.xcstrings”.
+     */
+    static var importExample: LocalizedStringResource {
+        LocalizedStringResource("import.example", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import mode label
+     
+     Localized string for key “import.mode” in table “Localizable.xcstrings”.
+     */
+    static var importMode: LocalizedStringResource {
+        LocalizedStringResource("import.mode", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Import mode: append
+     
+     Localized string for key “import.mode.append” in table “Localizable.xcstrings”.
+     */
+    static var importModeAppend: LocalizedStringResource {
+        LocalizedStringResource("import.mode.append", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import append mode description
+     
+     Localized string for key “import.mode.append.description” in table “Localizable.xcstrings”.
+     */
+    static func importModeAppendDescription(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("import.mode.append.description", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Import mode: replace
+     
+     Localized string for key “import.mode.replace” in table “Localizable.xcstrings”.
+     */
+    static var importModeReplace: LocalizedStringResource {
+        LocalizedStringResource("import.mode.replace", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import replace mode description when no existing targets
+     
+     Localized string for key “import.mode.replace.description.empty” in table “Localizable.xcstrings”.
+     */
+    static var importModeReplaceDescriptionEmpty: LocalizedStringResource {
+        LocalizedStringResource("import.mode.replace.description.empty", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import replace mode description with existing targets
+     
+     Localized string for key “import.mode.replace.description.withCount” in table “Localizable.xcstrings”.
+     */
+    static func importModeReplaceDescriptionWithCount(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("import.mode.replace.description.withCount", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Bulk import: duplicate target
      
      Localized string for key “import.rejected.duplicate” in table “Localizable.xcstrings”.
@@ -270,12 +576,39 @@ enum L10n {
     }
 
     /**
+     Bulk import preview summary
+     
+     Localized string for key “import.summary” in table “Localizable.xcstrings”.
+     */
+    static func importSummary(_ arg1: Int, _ arg2: Int) -> LocalizedStringResource {
+        LocalizedStringResource("import.summary", defaultValue: "\(arg1, specifier: "%lld")\(arg2, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import sheet title
+     
+     Localized string for key “import.title” in table “Localizable.xcstrings”.
+     */
+    static var importTitle: LocalizedStringResource {
+        LocalizedStringResource("import.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Language option: follow system
      
      Localized string for key “language.system” in table “Localizable.xcstrings”.
      */
     static var languageSystem: LocalizedStringResource {
         LocalizedStringResource("language.system", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     App menu Settings item
+     
+     Localized string for key “menu.settings” in table “Localizable.xcstrings”.
+     */
+    static var menuSettings: LocalizedStringResource {
+        LocalizedStringResource("menu.settings", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -342,6 +675,42 @@ enum L10n {
     }
 
     /**
+     Settings: appearance label
+     
+     Localized string for key “settings.appearance” in table “Localizable.xcstrings”.
+     */
+    static var settingsAppearance: LocalizedStringResource {
+        LocalizedStringResource("settings.appearance", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: appearance hint
+     
+     Localized string for key “settings.appearance.hint” in table “Localizable.xcstrings”.
+     */
+    static var settingsAppearanceHint: LocalizedStringResource {
+        LocalizedStringResource("settings.appearance.hint", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: probe interval label
+     
+     Localized string for key “settings.interval” in table “Localizable.xcstrings”.
+     */
+    static var settingsInterval: LocalizedStringResource {
+        LocalizedStringResource("settings.interval", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: interval hint
+     
+     Localized string for key “settings.interval.hint” in table “Localizable.xcstrings”.
+     */
+    static var settingsIntervalHint: LocalizedStringResource {
+        LocalizedStringResource("settings.interval.hint", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Settings: language picker label
      
      Localized string for key “settings.language” in table “Localizable.xcstrings”.
@@ -357,6 +726,69 @@ enum L10n {
      */
     static var settingsLanguageHint: LocalizedStringResource {
         LocalizedStringResource("settings.language.hint", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: max concurrency label
+     
+     Localized string for key “settings.maxConcurrent” in table “Localizable.xcstrings”.
+     */
+    static var settingsMaxConcurrent: LocalizedStringResource {
+        LocalizedStringResource("settings.maxConcurrent", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: max concurrency hint
+     
+     Localized string for key “settings.maxConcurrent.hint” in table “Localizable.xcstrings”.
+     */
+    static func settingsMaxConcurrentHint(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("settings.maxConcurrent.hint", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: rotation interval label
+     
+     Localized string for key “settings.rotation” in table “Localizable.xcstrings”.
+     */
+    static var settingsRotation: LocalizedStringResource {
+        LocalizedStringResource("settings.rotation", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: rotation hint
+     
+     Localized string for key “settings.rotation.hint” in table “Localizable.xcstrings”.
+     */
+    static var settingsRotationHint: LocalizedStringResource {
+        LocalizedStringResource("settings.rotation.hint", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: packet timeout label
+     
+     Localized string for key “settings.timeout” in table “Localizable.xcstrings”.
+     */
+    static var settingsTimeout: LocalizedStringResource {
+        LocalizedStringResource("settings.timeout", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: timeout hint
+     
+     Localized string for key “settings.timeout.hint” in table “Localizable.xcstrings”.
+     */
+    static var settingsTimeoutHint: LocalizedStringResource {
+        LocalizedStringResource("settings.timeout.hint", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings sheet title
+     
+     Localized string for key “settings.title” in table “Localizable.xcstrings”.
+     */
+    static var settingsTitle: LocalizedStringResource {
+        LocalizedStringResource("settings.title", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -852,6 +1284,24 @@ enum L10n {
      */
     static var toolbarStopHelp: LocalizedStringResource {
         LocalizedStringResource("toolbar.stop.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Duration with one decimal, e.g. 1.5 seconds
+     
+     Localized string for key “unit.seconds.decimal” in table “Localizable.xcstrings”.
+     */
+    static func unitSecondsDecimal(_ arg1: Float) -> LocalizedStringResource {
+        LocalizedStringResource("unit.seconds.decimal", defaultValue: "\(arg1, specifier: "%.1f")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Duration in whole seconds
+     
+     Localized string for key “unit.seconds.integer” in table “Localizable.xcstrings”.
+     */
+    static func unitSecondsInteger(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("unit.seconds.integer", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**

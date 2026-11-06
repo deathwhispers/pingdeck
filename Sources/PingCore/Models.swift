@@ -137,14 +137,6 @@ public enum AppearanceMode: String, Codable, CaseIterable, Hashable, Sendable {
     case light
     /// 始终深色
     case dark
-
-    public var displayName: String {
-        switch self {
-        case .system: return "跟随系统"
-        case .light: return "浅色"
-        case .dark: return "深色"
-        }
-    }
 }
 
 /// 应用语言

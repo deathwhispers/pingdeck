@@ -1200,6 +1200,606 @@
           }
         }
       }
+    },
+    "menu.settings": {
+      "comment": "App menu Settings item",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置…"
+          }
+        }
+      }
+    },
+    "settings.title": {
+      "comment": "Settings sheet title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置"
+          }
+        }
+      }
+    },
+    "settings.appearance": {
+      "comment": "Settings: appearance label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外观"
+          }
+        }
+      }
+    },
+    "settings.appearance.hint": {
+      "comment": "Settings: appearance hint",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟随系统会随 macOS 外观自动切换"
+          }
+        }
+      }
+    },
+    "settings.interval": {
+      "comment": "Settings: probe interval label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发包间隔"
+          }
+        }
+      }
+    },
+    "settings.interval.hint": {
+      "comment": "Settings: interval hint",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "间隔越小数据越实时，CPU 与网络占用越高"
+          }
+        }
+      }
+    },
+    "settings.timeout": {
+      "comment": "Settings: packet timeout label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "单包超时"
+          }
+        }
+      }
+    },
+    "settings.timeout.hint": {
+      "comment": "Settings: timeout hint",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超过该时间没有收到回包，状态显示为超时"
+          }
+        }
+      }
+    },
+    "settings.maxConcurrent": {
+      "comment": "Settings: max concurrency label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最大并发数"
+          }
+        }
+      }
+    },
+    "settings.maxConcurrent.hint": {
+      "comment": "Settings: max concurrency hint",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同时运行的 ping 进程上限；启动时会自动提升到启用目标数量（最多 %lld）"
+          }
+        }
+      }
+    },
+    "settings.rotation": {
+      "comment": "Settings: rotation interval label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "轮换周期"
+          }
+        }
+      }
+    },
+    "settings.rotation.hint": {
+      "comment": "Settings: rotation hint",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标数超过并发上限时，按该周期轮换探测，保证每个目标都被覆盖"
+          }
+        }
+      }
+    },
+    "unit.seconds.decimal": {
+      "comment": "Duration with one decimal, e.g. 1.5 seconds",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%.1f 秒"
+          }
+        }
+      }
+    },
+    "unit.seconds.integer": {
+      "comment": "Duration in whole seconds",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 秒"
+          }
+        }
+      }
+    },
+    "common.done": {
+      "comment": "Generic done button",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
+          }
+        }
+      }
+    },
+    "common.off": {
+      "comment": "Generic off state",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
+          }
+        }
+      }
+    },
+    "common.save": {
+      "comment": "Generic save button",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存"
+          }
+        }
+      }
+    },
+    "appearance.system": {
+      "comment": "Appearance option: follow system",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟随系统"
+          }
+        }
+      }
+    },
+    "appearance.light": {
+      "comment": "Appearance option: light",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浅色"
+          }
+        }
+      }
+    },
+    "appearance.dark": {
+      "comment": "Appearance option: dark",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "深色"
+          }
+        }
+      }
+    },
+    "editor.title.add": {
+      "comment": "Target editor title when adding",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加 Ping 目标"
+          }
+        }
+      }
+    },
+    "editor.title.edit": {
+      "comment": "Target editor title when editing",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑 Ping 目标"
+          }
+        }
+      }
+    },
+    "editor.host.label.range": {
+      "comment": "Target editor host label when ranges allowed",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标（IP、域名或网段）"
+          }
+        }
+      }
+    },
+    "editor.host.label.single": {
+      "comment": "Target editor host label when editing",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标（IP 或域名）"
+          }
+        }
+      }
+    },
+    "editor.host.placeholder.range": {
+      "comment": "Target editor host placeholder when ranges allowed",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "例如 8.8.8.8、gateway.lan 或 10.0.0.0/24"
+          }
+        }
+      }
+    },
+    "editor.host.placeholder.single": {
+      "comment": "Target editor host placeholder when editing",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "例如 8.8.8.8 或 gateway.lan"
+          }
+        }
+      }
+    },
+    "editor.preview.count": {
+      "comment": "Target editor range expansion preview",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将添加 %lld 个目标"
+          }
+        }
+      }
+    },
+    "editor.note": {
+      "comment": "Target editor note label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "备注"
+          }
+        }
+      }
+    },
+    "editor.note.placeholder": {
+      "comment": "Target editor note placeholder",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可选，例如「核心交换机」"
+          }
+        }
+      }
+    },
+    "editor.enabled": {
+      "comment": "Target editor enabled toggle",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用该目标"
+          }
+        }
+      }
+    },
+    "editor.rangeNotAllowed": {
+      "comment": "Target editor range input rejection in edit mode",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑模式只支持单个 IP 或域名；添加网段请使用「添加」或「批量导入」"
+          }
+        }
+      }
+    },
+    "import.title": {
+      "comment": "Bulk import sheet title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "批量导入目标"
+          }
+        }
+      }
+    },
+    "import.mode": {
+      "comment": "Bulk import mode label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入方式"
+          }
+        }
+      }
+    },
+    "import.mode.append": {
+      "comment": "Import mode: append",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "追加"
+          }
+        }
+      }
+    },
+    "import.mode.replace": {
+      "comment": "Import mode: replace",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "替换"
+          }
+        }
+      }
+    },
+    "import.description": {
+      "comment": "Bulk import help text",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每行一个目标或网段，可写成「目标」或「目标 备注」。支持 10.0.0.0/24、10.0.0.1-10.0.0.254、10.0.0.1-254；单个网段最多 1024 个地址。以 # 开头的行会被忽略；重复或格式非法的行会被跳过并列出原因。"
+          }
+        }
+      }
+    },
+    "import.mode.append.description": {
+      "comment": "Bulk import append mode description",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留现有 %lld 个目标，把导入的内容追加到末尾。"
+          }
+        }
+      }
+    },
+    "import.mode.replace.description.empty": {
+      "comment": "Bulk import replace mode description when no existing targets",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用导入的内容作为完整目标列表。"
+          }
+        }
+      }
+    },
+    "import.mode.replace.description.withCount": {
+      "comment": "Bulk import replace mode description with existing targets",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠️ 将丢弃现有 %lld 个目标（含备注与启用状态），只保留导入的内容。"
+          }
+        }
+      }
+    },
+    "import.confirm.append": {
+      "comment": "Bulk import confirm button for append",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "追加 %lld 个"
+          }
+        }
+      }
+    },
+    "import.confirm.replace": {
+      "comment": "Bulk import confirm button for replace",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "替换为 %lld 个"
+          }
+        }
+      }
+    },
+    "import.example": {
+      "comment": "Bulk import example text",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "示例：\n8.8.8.8  Google DNS\n10.0.0.0/30  机房网段\n192.168.1.1-254  内网\n# 下面这行是注释"
+          }
+        }
+      }
+    },
+    "import.summary": {
+      "comment": "Bulk import preview summary",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可导入 %1$lld 个，跳过 %2$lld 个"
+          }
+        }
+      }
+    },
+    "alert.import.completed.title": {
+      "comment": "Bulk import completion alert title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "批量导入完成"
+          }
+        }
+      }
+    },
+    "alert.import.completed.message": {
+      "comment": "Bulk import completion message",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已导入 %lld 个目标。"
+          }
+        }
+      }
+    },
+    "alert.import.completed.skipped": {
+      "comment": "Bulk import completion skipped message",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跳过 %lld 个（重复或格式非法）。"
+          }
+        }
+      }
+    },
+    "alert.concurrency.title": {
+      "comment": "Concurrency adjustment alert title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已提升并发数"
+          }
+        }
+      }
+    },
+    "alert.concurrency.belowLimit": {
+      "comment": "Concurrency adjustment message below limit",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前 %1$lld 个启用目标，并发数从 %2$lld 提升到 %3$lld，以便同时监控所有目标。"
+          }
+        }
+      }
+    },
+    "alert.concurrency.atLimit": {
+      "comment": "Concurrency adjustment message at limit",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前 %1$lld 个启用目标，并发数从 %2$lld 提升到 %3$lld（上限 %4$lld），其余目标将按轮换周期探测。"
+          }
+        }
+      }
+    },
+    "alert.saveFailed.title": {
+      "comment": "Save configuration failure alert title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存配置失败"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

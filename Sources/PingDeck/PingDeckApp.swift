@@ -74,8 +74,10 @@ struct PingDeckApp: App {
         .commands {
             // App 菜单中的“设置…”项，⌘, 打开现有设置 sheet
             CommandGroup(replacing: .appSettings) {
-                Button("设置…") {
+                Button {
                     model.openSettingsSheet()
+                } label: {
+                    Text(L10n.menuSettings)
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }

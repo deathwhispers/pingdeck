@@ -81,8 +81,8 @@ enum ImportMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .append: return "追加"
-        case .replace: return "替换"
+        case .append: return String(localized: L10n.importModeAppend)
+        case .replace: return String(localized: L10n.importModeReplace)
         }
     }
 }
@@ -381,11 +381,20 @@ final class PingDeckViewModel: ObservableObject {
 
         let message: String
         if enabled > desired {
-            message = "当前 \(enabled) 个启用目标，并发数从 \(previous) 提升到 \(desired)（上限 \(PingSettings.maxConcurrentLimit)），其余目标将按轮换周期探测。"
+            message = String(
+                localized: L10n.alertConcurrencyAtLimit(
+                    enabled,
+                    previous,
+                    desired,
+                    PingSettings.maxConcurrentLimit
+                )
+            )
         } else {
-            message = "当前 \(enabled) 个启用目标，并发数从 \(previous) 提升到 \(desired)，以便同时监控所有目标。"
+            message = String(
+                localized: L10n.alertConcurrencyBelowLimit(enabled, previous, desired)
+            )
         }
-        alert = AppAlert(title: "已提升并发数", message: message)
+        alert = AppAlert(title: String(localized: L10n.alertConcurrencyTitle), message: message)
     }
 
     func stop() {
@@ -448,7 +457,10 @@ final class PingDeckViewModel: ObservableObject {
         do {
             try store.save(AppConfiguration(targets: targets, settings: settings))
         } catch {
-            alert = AppAlert(title: "保存配置失败", message: error.localizedDescription)
+            alert = AppAlert(
+                title: String(localized: L10n.alertSaveFailedTitle),
+                message: error.localizedDescription
+            )
         }
     }
 

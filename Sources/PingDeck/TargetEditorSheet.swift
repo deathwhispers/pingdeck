@@ -21,16 +21,16 @@ struct TargetEditorSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(draft.isNew ? "添加 Ping 目标" : "编辑 Ping 目标")
+            Text(draft.isNew ? L10n.editorTitleAdd : L10n.editorTitleEdit)
                 .font(.headline)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(draft.isNew ? "目标（IP、域名或网段）" : "目标（IP 或域名）")
+                Text(draft.isNew ? L10n.editorHostLabelRange : L10n.editorHostLabelSingle)
                     .font(.subheadline)
                 TextField(
                     draft.isNew
-                        ? "例如 8.8.8.8、gateway.lan 或 10.0.0.0/24"
-                        : "例如 8.8.8.8 或 gateway.lan",
+                        ? String(localized: L10n.editorHostPlaceholderRange)
+                        : String(localized: L10n.editorHostPlaceholderSingle),
                     text: $host
                 )
                 .textFieldStyle(.roundedBorder)
@@ -39,25 +39,25 @@ struct TargetEditorSheet: View {
                         .font(.caption)
                         .foregroundStyle(.red)
                 } else if let preview, preview.entries.count > 1 {
-                    Text("将添加 \(preview.entries.count) 个目标")
+                    Text(L10n.editorPreviewCount(preview.entries.count))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("备注")
+                Text(L10n.editorNote)
                     .font(.subheadline)
-                TextField("可选，例如「核心交换机」", text: $note)
+                TextField(String(localized: L10n.editorNotePlaceholder), text: $note)
                     .textFieldStyle(.roundedBorder)
             }
 
-            Toggle("启用该目标", isOn: $enabled)
+            Toggle(String(localized: L10n.editorEnabled), isOn: $enabled)
 
             HStack {
                 Spacer()
-                Button("取消") { model.closeSheet() }
-                Button("保存") { save() }
+                Button(String(localized: L10n.commonCancel)) { model.closeSheet() }
+                Button(String(localized: L10n.commonSave)) { save() }
                     .keyboardShortcut(.defaultAction)
             }
         }
@@ -85,7 +85,7 @@ struct TargetEditorSheet: View {
 
     private func save() {
         if trimmedHost.isEmpty {
-            validationError = "目标不能为空"
+            validationError = TargetValidationIssue.empty.message
             return
         }
 
@@ -108,7 +108,7 @@ struct TargetEditorSheet: View {
         // 编辑模式只允许单个目标，避免「一个目标变成多个」的歧义
         let result = BulkImportParser.parse(host: trimmedHost, note: "", existing: [])
         guard result.entries.count == 1, result.entries[0].host == trimmedHost else {
-            validationError = "编辑模式只支持单个 IP 或域名；添加网段请使用「添加」或「批量导入」"
+            validationError = String(localized: L10n.editorRangeNotAllowed)
             return
         }
         validationError = nil

@@ -13,19 +13,19 @@ struct SettingsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("设置")
+            Text(L10n.settingsTitle)
                 .font(.headline)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("外观")
-                Picker("外观", selection: $model.settings.appearance) {
+                Text(L10n.settingsAppearance)
+                Picker(String(localized: L10n.settingsAppearance), selection: $model.settings.appearance) {
                     ForEach(AppearanceMode.allCases, id: \.self) { mode in
                         Text(mode.displayName).tag(mode)
                     }
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                Text("跟随系统会随 macOS 外观自动切换")
+                Text(L10n.settingsAppearanceHint)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
@@ -47,28 +47,28 @@ struct SettingsSheet: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text("发包间隔")
+                    Text(L10n.settingsInterval)
                     Spacer()
-                    Text(String(format: "%.1f 秒", model.settings.interval))
+                    Text(L10n.unitSecondsDecimal(Float(model.settings.interval)))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
                 Slider(value: $model.settings.interval, in: 0.5...10, step: 0.5)
-                Text("间隔越小数据越实时，CPU 与网络占用越高")
+                Text(L10n.settingsIntervalHint)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text("单包超时")
+                    Text(L10n.settingsTimeout)
                     Spacer()
-                    Text(String(format: "%.1f 秒", model.settings.timeout))
+                    Text(L10n.unitSecondsDecimal(Float(model.settings.timeout)))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
                 Slider(value: $model.settings.timeout, in: 1...10, step: 0.5)
-                Text("超过该时间没有收到回包，状态显示为超时")
+                Text(L10n.settingsTimeoutHint)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
@@ -78,14 +78,14 @@ struct SettingsSheet: View {
                 in: 1...PingSettings.maxConcurrentLimit
             ) {
                 HStack {
-                    Text("最大并发数")
+                    Text(L10n.settingsMaxConcurrent)
                     Spacer()
                     Text("\(model.settings.maxConcurrent)")
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
             }
-            Text("同时运行的 ping 进程上限；启动时会自动提升到启用目标数量（最多 \(PingSettings.maxConcurrentLimit)）")
+            Text(L10n.settingsMaxConcurrentHint(PingSettings.maxConcurrentLimit))
                 .font(.caption)
                 .foregroundStyle(.tertiary)
 
@@ -95,20 +95,24 @@ struct SettingsSheet: View {
                 step: 15
             ) {
                 HStack {
-                    Text("轮换周期")
+                    Text(L10n.settingsRotation)
                     Spacer()
-                    Text(model.settings.rotationInterval == 0 ? "关闭" : "\(Int(model.settings.rotationInterval)) 秒")
+                    Text(
+                        model.settings.rotationInterval == 0
+                            ? L10n.commonOff
+                            : L10n.unitSecondsInteger(Int(model.settings.rotationInterval))
+                    )
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
             }
-            Text("目标数超过并发上限时，按该周期轮换探测，保证每个目标都被覆盖")
+            Text(L10n.settingsRotationHint)
                 .font(.caption)
                 .foregroundStyle(.tertiary)
 
             HStack {
                 Spacer()
-                Button("完成") {
+                Button(String(localized: L10n.commonDone)) {
                     model.saveNow()
                     model.closeSheet()
                 }

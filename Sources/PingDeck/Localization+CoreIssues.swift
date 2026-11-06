@@ -90,4 +90,14 @@ extension TargetStatus {
     }
 }
 
+extension AppearanceMode {
+    var displayName: String {
+        switch self {
+        case .system: return String(localized: L10n.appearanceSystem)
+        case .light: return String(localized: L10n.appearanceLight)
+        case .dark: return String(localized: L10n.appearanceDark)
+        }
+    }
+}
+
 
