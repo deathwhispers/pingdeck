@@ -5,7 +5,7 @@ import PingCore
 final class SelectionTests: XCTestCase {
     private func makeModel(_ hosts: [String]) -> PingDeckViewModel {
         let configuration = AppConfiguration(targets: hosts.map { PingTarget(host: $0) })
-        return PingDeckViewModel(configuration: configuration)
+        return PingDeckViewModel(configuration: configuration, store: InMemoryConfigStore())
     }
 
     func testSelectAllAndClearSelection() {
@@ -62,7 +62,7 @@ final class SelectionTests: XCTestCase {
 final class ClearAllTargetsTests: XCTestCase {
     func testClearAllTargetsRemovesEverything() {
         let configuration = AppConfiguration(targets: [PingTarget(host: "a.com"), PingTarget(host: "b.com")])
-        let model = PingDeckViewModel(configuration: configuration)
+        let model = PingDeckViewModel(configuration: configuration, store: InMemoryConfigStore())
         model.selectAll()
 
         model.clearAllTargets()
@@ -75,7 +75,7 @@ final class ClearAllTargetsTests: XCTestCase {
 final class BulkImportModeTests: XCTestCase {
     private func makeModel(_ hosts: [String]) -> PingDeckViewModel {
         let configuration = AppConfiguration(targets: hosts.map { PingTarget(host: $0) })
-        return PingDeckViewModel(configuration: configuration)
+        return PingDeckViewModel(configuration: configuration, store: InMemoryConfigStore())
     }
 
     /// 追加模式：保留现有目标，只在末尾加新的
@@ -130,7 +130,7 @@ final class StartWithLoadedConfigurationTests: XCTestCase {
             targets: [loopback],
             settings: PingSettings(interval: 0.3, timeout: 1, maxConcurrent: 2, rotationInterval: 0)
         )
-        let model = PingDeckViewModel(configuration: configuration)
+        let model = PingDeckViewModel(configuration: configuration, store: InMemoryConfigStore())
 
         model.start()
         let deadline = Date().addingTimeInterval(5)

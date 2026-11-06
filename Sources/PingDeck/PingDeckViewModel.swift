@@ -121,6 +121,7 @@ final class PingDeckViewModel: ObservableObject {
     }
 
     private let engine = PingEngine()
+    private let store: ConfigStoring
     private var pendingStats: [UUID: PingStats] = [:]
     private var flushTimer: Timer?
     private var saveTimer: Timer?
@@ -131,8 +132,9 @@ final class PingDeckViewModel: ObservableObject {
         return formatter
     }()
 
-    init(configuration: AppConfiguration? = nil) {
-        let configuration = configuration ?? ConfigStore.load()
+    init(configuration: AppConfiguration? = nil, store: ConfigStoring = FileConfigStore()) {
+        self.store = store
+        let configuration = configuration ?? store.load()
         targets = configuration.targets
         settings = configuration.settings
         engine.setTargets(targets)
@@ -402,7 +404,7 @@ final class PingDeckViewModel: ObservableObject {
         saveTimer?.invalidate()
         saveTimer = nil
         do {
-            try ConfigStore.save(AppConfiguration(targets: targets, settings: settings))
+            try store.save(AppConfiguration(targets: targets, settings: settings))
         } catch {
             alert = AppAlert(title: "保存配置失败", message: error.localizedDescription)
         }
