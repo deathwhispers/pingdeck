@@ -1,28 +1,91 @@
-# PingDeck
+<p align="center">
+  <img src="docs/images/icon.png" width="120" alt="PingDeck 图标">
+</p>
 
-**把一堆 IP 和域名丢进一张表，一眼看清谁在线、谁在丢包、谁在抖。**
+<h1 align="center">PingDeck</h1>
 
-PingDeck 是一个轻量的 macOS 批量 Ping 工具。它像 Windows 上的 PingInfoView 一样，把多个目标的连通状态、延迟和丢包率并排放在一张表格里，让你不用在终端里开一堆窗口。
+<p align="center">
+  <strong>macOS 上终于有一个顺手的批量 Ping 工具。</strong><br>
+  把几十上百个 IP 和域名丢进一张表，实时看清谁在线、谁丢包、谁在抖。
+</p>
 
-![平台](https://img.shields.io/badge/macOS-13%2B-blue)
-![版本](https://img.shields.io/badge/version-0.0.2-green)
-![依赖](https://img.shields.io/badge/dependencies-none-lightgrey)
+<p align="center">
+  <a href="https://github.com/deathwhispers/pingdeck/releases/latest"><img alt="版本" src="https://img.shields.io/badge/version-0.0.2-green"></a>
+  <img alt="平台" src="https://img.shields.io/badge/macOS-13%2B-blue">
+  <img alt="体积" src="https://img.shields.io/badge/app-1.5%20MB-lightgrey">
+  <img alt="依赖" src="https://img.shields.io/badge/dependencies-none-lightgrey">
+  <img alt="权限" src="https://img.shields.io/badge/root-not%20required-brightgreen">
+</p>
 
-## 截图
+<p align="center">
+  <a href="#安装"><strong>下载安装</strong></a> ·
+  <a href="#快速上手">快速上手</a> ·
+  <a href="#功能一览">功能一览</a> ·
+  <a href="#常见问题">常见问题</a>
+</p>
 
-![PingDeck 主界面](docs/images/main-window.png)
+<p align="center">
+  <img src="docs/images/main-window.png" width="900" alt="PingDeck 主界面：多个目标同时探测，状态、延迟与丢包率一屏可见">
+  <br>
+  <sub>11 个目标同时探测：状态、延迟、丢包率与最后响应时间，一屏尽收。</sub>
+</p>
 
-## 为什么用它
+## 为什么是 PingDeck
 
-- **一屏看清全局**：所有目标同时监控，哪台机器挂了、哪条链路在丢包，扫一眼就知道
-- **常驻几乎不耗电**：空闲时 CPU 0%，内存约 28MB，开着一天也不心疼
-- **目标再多也不卡**：并发数可限制，超出上限时自动轮换，几百个目标也不会拖慢系统
-- **零依赖**：直接用系统自带的 `ping`，不需要装任何东西，也不需要 root 权限
-- **配置跟着你**：目标列表自动保存，下次打开就能接着用
+macOS 上没有 PingInfoView。想在终端里同时盯几十台设备，你只能开一堆 `ping` 窗口，或者让日志在滚动缓冲里越堆越多——哪台掉线了、哪条链路在丢包，全靠肉眼比对。
+
+到了离线环境，这件事更麻烦：机房上架、内网交付、网络割接、值班巡检，动辄几十上百台设备、一整个网段要逐台确认。手工 ping 慢、容易漏，结果还很难交给别人。
+
+PingDeck 把这些事压缩成一张表：**粘贴目标，点开始，剩下的交给它。**
+
+- **机房上架**：设备通电后批量确认连通性，异常项一眼挑出来
+- **离线交付**：交付前把整段 IP 跑一遍，导出结果直接归档
+- **网络割接**：割接前后对比延迟与丢包，快速判断是否需要回退
+- **值班巡检**：常驻后台，空闲 0% CPU、约 28 MB 内存，不影响其他工作
+
+## 它解决什么
+
+| | |
+| --- | --- |
+| **一屏全局** | 所有目标并排显示，状态、最新 / 平均 / 最小 / 最大延迟、丢包率、最后响应时间一表打尽 |
+| **批量导入** | 粘贴多行文本即可建目标，支持「目标 备注」写法；IP 列表、CIDR 网段与起止范围都能直接展开 |
+| **轻到几乎没有存在感** | 1.5 MB 的 app，常驻内存约 28 MB，空闲 CPU 0% |
+| **零依赖、免 root** | 直接调用系统自带的 `ping` / `ping6`，不装运行时、不要管理员权限 |
+| **目标再多也稳** | 并发数可限制，超出上限按周期轮换，几百个目标也不会拖慢系统 |
+| **结果可交付** | CSV / JSON / TXT / Markdown / Excel，支持全部或仅选中项，Excel 打开不乱码 |
+
+## 界面预览
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/bulk-import.png" alt="批量导入目标">
+      <br>
+      <sub><b>批量导入</b>：粘贴多行目标，自动去重并预览可导入数量，支持追加或整体替换。</sub>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/settings.png" alt="设置面板">
+      <br>
+      <sub><b>设置</b>：发包间隔、单包超时、最大并发与轮换周期，按现场网络情况调整。</sub>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/images/export-menu.png" width="900" alt="导出菜单：CSV、JSON、TXT、Markdown、Excel">
+  <br>
+  <sub><b>多格式导出</b>：CSV / JSON / TXT / Markdown / Excel，可导出全部或仅选中项。</sub>
+</p>
+
+## 为什么这么轻
+
+PingDeck 用 Swift + SwiftUI 原生实现，不套 Electron，也不打包任何运行时。探测直接复用系统 `ping`：每个目标一个常驻子进程，发包节奏由内核控制；界面侧只做 4 Hz 的合并刷新，避免高频重绘。
+
+所以它才能做到 **1.5 MB 体积、约 28 MB 内存、空闲 0% CPU**——开着一天也不会让你注意到它的存在。
 
 ## 安装
 
-1. 到 [Releases](https://github.com/deathwhispers/pingdeck/releases) 下载最新的 `PingDeck-x.y.z.dmg`
+1. 到 [Releases](https://github.com/deathwhispers/pingdeck/releases/latest) 下载最新的 `PingDeck-x.y.z.dmg`
 2. 打开 DMG，把 PingDeck 拖进「应用程序」
 3. 首次打开如果提示「无法验证开发者」，在 Finder 里右键点 PingDeck → 选择「打开」，之后就不会再提示
 
@@ -30,13 +93,13 @@ PingDeck 是一个轻量的 macOS 批量 Ping 工具。它像 Windows 上的 Pin
 
 ## 快速上手
 
-1. 点「**添加**」加一个目标，或点「**批量导入**」一次粘贴一堆（每行一个，可写成 `8.8.8.8  Google DNS`）
+1. 点「**批量导入**」，粘贴目标（每行一个，可写成 `8.8.8.8 Google DNS`，也支持 IP 段）
 2. 点「**开始**」
-3. 表格里每一行会实时更新状态、延迟和丢包率
+3. 表格会实时刷新状态、延迟和丢包率；点任意表头可排序
 
-想只盯其中几个？关掉其他行的「启用」开关即可；想清掉历史数据，用「清空 → 清空结果」。
+只想盯其中几台？关掉其他行的「启用」开关即可；想清掉历史数据，用「清空 → 清空结果」。
 
-## 功能
+## 功能一览
 
 | | |
 | --- | --- |
@@ -46,7 +109,7 @@ PingDeck 是一个轻量的 macOS 批量 Ping 工具。它像 Windows 上的 Pin
 | **多选操作** | ⌘ 点击加选、⇧ 点击选区间、Delete 批量删除、一键清空全部 |
 | **单行启停** | 关掉某行的「启用」开关会立即终止它的探测，不占资源 |
 | **并发控制** | 设置最大并发数与轮换周期，目标再多也稳定 |
-| **多格式导出** | 导出全部或仅选中项，支持 CSV / JSON / TXT / Markdown / Excel(XLSX)，Excel 打开不乱码 |
+| **多格式导出** | 导出全部或仅选中项，支持 CSV / JSON / TXT / Markdown / Excel(XLSX) |
 | **深色模式** | 跟随系统外观自动切换 |
 | **自动保存** | 目标与设置写入本地配置，下次启动自动加载 |
 
@@ -91,6 +154,9 @@ PingDeck 是一个轻量的 macOS 批量 Ping 工具。它像 Windows 上的 Pin
 **需要 root 权限吗？**
 不需要。macOS 的 `ping` 使用非特权 ICMP socket，普通用户即可运行。
 
+**能一次 ping 一整个网段吗？**
+可以。批量导入支持 CIDR 网段（如 `10.0.0.0/24`）与起止范围（如 `10.0.0.1-10.0.0.254`），粘贴后会自动展开。
+
 **为什么某些目标一直显示超时？**
 常见原因：对方防火墙屏蔽了 ICMP、目标只开了 TCP 端口（ICMP 不响应不代表服务不可用）、或者本地路由不通。
 
@@ -102,10 +168,6 @@ PingDeck 是一个轻量的 macOS 批量 Ping 工具。它像 Windows 上的 Pin
 
 **为什么不能在 App Store 下载？**
 App Sandbox 禁止创建子进程，也就无法调用系统 `ping`。PingDeck 因此采用直接分发（DMG）的方式。
-
-## 更新日志
-
-见 [CHANGELOG.md](CHANGELOG.md) 或 [Releases](https://github.com/deathwhispers/pingdeck/releases)。
 
 ## 从源码构建
 
@@ -119,3 +181,11 @@ make dmg     # 生成 dist/PingDeck-<版本号>.dmg
 ```
 
 技术细节、目录结构、CI 流程和签名配置见 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)。
+
+## 参与贡献
+
+欢迎提交 Issue 与 Pull Request。分支命名、提交信息与发布规则见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+## 更新日志
+
+见 [CHANGELOG.md](CHANGELOG.md) 或 [Releases](https://github.com/deathwhispers/pingdeck/releases)。
