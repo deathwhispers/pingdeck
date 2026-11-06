@@ -299,11 +299,18 @@ final class ExportFileTests: XCTestCase {
     }
 
     func testFilenameUsesFormatExtensionAndTimestamp() {
-        let name = ExportFile.filename(format: .markdown, date: Date(timeIntervalSince1970: 1_700_000_000))
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        let name = ExportFile.filename(format: .markdown, date: date)
+
+        // 文件名用本地时间，期望值也按本地时区计算，避免在 UTC 的 CI 上失败
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyyMMdd-HHmmss"
+        let timestamp = formatter.string(from: date)
 
         XCTAssertTrue(name.hasPrefix("pingdeck-"))
         XCTAssertTrue(name.hasSuffix(".md"))
-        XCTAssertTrue(name.contains("20231115"))
+        XCTAssertTrue(name.contains(timestamp))
     }
 
     /// 每个格式都要能产出非空数据
