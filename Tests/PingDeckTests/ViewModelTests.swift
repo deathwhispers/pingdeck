@@ -73,6 +73,24 @@ final class SettingsSheetTests: XCTestCase {
             return XCTFail("期望呈现设置 sheet，实际为 \(String(describing: model.sheet))")
         }
     }
+
+    func testSetLanguageUpdatesSettingsAndShowsRestartAlert() {
+        let suiteName = "ViewModelLanguageTests-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let model = PingDeckViewModel(
+            configuration: AppConfiguration(),
+            store: InMemoryConfigStore(),
+            languageDefaults: defaults
+        )
+
+        model.setLanguage(.english)
+
+        XCTAssertEqual(model.settings.language, .english)
+        XCTAssertEqual(defaults.stringArray(forKey: "AppleLanguages"), ["en"])
+        XCTAssertNotNil(model.alert)
+    }
 }
 
 final class ClearAllTargetsTests: XCTestCase {

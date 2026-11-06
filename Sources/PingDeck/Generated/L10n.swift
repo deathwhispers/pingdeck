@@ -27,6 +27,24 @@ enum L10n {
     }
 
     /**
+     Language change alert message
+     
+     Localized string for key “alert.language.restart” in table “Localizable.xcstrings”.
+     */
+    static var alertLanguageRestart: LocalizedStringResource {
+        LocalizedStringResource("alert.language.restart", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Language change alert title
+     
+     Localized string for key “alert.language.title” in table “Localizable.xcstrings”.
+     */
+    static var alertLanguageTitle: LocalizedStringResource {
+        LocalizedStringResource("alert.language.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Build-time smoke test for generated String Catalog symbols.
      
      Localized string for key “app.name.smoke” in table “Localizable.xcstrings”.
@@ -180,6 +198,15 @@ enum L10n {
     }
 
     /**
+     Language option: follow system
+     
+     Localized string for key “language.system” in table “Localizable.xcstrings”.
+     */
+    static var languageSystem: LocalizedStringResource {
+        LocalizedStringResource("language.system", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Ping process: system ping executable not found
      
      Localized string for key “ping.error.executableNotFound” in table “Localizable.xcstrings”.
@@ -240,6 +267,24 @@ enum L10n {
      */
     static func rangeTooLarge(_ arg1: Int) -> LocalizedStringResource {
         LocalizedStringResource("range.tooLarge", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: language picker label
+     
+     Localized string for key “settings.language” in table “Localizable.xcstrings”.
+     */
+    static var settingsLanguage: LocalizedStringResource {
+        LocalizedStringResource("settings.language", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings: language restart hint
+     
+     Localized string for key “settings.language.hint” in table “Localizable.xcstrings”.
+     */
+    static var settingsLanguageHint: LocalizedStringResource {
+        LocalizedStringResource("settings.language.hint", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**

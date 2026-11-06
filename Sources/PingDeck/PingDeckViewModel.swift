@@ -107,6 +107,7 @@ final class PingDeckViewModel: ObservableObject {
 
     private let engine = PingEngine()
     private let store: ConfigStoring
+    private let languageDefaults: UserDefaults
     private var pendingStats: [UUID: PingStats] = [:]
     private var flushTimer: Timer?
     private var saveTimer: Timer?
@@ -117,8 +118,13 @@ final class PingDeckViewModel: ObservableObject {
         return formatter
     }()
 
-    init(configuration: AppConfiguration? = nil, store: ConfigStoring = FileConfigStore()) {
+    init(
+        configuration: AppConfiguration? = nil,
+        store: ConfigStoring = FileConfigStore(),
+        languageDefaults: UserDefaults = .standard
+    ) {
         self.store = store
+        self.languageDefaults = languageDefaults
         let configuration = configuration ?? store.load()
         targets = configuration.targets
         settings = configuration.settings
@@ -312,6 +318,16 @@ final class PingDeckViewModel: ObservableObject {
 
     func openSettingsSheet() {
         sheet = .settings
+    }
+
+    func setLanguage(_ language: AppLanguage) {
+        guard settings.language != language else { return }
+        settings.language = language
+        LanguagePreference.apply(language, defaults: languageDefaults)
+        alert = AppAlert(
+            title: String(localized: L10n.alertLanguageTitle),
+            message: String(localized: L10n.alertLanguageRestart)
+        )
     }
 
     func openBulkImportSheet() {

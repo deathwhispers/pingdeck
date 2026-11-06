@@ -480,6 +480,66 @@
           }
         }
       }
+    },
+    "settings.language": {
+      "comment": "Settings: language picker label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言"
+          }
+        }
+      }
+    },
+    "settings.language.hint": {
+      "comment": "Settings: language restart hint",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换后需要重启应用才能完全生效"
+          }
+        }
+      }
+    },
+    "language.system": {
+      "comment": "Language option: follow system",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟随系统"
+          }
+        }
+      }
+    },
+    "alert.language.title": {
+      "comment": "Language change alert title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言已更新"
+          }
+        }
+      }
+    },
+    "alert.language.restart": {
+      "comment": "Language change alert message",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启应用后生效。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

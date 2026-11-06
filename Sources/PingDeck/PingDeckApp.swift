@@ -6,6 +6,11 @@ import PingCore
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var appearanceObservation: NSKeyValueObservation?
 
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        let configuration = FileConfigStore().load()
+        LanguagePreference.apply(configuration.settings.language)
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // 已经有实例在跑时激活它并退出自己，避免出现两个窗口、两套配置互相覆盖
         if Self.activateRunningInstance() {

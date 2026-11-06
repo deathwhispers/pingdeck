@@ -4,6 +4,13 @@ import PingCore
 struct SettingsSheet: View {
     @EnvironmentObject private var model: PingDeckViewModel
 
+    private var languageBinding: Binding<AppLanguage> {
+        Binding(
+            get: { model.settings.language },
+            set: { model.setLanguage($0) }
+        )
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("设置")
@@ -19,6 +26,21 @@ struct SettingsSheet: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 Text("跟随系统会随 macOS 外观自动切换")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(L10n.settingsLanguage)
+                Picker(String(localized: L10n.settingsLanguage), selection: languageBinding) {
+                    Text(L10n.languageSystem).tag(AppLanguage.system)
+                    Text(verbatim: "简体中文").tag(AppLanguage.simplifiedChinese)
+                    Text(verbatim: "English").tag(AppLanguage.english)
+                    Text(verbatim: "日本語").tag(AppLanguage.japanese)
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                Text(L10n.settingsLanguageHint)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
