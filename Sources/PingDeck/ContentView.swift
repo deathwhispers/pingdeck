@@ -35,7 +35,8 @@ struct ContentView: View {
                         } else if result.entries.isEmpty {
                             model.alert = AppAlert(
                                 title: "添加失败",
-                                message: result.rejected.first?.reason ?? "目标格式不正确"
+                                message: result.rejected.first?.reason.message
+                                    ?? String(localized: L10n.alertAddFailedDefaultMessage)
                             )
                         }
                     } else if let id = draft.targetID {

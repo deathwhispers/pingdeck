@@ -87,7 +87,7 @@ struct BulkImportSheet: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 2) {
                             ForEach(preview.rejected, id: \.line) { item in
-                                Text("第 \(item.line) 行「\(item.text)」：\(item.reason)")
+                                Text(String(localized: L10n.importRejectedLine(item.line, item.text, item.reason.message)))
                                     .font(.caption)
                                     .foregroundStyle(.orange)
                             }

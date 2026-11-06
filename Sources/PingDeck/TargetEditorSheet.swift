@@ -96,7 +96,8 @@ struct TargetEditorSheet: View {
                 existing: Set(model.targets.map { $0.host.lowercased() })
             )
             guard !result.entries.isEmpty else {
-                validationError = result.rejected.first?.reason ?? "目标格式不正确"
+                validationError = result.rejected.first?.reason.message
+                    ?? String(localized: L10n.alertAddFailedDefaultMessage)
                 return
             }
             validationError = nil

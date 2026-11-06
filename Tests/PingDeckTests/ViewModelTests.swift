@@ -208,7 +208,7 @@ final class AddTargetsTests: XCTestCase {
 
         XCTAssertTrue(result.entries.isEmpty)
         XCTAssertEqual(model.targets.count, 2)
-        XCTAssertEqual(result.rejected.first?.reason, "与已有目标重复")
+        XCTAssertEqual(result.rejected.first?.reason, .duplicate)
     }
 }
 

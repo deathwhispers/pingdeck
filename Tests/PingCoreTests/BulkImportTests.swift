@@ -32,9 +32,9 @@ final class BulkImportTests: XCTestCase {
         XCTAssertEqual(result.entries.count, 1)
         XCTAssertEqual(result.entries[0].host, "8.8.8.8")
         XCTAssertEqual(result.rejected.count, 4)
-        XCTAssertTrue(result.rejected.contains { $0.reason.contains("重复") })
-        XCTAssertTrue(result.rejected.contains { $0.reason.contains("协议") })
-        XCTAssertTrue(result.rejected.contains { $0.reason.contains("网络地址") })
+        XCTAssertTrue(result.rejected.contains { $0.reason == .duplicate })
+        XCTAssertTrue(result.rejected.contains { $0.reason == .invalidTarget(.protocolPrefix) })
+        XCTAssertTrue(result.rejected.contains { $0.reason == .invalidRange(.cidrNotNetworkAddress) })
     }
 
     func testLineNumbersAreReported() {

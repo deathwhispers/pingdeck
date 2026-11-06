@@ -1,30 +1,198 @@
 {
-  "sourceLanguage" : "zh-Hans",
-  "strings" : {
-    "app.name.smoke" : {
-      "comment" : "Build-time smoke test for generated String Catalog symbols.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PingDeck"
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "app.name.smoke": {
+      "comment": "Build-time smoke test for generated String Catalog symbols.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PingDeck"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PingDeck"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PingDeck"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PingDeck"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PingDeck"
+          }
+        }
+      }
+    },
+    "validation.empty": {
+      "comment": "Target validation: empty input",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标不能为空"
+          }
+        }
+      }
+    },
+    "validation.protocolPrefix": {
+      "comment": "Target validation: protocol prefix",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请不要填写协议前缀，例如 http://"
+          }
+        }
+      }
+    },
+    "validation.path": {
+      "comment": "Target validation: path in host",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请只填写主机名或 IP，不要带路径"
+          }
+        }
+      }
+    },
+    "validation.whitespace": {
+      "comment": "Target validation: whitespace in host",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标不能包含空格"
+          }
+        }
+      }
+    },
+    "validation.invalidCharacters": {
+      "comment": "Target validation: invalid characters",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标包含非法字符"
+          }
+        }
+      }
+    },
+    "range.ipv6Unsupported": {
+      "comment": "IP range parsing: IPv6 CIDR unsupported",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂不支持 IPv6 网段，请填写 IPv4 网段"
+          }
+        }
+      }
+    },
+    "range.malformedCIDR": {
+      "comment": "IP range parsing: malformed CIDR",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网段格式不正确：请写成 10.0.0.0/24 这样的 CIDR"
+          }
+        }
+      }
+    },
+    "range.cidrNotNetworkAddress": {
+      "comment": "IP range parsing: CIDR host bits set",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网段格式不正确：CIDR 请填写网络地址，例如 10.0.0.0/24"
+          }
+        }
+      }
+    },
+    "range.tooLarge": {
+      "comment": "IP range parsing: range exceeds max addresses",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网段过大：单个网段最多支持 %lld 个地址"
+          }
+        }
+      }
+    },
+    "range.malformed": {
+      "comment": "IP range parsing: malformed explicit range",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网段格式不正确：请写成 10.0.0.1-10.0.0.254 或 10.0.0.1-254"
+          }
+        }
+      }
+    },
+    "range.endBeforeStart": {
+      "comment": "IP range parsing: end address before start",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网段格式不正确：结束地址不能小于起始地址"
+          }
+        }
+      }
+    },
+    "import.rejected.duplicate": {
+      "comment": "Bulk import: duplicate target",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与已有目标重复"
+          }
+        }
+      }
+    },
+    "import.rejected.line": {
+      "comment": "Bulk import: rejected line with line number, text and reason",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %1$lld 行「%2$@」：%3$@"
+          }
+        }
+      }
+    },
+    "alert.addFailed.defaultMessage": {
+      "comment": "Add target alert fallback message",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标格式不正确"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }
