@@ -66,6 +66,15 @@ struct PingDeckApp: App {
                 .frame(minWidth: 1000, minHeight: 560)
         }
         .defaultSize(width: 1280, height: 760)
+        .commands {
+            // App 菜单中的“设置…”项，⌘, 打开现有设置 sheet
+            CommandGroup(replacing: .appSettings) {
+                Button("设置…") {
+                    model.openSettingsSheet()
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
+        }
     }
 }
 

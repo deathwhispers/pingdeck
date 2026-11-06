@@ -59,6 +59,22 @@ final class SelectionTests: XCTestCase {
     }
 }
 
+final class SettingsSheetTests: XCTestCase {
+    /// 菜单里的“设置…”与工具栏按钮共用同一个 sheet 状态
+    func testOpenSettingsSheetPresentsSettings() {
+        let model = PingDeckViewModel(
+            configuration: AppConfiguration(),
+            store: InMemoryConfigStore()
+        )
+
+        model.openSettingsSheet()
+
+        guard case .settings? = model.sheet else {
+            return XCTFail("期望呈现设置 sheet，实际为 \(String(describing: model.sheet))")
+        }
+    }
+}
+
 final class ClearAllTargetsTests: XCTestCase {
     func testClearAllTargetsRemovesEverything() {
         let configuration = AppConfiguration(targets: [PingTarget(host: "a.com"), PingTarget(host: "b.com")])
