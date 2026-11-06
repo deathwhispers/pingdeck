@@ -160,6 +160,20 @@ public enum AppearanceMode: String, Codable, CaseIterable, Hashable, Sendable {
     }
 }
 
+/// 应用语言
+public enum AppLanguage: String, Codable, CaseIterable, Hashable, Sendable {
+    /// 跟随系统
+    case system
+    case simplifiedChinese = "zh-Hans"
+    case english = "en"
+    case japanese = "ja"
+
+    /// 写入 AppleLanguages 的语言代码；跟随系统时返回 nil
+    public var localeIdentifier: String? {
+        self == .system ? nil : rawValue
+    }
+}
+
 /// 运行参数
 public struct PingSettings: Codable, Sendable, Equatable {
     /// 最大并发数上限
@@ -175,17 +189,21 @@ public struct PingSettings: Codable, Sendable, Equatable {
     public var rotationInterval: Double
     /// 界面外观
     public var appearance: AppearanceMode
+    /// 应用语言
+    public var language: AppLanguage
 
     public init(interval: Double = 1.0,
                 timeout: Double = 2.0,
                 maxConcurrent: Int = 16,
                 rotationInterval: Double = 30,
-                appearance: AppearanceMode = .system) {
+                appearance: AppearanceMode = .system,
+                language: AppLanguage = .system) {
         self.interval = interval
         self.timeout = timeout
         self.maxConcurrent = max(1, maxConcurrent)
         self.rotationInterval = max(0, rotationInterval)
         self.appearance = appearance
+        self.language = language
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -194,9 +212,10 @@ public struct PingSettings: Codable, Sendable, Equatable {
         case maxConcurrent
         case rotationInterval
         case appearance
+        case language
     }
 
-    /// 手写解码：旧版本配置没有 appearance 字段（或值未知）时回落到跟随系统。
+    /// 手写解码：旧版本配置没有 appearance / language 字段（或值未知）时回落到默认值。
     /// 不能让整个配置解码失败，否则用户保存的目标会全部丢失。
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -205,6 +224,7 @@ public struct PingSettings: Codable, Sendable, Equatable {
         maxConcurrent = try container.decode(Int.self, forKey: .maxConcurrent)
         rotationInterval = try container.decode(Double.self, forKey: .rotationInterval)
         appearance = (try? container.decodeIfPresent(AppearanceMode.self, forKey: .appearance)) ?? .system
+        language = (try? container.decodeIfPresent(AppLanguage.self, forKey: .language)) ?? .system
     }
 
     public static let `default` = PingSettings()
