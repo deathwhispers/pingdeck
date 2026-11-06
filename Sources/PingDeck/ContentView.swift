@@ -226,6 +226,28 @@ struct ContentView: View {
         )
     }
 
+    private var exportLabels: ExportLabels {
+        ExportLabels(
+            columnTitles: [
+                String(localized: L10n.exportColumnTarget),
+                String(localized: L10n.exportColumnNote),
+                String(localized: L10n.exportColumnStatus),
+                String(localized: L10n.exportColumnLastLatency),
+                String(localized: L10n.exportColumnAverageLatency),
+                String(localized: L10n.exportColumnMinLatency),
+                String(localized: L10n.exportColumnMaxLatency),
+                String(localized: L10n.exportColumnLossRate),
+                String(localized: L10n.exportColumnLastResponse),
+            ],
+            statusName: { $0.displayName },
+            summary: {
+                String(localized: L10n.exportSummary($0.targets, $0.alive, $0.problems, $0.totalSent))
+            },
+            markdownTitle: String(localized: L10n.exportMarkdownTitle),
+            exportedAtLabel: String(localized: L10n.exportMarkdownExportedAt)
+        )
+    }
+
     private func export(entries: [ExportEntry], format: ExportFormat) {
         guard !entries.isEmpty else { return }
         let panel = NSSavePanel()
@@ -235,7 +257,7 @@ struct ContentView: View {
 
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
-            let data = ExportFile.data(format: format, entries: entries)
+            let data = ExportFile.data(format: format, entries: entries, labels: exportLabels)
             do {
                 try data.write(to: url, options: .atomic)
             } catch {

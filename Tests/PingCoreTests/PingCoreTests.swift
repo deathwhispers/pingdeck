@@ -86,7 +86,10 @@ final class CsvExporterTests: XCTestCase {
         stats.recordSuccess(12.5, at: Date(), seq: 0)
 
         let target = PingTarget(host: "8.8.8.8", note: "网关")
-        let csv = CsvExporter.csv(for: [CsvExporter.Entry(target: target, stats: stats)])
+        let csv = CsvExporter.csv(
+            for: [CsvExporter.Entry(target: target, stats: stats)],
+            labels: TestExportLabels.chinese
+        )
 
         XCTAssertTrue(csv.hasPrefix("\u{FEFF}"))
         XCTAssertTrue(csv.contains("目标,备注,状态"))
@@ -96,7 +99,10 @@ final class CsvExporterTests: XCTestCase {
 
     func testCSVEscapesCommas() {
         let target = PingTarget(host: "a,b", note: "带,逗号")
-        let csv = CsvExporter.csv(for: [CsvExporter.Entry(target: target, stats: PingStats())])
+        let csv = CsvExporter.csv(
+            for: [CsvExporter.Entry(target: target, stats: PingStats())],
+            labels: TestExportLabels.chinese
+        )
         XCTAssertTrue(csv.contains("\"a,b\""))
     }
 }

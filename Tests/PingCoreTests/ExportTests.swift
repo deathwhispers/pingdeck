@@ -11,16 +11,16 @@ final class ExportTableTests: XCTestCase {
 
     /// 列标题必须与既有 CSV 表头完全一致，避免各格式之间出现列偏差
     func testColumnsMatchCSVHeader() {
-        let table = ExportTable(entries: [])
+        let table = ExportTable(entries: [], labels: TestExportLabels.chinese)
 
-        XCTAssertEqual(table.columns.map(\.title), CsvExporter.header)
+        XCTAssertEqual(table.columns.map(\.title), TestExportLabels.chinese.columnTitles)
     }
 
     /// 列值带类型：延迟是数字、状态是文本、最后响应时间是日期
     func testRowCarriesTypedValues() {
         let entry = ExportEntry(target: PingTarget(host: "8.8.8.8", note: "网关"), stats: makeStats())
 
-        let row = ExportTable(entries: [entry]).rows[0]
+        let row = ExportTable(entries: [entry], labels: TestExportLabels.chinese).rows[0]
 
         XCTAssertEqual(row[0], .text("8.8.8.8"))
         XCTAssertEqual(row[1], .text("网关"))
@@ -37,7 +37,7 @@ final class ExportTableTests: XCTestCase {
     func testMissingValuesAreEmptyNotZero() {
         let entry = ExportEntry(target: PingTarget(host: "8.8.8.8"), stats: PingStats())
 
-        let row = ExportTable(entries: [entry]).rows[0]
+        let row = ExportTable(entries: [entry], labels: TestExportLabels.chinese).rows[0]
 
         XCTAssertEqual(row[3], .number(nil))
         XCTAssertEqual(row[8], .date(nil))
@@ -51,7 +51,7 @@ final class ExportTableTests: XCTestCase {
         stats.recordTimeout(seq: 1)
         let entry = ExportEntry(target: PingTarget(host: "8.8.8.8"), stats: stats)
 
-        let row = ExportTable(entries: [entry]).rows[0]
+        let row = ExportTable(entries: [entry], labels: TestExportLabels.chinese).rows[0]
 
         XCTAssertEqual(row[7], .number(50))
     }
@@ -72,17 +72,26 @@ final class CsvExporterCompatibilityTests: XCTestCase {
         stats.recordSuccess(12.5, at: date, seq: 0)
         let entry = ExportEntry(target: PingTarget(host: "8.8.8.8", note: "网关"), stats: stats)
 
-        let csv = CsvExporter.csv(for: [entry])
+        let csv = CsvExporter.csv(for: [entry], labels: TestExportLabels.chinese)
 
         let expected = "\u{FEFF}目标,备注,状态,最新延迟(ms),平均延迟(ms),最小延迟(ms),最大延迟(ms),丢包率(%),最后响应时间\r\n"
             + "8.8.8.8,网关,正常,12.500,12.500,12.500,12.500,0.00,\(expectedDateString(date))\r\n"
         XCTAssertEqual(csv, expected)
     }
 
+    func testCSVUsesProvidedLabels() {
+        let entry = ExportEntry(target: PingTarget(host: "8.8.8.8"), stats: PingStats())
+
+        let csv = CsvExporter.csv(for: [entry], labels: TestExportLabels.english)
+
+        XCTAssertTrue(csv.contains("Target,Note,Status"))
+        XCTAssertTrue(csv.contains("8.8.8.8,,Idle"))
+    }
+
     func testCSVEscapingIsUnchanged() {
         let entry = ExportEntry(target: PingTarget(host: "a,b", note: "带\"引号"), stats: PingStats())
 
-        let csv = CsvExporter.csv(for: [entry])
+        let csv = CsvExporter.csv(for: [entry], labels: TestExportLabels.chinese)
 
         XCTAssertTrue(csv.contains("\"a,b\""))
         XCTAssertTrue(csv.contains("\"带\"\"引号\""))
@@ -140,7 +149,11 @@ final class MarkdownExporterTests: XCTestCase {
         stats.recordSuccess(12.5, at: Date(timeIntervalSince1970: 1_700_000_000), seq: 0)
         let entry = ExportEntry(target: PingTarget(host: "8.8.8.8", note: "网关"), stats: stats)
 
-        let markdown = MarkdownExporter.markdown(for: [entry], exportedAt: Date(timeIntervalSince1970: 1_700_000_000))
+        let markdown = MarkdownExporter.markdown(
+            for: [entry],
+            labels: TestExportLabels.chinese,
+            exportedAt: Date(timeIntervalSince1970: 1_700_000_000)
+        )
 
         XCTAssertTrue(markdown.contains("| 目标 | 备注 | 状态 | 最新延迟(ms) |"))
         XCTAssertTrue(markdown.contains("| --- | --- | --- | --- |"))
@@ -157,7 +170,7 @@ final class TextExporterTests: XCTestCase {
         stats.recordSuccess(12.5, at: Date(timeIntervalSince1970: 1_700_000_000), seq: 0)
         let entry = ExportEntry(target: PingTarget(host: "8.8.8.8", note: "网关"), stats: stats)
 
-        let text = TextExporter.text(for: [entry])
+        let text = TextExporter.text(for: [entry], labels: TestExportLabels.chinese)
 
         XCTAssertTrue(text.contains("目标"))
         XCTAssertTrue(text.contains("8.8.8.8"))
@@ -170,7 +183,7 @@ final class TextExporterTests: XCTestCase {
     func testColumnsAreAlignedByDisplayWidth() {
         let entry = ExportEntry(target: PingTarget(host: "1.1.1.1"), stats: PingStats())
 
-        let text = TextExporter.text(for: [entry])
+        let text = TextExporter.text(for: [entry], labels: TestExportLabels.chinese)
 
         let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
         let header = try? XCTUnwrap(lines.first)
@@ -190,7 +203,7 @@ final class XlsxExporterTests: XCTestCase {
     }
 
     func testXLSXIsZipArchiveWithRequiredParts() throws {
-        let data = XlsxExporter.xlsx(for: [makeEntry()])
+        let data = XlsxExporter.xlsx(for: [makeEntry()], labels: TestExportLabels.chinese)
 
         XCTAssertEqual(Array(data.prefix(2)), [0x50, 0x4B], "xlsx 必须是 zip 包")
 
@@ -205,7 +218,7 @@ final class XlsxExporterTests: XCTestCase {
 
     /// 表头一行、数据一行，延迟写成数值单元格而不是字符串
     func testSheetContainsHeaderRowAndNumericCells() throws {
-        let data = XlsxExporter.xlsx(for: [makeEntry()])
+        let data = XlsxExporter.xlsx(for: [makeEntry()], labels: TestExportLabels.chinese)
 
         let parts = try MiniZip.contents(of: data)
         let sheet = try XCTUnwrap(parts["xl/worksheets/sheet1.xml"])
@@ -219,7 +232,7 @@ final class XlsxExporterTests: XCTestCase {
     func testCellContentIsXMLEscaped() throws {
         let entry = ExportEntry(target: PingTarget(host: "a&b<c>", note: "\"引号\""), stats: PingStats())
 
-        let data = XlsxExporter.xlsx(for: [entry])
+        let data = XlsxExporter.xlsx(for: [entry], labels: TestExportLabels.chinese)
 
         let parts = try MiniZip.contents(of: data)
         let sheet = try XCTUnwrap(parts["xl/worksheets/sheet1.xml"])
@@ -228,7 +241,7 @@ final class XlsxExporterTests: XCTestCase {
 
     /// 空目标也要生成只有表头的工作表
     func testEmptyEntriesStillProduceHeader() throws {
-        let data = XlsxExporter.xlsx(for: [])
+        let data = XlsxExporter.xlsx(for: [], labels: TestExportLabels.chinese)
 
         let parts = try MiniZip.contents(of: data)
         let sheet = try XCTUnwrap(parts["xl/worksheets/sheet1.xml"])
@@ -319,7 +332,7 @@ final class ExportFileTests: XCTestCase {
         let date = Date(timeIntervalSince1970: 1_700_000_000)
 
         for format in ExportFormat.allCases {
-            let data = ExportFile.data(format: format, entries: entries, date: date)
+            let data = ExportFile.data(format: format, entries: entries, labels: TestExportLabels.chinese, date: date)
             XCTAssertFalse(data.isEmpty, "\(format.displayName) 导出结果不应为空")
         }
     }
@@ -329,10 +342,10 @@ final class ExportFileTests: XCTestCase {
         let entries = makeEntries()
         let date = Date(timeIntervalSince1970: 1_700_000_000)
 
-        XCTAssertEqual(Array(ExportFile.data(format: .xlsx, entries: entries, date: date).prefix(2)), [0x50, 0x4B])
-        XCTAssertTrue(String(decoding: ExportFile.data(format: .json, entries: entries, date: date), as: UTF8.self).contains("\"targets\""))
-        XCTAssertTrue(String(decoding: ExportFile.data(format: .markdown, entries: entries, date: date), as: UTF8.self).hasPrefix("# PingDeck"))
-        XCTAssertTrue(String(decoding: ExportFile.data(format: .txt, entries: entries, date: date), as: UTF8.self).contains("8.8.8.8"))
-        XCTAssertTrue(String(decoding: ExportFile.data(format: .csv, entries: entries, date: date), as: UTF8.self).hasPrefix("\u{FEFF}"))
+        XCTAssertEqual(Array(ExportFile.data(format: .xlsx, entries: entries, labels: TestExportLabels.chinese, date: date).prefix(2)), [0x50, 0x4B])
+        XCTAssertTrue(String(decoding: ExportFile.data(format: .json, entries: entries, labels: TestExportLabels.chinese, date: date), as: UTF8.self).contains("\"targets\""))
+        XCTAssertTrue(String(decoding: ExportFile.data(format: .markdown, entries: entries, labels: TestExportLabels.chinese, date: date), as: UTF8.self).hasPrefix("# PingDeck"))
+        XCTAssertTrue(String(decoding: ExportFile.data(format: .txt, entries: entries, labels: TestExportLabels.chinese, date: date), as: UTF8.self).contains("8.8.8.8"))
+        XCTAssertTrue(String(decoding: ExportFile.data(format: .csv, entries: entries, labels: TestExportLabels.chinese, date: date), as: UTF8.self).hasPrefix("\u{FEFF}"))
     }
 }

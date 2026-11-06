@@ -336,6 +336,150 @@
           }
         }
       }
+    },
+    "export.column.target": {
+      "comment": "Export column: host",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标"
+          }
+        }
+      }
+    },
+    "export.column.note": {
+      "comment": "Export column: note",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "备注"
+          }
+        }
+      }
+    },
+    "export.column.status": {
+      "comment": "Export column: status",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状态"
+          }
+        }
+      }
+    },
+    "export.column.lastLatency": {
+      "comment": "Export column: latest latency",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新延迟(ms)"
+          }
+        }
+      }
+    },
+    "export.column.averageLatency": {
+      "comment": "Export column: average latency",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均延迟(ms)"
+          }
+        }
+      }
+    },
+    "export.column.minLatency": {
+      "comment": "Export column: minimum latency",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最小延迟(ms)"
+          }
+        }
+      }
+    },
+    "export.column.maxLatency": {
+      "comment": "Export column: maximum latency",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最大延迟(ms)"
+          }
+        }
+      }
+    },
+    "export.column.lossRate": {
+      "comment": "Export column: loss rate",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "丢包率(%)"
+          }
+        }
+      }
+    },
+    "export.column.lastResponse": {
+      "comment": "Export column: last response time",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最后响应时间"
+          }
+        }
+      }
+    },
+    "export.summary": {
+      "comment": "Export summary line",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标 %1$lld · 正常 %2$lld · 异常 %3$lld · 累计发包 %4$lld"
+          }
+        }
+      }
+    },
+    "export.markdown.title": {
+      "comment": "Markdown export title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PingDeck 导出结果"
+          }
+        }
+      }
+    },
+    "export.markdown.exportedAt": {
+      "comment": "Markdown export timestamp label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出时间"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

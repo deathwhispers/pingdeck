@@ -17,7 +17,7 @@ public struct ExportEntry: Sendable {
 public enum ExportValue: Equatable, Sendable {
     /// 文本
     case text(String)
-    /// 状态：显示时用中文名，机器可读格式用枚举原值
+    /// 状态：由导出标签决定显示名，机器可读格式使用枚举原值
     case status(TargetStatus)
     /// 数值（延迟毫秒、丢包率百分点）；nil 表示该值缺失
     case number(Double?)
@@ -31,7 +31,7 @@ public struct ExportColumn: Sendable {
     public enum Format: Sendable {
         /// 文本，原样输出
         case text
-        /// 状态：文本格式显示中文名，机器可读格式显示英文枚举值
+        /// 状态：文本格式使用本地化名称，机器可读格式使用英文枚举值
         case status
         /// 毫秒，保留三位小数
         case milliseconds
@@ -41,7 +41,7 @@ public struct ExportColumn: Sendable {
         case dateTime
     }
 
-    /// 表头标题（中文，用于表格展示）
+    /// 表头标题
     public let title: String
     /// 机器可读的字段名（英文，用于 JSON）
     public let key: String
@@ -54,29 +54,69 @@ public struct ExportColumn: Sendable {
     }
 }
 
+/// 导出文案：由 UI 层按当前语言提供
+public struct ExportLabels {
+    public var columnTitles: [String]
+    public var statusName: (TargetStatus) -> String
+    public var summary: (ExportSummary) -> String
+    public var markdownTitle: String
+    public var exportedAtLabel: String
+
+    public init(
+        columnTitles: [String],
+        statusName: @escaping (TargetStatus) -> String,
+        summary: @escaping (ExportSummary) -> String,
+        markdownTitle: String,
+        exportedAtLabel: String
+    ) {
+        self.columnTitles = columnTitles
+        self.statusName = statusName
+        self.summary = summary
+        self.markdownTitle = markdownTitle
+        self.exportedAtLabel = exportedAtLabel
+    }
+}
+
 /// 所有导出格式共用的表格模型
 ///
 /// CSV / TXT / Markdown / JSON / XLSX 都从这张表派生，避免各格式之间出现列偏差。
 public struct ExportTable: Sendable {
-    /// 列定义，所有格式共用
-    public static let columns: [ExportColumn] = [
-        ExportColumn(title: "目标", key: "host", format: .text),
-        ExportColumn(title: "备注", key: "note", format: .text),
-        ExportColumn(title: "状态", key: "status", format: .status),
-        ExportColumn(title: "最新延迟(ms)", key: "lastLatencyMs", format: .milliseconds),
-        ExportColumn(title: "平均延迟(ms)", key: "averageLatencyMs", format: .milliseconds),
-        ExportColumn(title: "最小延迟(ms)", key: "minLatencyMs", format: .milliseconds),
-        ExportColumn(title: "最大延迟(ms)", key: "maxLatencyMs", format: .milliseconds),
-        ExportColumn(title: "丢包率(%)", key: "lossRatePercent", format: .percent),
-        ExportColumn(title: "最后响应时间", key: "lastResponseAt", format: .dateTime),
+    private static let definitions: [(key: String, format: ExportColumn.Format)] = [
+        ("host", .text),
+        ("note", .text),
+        ("status", .status),
+        ("lastLatencyMs", .milliseconds),
+        ("averageLatencyMs", .milliseconds),
+        ("minLatencyMs", .milliseconds),
+        ("maxLatencyMs", .milliseconds),
+        ("lossRatePercent", .percent),
+        ("lastResponseAt", .dateTime),
     ]
 
     public let columns: [ExportColumn]
     public let rows: [[ExportValue]]
 
-    public init(entries: [ExportEntry]) {
-        columns = Self.columns
-        rows = entries.map { entry in
+    public init(entries: [ExportEntry], labels: ExportLabels) {
+        precondition(
+            labels.columnTitles.count == Self.definitions.count,
+            "ExportLabels.columnTitles 数量必须为 \(Self.definitions.count)"
+        )
+        columns = zip(Self.definitions, labels.columnTitles).map { definition, title in
+            ExportColumn(title: title, key: definition.key, format: definition.format)
+        }
+        rows = Self.makeRows(entries)
+    }
+
+    /// JSON 只使用 key 与格式，不需要展示标题
+    init(entries: [ExportEntry]) {
+        columns = Self.definitions.map { definition in
+            ExportColumn(title: definition.key, key: definition.key, format: definition.format)
+        }
+        rows = Self.makeRows(entries)
+    }
+
+    private static func makeRows(_ entries: [ExportEntry]) -> [[ExportValue]] {
+        entries.map { entry in
             let stats = entry.stats
             return [
                 .text(entry.target.host),
@@ -93,9 +133,9 @@ public struct ExportTable: Sendable {
     }
 
     /// 某一列在全部行上的显示文本
-    public func displayValues(at column: Int) -> [String] {
+    public func displayValues(at column: Int, labels: ExportLabels) -> [String] {
         rows.map { row in
-            ExportValueFormatter.display(row[column], format: columns[column].format)
+            ExportValueFormatter.display(row[column], format: columns[column].format, labels: labels)
         }
     }
 }
@@ -115,11 +155,6 @@ public struct ExportSummary: Sendable {
         }.count
         totalSent = entries.reduce(0) { $0 + $1.stats.sent }
     }
-
-    /// 「目标 12 · 正常 9 · 异常 3 · 累计发包 480」形式的摘要
-    public var description: String {
-        "目标 \(targets) · 正常 \(alive) · 异常 \(problems) · 累计发包 \(totalSent)"
-    }
 }
 
 /// 把单元格值转成各格式共用的显示文本
@@ -132,13 +167,17 @@ public enum ExportValueFormatter {
         return formatter
     }()
 
-    public static func display(_ value: ExportValue, format: ExportColumn.Format) -> String {
+    public static func display(
+        _ value: ExportValue,
+        format: ExportColumn.Format,
+        labels: ExportLabels
+    ) -> String {
         switch format {
         case .text:
             if case .text(let text) = value { return text }
             return ""
         case .status:
-            if case .status(let status) = value { return status.displayName }
+            if case .status(let status) = value { return labels.statusName(status) }
             return ""
         case .milliseconds:
             if case .number(let number?) = value { return String(format: "%.3f", number) }

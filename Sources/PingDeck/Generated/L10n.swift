@@ -54,6 +54,114 @@ enum L10n {
     }
 
     /**
+     Export column: average latency
+     
+     Localized string for key “export.column.averageLatency” in table “Localizable.xcstrings”.
+     */
+    static var exportColumnAverageLatency: LocalizedStringResource {
+        LocalizedStringResource("export.column.averageLatency", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Export column: latest latency
+     
+     Localized string for key “export.column.lastLatency” in table “Localizable.xcstrings”.
+     */
+    static var exportColumnLastLatency: LocalizedStringResource {
+        LocalizedStringResource("export.column.lastLatency", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Export column: last response time
+     
+     Localized string for key “export.column.lastResponse” in table “Localizable.xcstrings”.
+     */
+    static var exportColumnLastResponse: LocalizedStringResource {
+        LocalizedStringResource("export.column.lastResponse", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Export column: loss rate
+     
+     Localized string for key “export.column.lossRate” in table “Localizable.xcstrings”.
+     */
+    static var exportColumnLossRate: LocalizedStringResource {
+        LocalizedStringResource("export.column.lossRate", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Export column: maximum latency
+     
+     Localized string for key “export.column.maxLatency” in table “Localizable.xcstrings”.
+     */
+    static var exportColumnMaxLatency: LocalizedStringResource {
+        LocalizedStringResource("export.column.maxLatency", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Export column: minimum latency
+     
+     Localized string for key “export.column.minLatency” in table “Localizable.xcstrings”.
+     */
+    static var exportColumnMinLatency: LocalizedStringResource {
+        LocalizedStringResource("export.column.minLatency", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Export column: note
+     
+     Localized string for key “export.column.note” in table “Localizable.xcstrings”.
+     */
+    static var exportColumnNote: LocalizedStringResource {
+        LocalizedStringResource("export.column.note", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Export column: status
+     
+     Localized string for key “export.column.status” in table “Localizable.xcstrings”.
+     */
+    static var exportColumnStatus: LocalizedStringResource {
+        LocalizedStringResource("export.column.status", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Export column: host
+     
+     Localized string for key “export.column.target” in table “Localizable.xcstrings”.
+     */
+    static var exportColumnTarget: LocalizedStringResource {
+        LocalizedStringResource("export.column.target", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Markdown export timestamp label
+     
+     Localized string for key “export.markdown.exportedAt” in table “Localizable.xcstrings”.
+     */
+    static var exportMarkdownExportedAt: LocalizedStringResource {
+        LocalizedStringResource("export.markdown.exportedAt", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Markdown export title
+     
+     Localized string for key “export.markdown.title” in table “Localizable.xcstrings”.
+     */
+    static var exportMarkdownTitle: LocalizedStringResource {
+        LocalizedStringResource("export.markdown.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Export summary line
+     
+     Localized string for key “export.summary” in table “Localizable.xcstrings”.
+     */
+    static func exportSummary(_ arg1: Int, _ arg2: Int, _ arg3: Int, _ arg4: Int) -> LocalizedStringResource {
+        LocalizedStringResource("export.summary", defaultValue: "\(arg1, specifier: "%lld")\(arg2, specifier: "%lld")\(arg3, specifier: "%lld")\(arg4, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Bulk import: duplicate target
      
      Localized string for key “import.rejected.duplicate” in table “Localizable.xcstrings”.
