@@ -28,7 +28,7 @@ struct BulkImportSheet: View {
                 .font(.caption)
                 .foregroundStyle(mode == .replace && !model.targets.isEmpty ? .red : .secondary)
 
-            Text("每行一个目标，可写成「目标」或「目标 备注」。以 # 开头的行会被忽略；重复或格式非法的行会被跳过并列出原因。")
+            Text("每行一个目标或网段，可写成「目标」或「目标 备注」。支持 10.0.0.0/24、10.0.0.1-10.0.0.254、10.0.0.1-254；单个网段最多 1024 个地址。以 # 开头的行会被忽略；重复或格式非法的行会被跳过并列出原因。")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -75,7 +75,7 @@ struct BulkImportSheet: View {
     @ViewBuilder
     private var summary: some View {
         if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            Text("示例：\n8.8.8.8  Google DNS\n1.1.1.1  Cloudflare\n# 下面这行是注释\n192.168.1.1  网关")
+            Text("示例：\n8.8.8.8  Google DNS\n10.0.0.0/30  机房网段\n192.168.1.1-254  内网\n# 下面这行是注释")
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.tertiary)
         } else {
