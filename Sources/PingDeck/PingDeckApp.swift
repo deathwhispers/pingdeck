@@ -41,8 +41,9 @@ struct PingDeckApp: App {
             ContentView()
                 .environmentObject(model)
                 .preferredColorScheme(model.settings.appearance.colorScheme)
-                .frame(minWidth: 940, minHeight: 480)
+                .frame(minWidth: 1000, minHeight: 560)
         }
+        .defaultSize(width: 1280, height: 760)
     }
 }
 

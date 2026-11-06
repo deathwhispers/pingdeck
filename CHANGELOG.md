@@ -2,6 +2,18 @@
 
 本文件记录 PingDeck 的重要变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [未发布]
+
+### 变更
+
+- 最低系统要求从 macOS 13 提升到 macOS 14.4（使用 SwiftUI Table 的列自定义能力）
+
+### 改进
+
+- 默认窗口调大到 1280×760，最小 1000×560
+- 表格改用 SwiftUI Table：支持拖动调整列宽、显示/隐藏列，内容超宽时可横向滚动
+- 列显隐与顺序自动保存，重启后保留
+
 ## [0.0.4] - 2026-11-06
 
 ### 改进

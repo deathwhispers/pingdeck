@@ -48,6 +48,7 @@
 - **配置读写可注入**：界面层通过 `ConfigStoring` 协议读写配置，默认实现写磁盘，单元测试注入内存实现——跑测试不会写坏用户真实配置。
 - **外观设置**：`AppearanceMode`（跟随系统 / 浅色 / 深色）随 `PingSettings` 持久化；旧配置缺少该字段时手写解码回落为跟随系统，避免整个配置解码失败导致目标丢失。
 - **网段展开**：批量导入与「添加」弹窗共用同一套解析（`BulkImportParser.parse(host:note:existing:)`），支持 CIDR、完整范围与末段简写。CIDR 只接受规范网络地址（主机位必须为 0），单个网段最多展开 1024 个地址；展开后的每个地址继承该行备注，并与现有目标及同批输入去重。
+- **表格**：使用 SwiftUI `Table` 获得原生列宽拖动、横向滚动、多选与表头排序；列显隐与顺序通过 `TableColumnCustomization` 持久化，「目标」列固定显示。`TargetRowComparator` 负责排序，并保证空值始终排在最后。
 - **错误处理**：解析 `ping` 的三类失败——目标无效（`cannot resolve host` → 状态「错误」并停止该目标进程）、网络不可达（`No route to host` → 状态「不可达」）、发包失败（`sendto:` → 计入丢包）。
 
 ## 目录结构
@@ -83,7 +84,7 @@
 │       ├── PingDeckApp.swift      # @main App + 菜单 + 单实例保护
 │       ├── PingDeckViewModel.swift
 │       ├── ContentView.swift      # 工具栏 / 状态栏 / 导出
-│       ├── TargetsTableView.swift # 表格（List 原生多选 + 表头排序）
+│       ├── TargetsTableView.swift # 表格（SwiftUI Table：多选 / 排序 / 列宽 / 显隐）
 │       ├── TargetEditorSheet.swift
 │       ├── BulkImportSheet.swift
 │       └── SettingsSheet.swift
@@ -99,7 +100,7 @@
 
 ## 构建、测试与打包
 
-前置条件：macOS 13+、Xcode Command Line Tools。
+前置条件：macOS 14.4+、Xcode Command Line Tools。
 
 ```bash
 make build            # swift build -c release

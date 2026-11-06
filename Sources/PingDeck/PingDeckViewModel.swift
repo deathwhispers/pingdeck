@@ -13,29 +13,14 @@ struct TargetRow: Identifiable {
 struct SortSpec: Equatable {
     enum Field: String, CaseIterable {
         case target
+        case status
         case last
         case average
         case minimum
         case maximum
         case loss
         case lastResponse
-
-        var title: String {
-            switch self {
-            case .target: return "目标"
-            case .last: return "最新延迟"
-            case .average: return "平均延迟"
-            case .minimum: return "最小延迟"
-            case .maximum: return "最大延迟"
-            case .loss: return "丢包率"
-            case .lastResponse: return "最后响应时间"
-            }
-        }
-
-        /// 首次点击该列时的默认方向：目标升序，其余降序（最差的排前面）
-        var defaultAscending: Bool {
-            self == .target
-        }
+        case enabled
     }
 
     var field: Field
@@ -164,20 +149,14 @@ final class PingDeckViewModel: ObservableObject {
         return list.sorted(by: compareRows)
     }
 
-    /// 点击表头：同一列再次点击则反向，否则切换到该列（默认方向见 SortSpec.Field）
-    func toggleSort(_ field: SortSpec.Field) {
-        if sort.field == field {
-            sort.ascending.toggle()
-        } else {
-            sort = SortSpec(field: field, ascending: field.defaultAscending)
-        }
-    }
-
+    /// 按当前排序规则比较两行
     private func compareRows(_ left: TargetRow, _ right: TargetRow) -> Bool {
         let ordering: ComparisonResult
         switch sort.field {
         case .target:
             ordering = left.target.host.localizedStandardCompare(right.target.host)
+        case .status:
+            ordering = ordered(left.stats.status.sortRank, right.stats.status.sortRank)
         case .last:
             ordering = ordered(left.stats.lastLatency, right.stats.lastLatency)
         case .average:
@@ -190,6 +169,8 @@ final class PingDeckViewModel: ObservableObject {
             ordering = ordered(left.stats.lossRate, right.stats.lossRate)
         case .lastResponse:
             ordering = ordered(left.stats.lastResponseAt, right.stats.lastResponseAt)
+        case .enabled:
+            ordering = ordered(left.target.enabled ? 1 : 0, right.target.enabled ? 1 : 0)
         }
 
         if ordering == .orderedSame {
