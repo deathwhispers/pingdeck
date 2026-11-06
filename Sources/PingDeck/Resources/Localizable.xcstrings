@@ -1,0 +1,30 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "app.name.smoke" : {
+      "comment" : "Build-time smoke test for generated String Catalog symbols.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PingDeck"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PingDeck"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PingDeck"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
