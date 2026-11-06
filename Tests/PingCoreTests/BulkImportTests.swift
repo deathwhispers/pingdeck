@@ -34,7 +34,7 @@ final class BulkImportTests: XCTestCase {
         XCTAssertEqual(result.rejected.count, 4)
         XCTAssertTrue(result.rejected.contains { $0.reason.contains("重复") })
         XCTAssertTrue(result.rejected.contains { $0.reason.contains("协议") })
-        XCTAssertTrue(result.rejected.contains { $0.reason.contains("路径") })
+        XCTAssertTrue(result.rejected.contains { $0.reason.contains("网络地址") })
     }
 
     func testLineNumbersAreReported() {

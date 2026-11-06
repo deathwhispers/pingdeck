@@ -78,6 +78,18 @@ final class BulkImportModeTests: XCTestCase {
         return PingDeckViewModel(configuration: configuration, store: InMemoryConfigStore())
     }
 
+    /// 导入 CIDR 网段会展开为一个个独立目标
+    func testImportingCIDRExpandsTargets() {
+        let model = makeModel([])
+
+        let result = model.importTargets("10.0.0.0/24", mode: .append)
+
+        XCTAssertEqual(result.entries.count, 256)
+        XCTAssertEqual(model.targets.count, 256)
+        XCTAssertEqual(model.targets.first?.host, "10.0.0.0")
+        XCTAssertEqual(model.targets.last?.host, "10.0.0.255")
+    }
+
     /// 追加模式：保留现有目标，只在末尾加新的
     func testAppendModeKeepsExistingTargets() {
         let model = makeModel(["old.com"])
