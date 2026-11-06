@@ -118,15 +118,16 @@ CI 工作流：[.github/workflows/build.yml](../.github/workflows/build.yml)
 
 | 触发条件 | 行为 |
 | --- | --- |
-| 创建 PR 到 `main`（或重新打开） | 构建 + 测试 + 打包，上传 Artifact（不发布） |
-| 往已有 PR 的分支继续提交 | 不触发 |
+| 创建 PR 到 `main`、重新打开，或 PR 分支有新提交 | 构建 + 测试 + 打包，上传 Artifact（不发布） |
 | 手动 Run workflow | `version` 留空则按 `VERSION` 文件构建；填 `0.0.2` 则按该版本打包并创建/更新 Release |
 
 发布新版本的流程：
 
-1. 更新 `VERSION` 与 `CHANGELOG.md`，合并到 `main`；
-2. Actions → **Build** → **Run workflow**，`version` 填目标版本号（如 `0.0.1`）；
+1. 在独立 PR 中更新 `VERSION`、`CHANGELOG.md` 与 README 版本徽章，squash 合并到 `main`；
+2. Actions → **Build** → **Run workflow**，`version` 填目标版本号（如 `0.0.3`）；
 3. 流水线跑完后，Releases 页面会出现对应 tag，附带 `PingDeck-<版本>.dmg`。
+
+分支、提交与 PR 规则见 [CONTRIBUTING.md](../CONTRIBUTING.md)。
 
 ### 可选 Secrets（开启 Apple 签名与公证）
 
