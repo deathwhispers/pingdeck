@@ -5,7 +5,7 @@
 PingDeck 是一个轻量的 macOS 批量 Ping 工具。它像 Windows 上的 PingInfoView 一样，把多个目标的连通状态、延迟和丢包率并排放在一张表格里，让你不用在终端里开一堆窗口。
 
 ![平台](https://img.shields.io/badge/macOS-13%2B-blue)
-![版本](https://img.shields.io/badge/version-0.0.1-green)
+![版本](https://img.shields.io/badge/version-0.0.2-green)
 ![依赖](https://img.shields.io/badge/dependencies-none-lightgrey)
 
 ## 截图
