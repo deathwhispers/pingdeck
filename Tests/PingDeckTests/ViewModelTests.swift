@@ -120,3 +120,29 @@ final class BulkImportModeTests: XCTestCase {
         XCTAssertEqual(model.targets.map { $0.host }, ["old.com"])
     }
 }
+
+/// 启动时的目标同步
+final class StartWithLoadedConfigurationTests: XCTestCase {
+    /// 从配置加载的目标必须在启动时同步给引擎，否则点「开始」不会发起任何探测
+    func testStartProbesTargetsLoadedFromConfiguration() {
+        let loopback = PingTarget(host: "127.0.0.1")
+        let configuration = AppConfiguration(
+            targets: [loopback],
+            settings: PingSettings(interval: 0.3, timeout: 1, maxConcurrent: 2, rotationInterval: 0)
+        )
+        let model = PingDeckViewModel(configuration: configuration)
+
+        model.start()
+        let deadline = Date().addingTimeInterval(5)
+        while Date() < deadline {
+            if let stats = model.stats[loopback.id], stats.received > 0 { break }
+            RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+        }
+        model.stop()
+
+        XCTAssertGreaterThan(
+            model.stats[loopback.id]?.received ?? 0, 0,
+            "从配置加载的目标在点击开始后应开始探测"
+        )
+    }
+}

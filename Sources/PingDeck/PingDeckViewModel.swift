@@ -135,6 +135,7 @@ final class PingDeckViewModel: ObservableObject {
         let configuration = configuration ?? ConfigStore.load()
         targets = configuration.targets
         settings = configuration.settings
+        engine.setTargets(targets)
 
         engine.onStats = { [weak self] id, value in
             DispatchQueue.main.async {
