@@ -2,7 +2,7 @@
 
 本文件记录 PingDeck 的重要变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [未发布]
+## [0.0.5] - 2026-11-06
 
 ### 变更
 
@@ -14,6 +14,7 @@
 - 表格改用 SwiftUI Table：支持拖动调整列宽、显示/隐藏列，内容超宽时可横向滚动
 - 列显隐与顺序自动保存，重启后保留
 - 应用图标支持浅色/深色两套，随系统外观自动切换（Dock 与 App Switcher）
+- App 菜单新增“设置…”项，支持用 ⌘, 打开现有设置 sheet
 - README 头图跟随阅读者的浅色/深色主题切换
 
 ## [0.0.4] - 2026-11-06
