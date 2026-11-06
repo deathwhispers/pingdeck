@@ -56,26 +56,40 @@ PingDeck 把这些事压缩成一张表：**粘贴目标，点开始，剩下的
 
 ## 界面预览
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <img src="docs/images/bulk-import.png" alt="批量导入目标">
-      <br>
-      <sub><b>批量导入</b>：粘贴多行目标，自动去重并预览可导入数量，支持追加或整体替换。</sub>
-    </td>
-    <td width="50%" valign="top">
-      <img src="docs/images/settings.png" alt="设置面板">
-      <br>
-      <sub><b>设置</b>：发包间隔、单包超时、最大并发与轮换周期，按现场网络情况调整。</sub>
-    </td>
-  </tr>
-</table>
+### 批量导入：粘贴即建目标
+
+<p align="center">
+  <img src="docs/images/bulk-import.png" width="640" alt="批量导入目标">
+  <br>
+  <sub>粘贴多行目标，自动去重并预览可导入数量，支持追加或整体替换。</sub>
+</p>
+
+### 多格式导出：结果直接交付
 
 <p align="center">
   <img src="docs/images/export-menu.png" width="900" alt="导出菜单：CSV、JSON、TXT、Markdown、Excel">
   <br>
-  <sub><b>多格式导出</b>：CSV / JSON / TXT / Markdown / Excel，可导出全部或仅选中项。</sub>
+  <sub>CSV / JSON / TXT / Markdown / Excel，可导出全部或仅选中项。</sub>
 </p>
+
+### 外观：跟随系统、浅色、深色
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/light.png" alt="浅色外观设置面板">
+      <br>
+      <sub><b>浅色</b>：明亮环境下更清晰。</sub>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/dark.png" alt="深色外观设置面板">
+      <br>
+      <sub><b>深色</b>：夜间与低光环境更舒适。</sub>
+    </td>
+  </tr>
+</table>
+
+设置面板同时提供发包间隔、单包超时、最大并发与轮换周期。
 
 ## 为什么这么轻
 
