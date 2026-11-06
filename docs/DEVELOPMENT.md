@@ -121,7 +121,7 @@ CI 工作流：[.github/workflows/build.yml](../.github/workflows/build.yml)
 | 触发条件 | 行为 |
 | --- | --- |
 | 创建 PR 到 `main`、重新打开，或 PR 分支有新提交 | 构建 + 测试 + 打包，上传 Artifact（不发布） |
-| 手动 Run workflow | `version` 留空则按 `VERSION` 文件构建；填 `0.0.3` 则按该版本打包并创建/更新 Release |
+| 手动 Run workflow | `version` 留空则按 `VERSION` 文件构建；填 `0.0.4` 则按该版本打包并创建/更新 Release |
 
 发布新版本的流程：
 
