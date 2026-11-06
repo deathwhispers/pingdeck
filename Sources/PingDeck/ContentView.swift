@@ -115,20 +115,26 @@ struct ContentView: View {
             .help("从多行文本批量添加目标")
 
             Menu {
-                Button("导出全部 \(model.rows.count) 项") {
-                    exportCSV(entries: model.allEntries)
+                ForEach(ExportFormat.allCases, id: \.self) { format in
+                    Menu {
+                        Button("导出全部 \(model.rows.count) 项") {
+                            export(entries: model.allEntries, format: format)
+                        }
+                        .disabled(model.rows.isEmpty)
+                        Button("导出选中 \(model.selection.count) 项") {
+                            export(entries: model.selectedEntries, format: format)
+                        }
+                        .disabled(model.selection.isEmpty)
+                    } label: {
+                        Text(format.displayName)
+                    }
                 }
-                .disabled(model.rows.isEmpty)
-                Button("导出选中 \(model.selection.count) 项") {
-                    exportCSV(entries: model.selectedEntries)
-                }
-                .disabled(model.selection.isEmpty)
             } label: {
-                Label("导出 CSV", systemImage: "square.and.arrow.up")
+                Label("导出", systemImage: "square.and.arrow.up")
             }
             .menuStyle(.borderlessButton)
             .fixedSize()
-            .help("导出为 CSV：可选择导出全部或仅选中项")
+            .help("导出结果：支持 CSV / JSON / TXT / Markdown / Excel，可选择导出全部或仅选中项")
 
             Button {
                 model.openSettingsSheet()
@@ -175,18 +181,18 @@ struct ContentView: View {
         model.removeTargets(ids: model.selection)
     }
 
-    private func exportCSV(entries: [CsvExporter.Entry]) {
+    private func export(entries: [ExportEntry], format: ExportFormat) {
         guard !entries.isEmpty else { return }
         let panel = NSSavePanel()
-        panel.allowedContentTypes = [UTType.commaSeparatedText]
-        panel.nameFieldStringValue = "pingdeck-\(Self.fileTimestamp()).csv"
+        panel.allowedContentTypes = [Self.contentType(for: format)]
+        panel.nameFieldStringValue = ExportFile.filename(format: format)
         panel.canCreateDirectories = true
 
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
-            let csv = CsvExporter.csv(for: entries)
+            let data = ExportFile.data(format: format, entries: entries)
             do {
-                try csv.write(to: url, atomically: true, encoding: .utf8)
+                try data.write(to: url, options: .atomic)
             } catch {
                 DispatchQueue.main.async {
                     model.alert = AppAlert(title: "导出失败", message: error.localizedDescription)
@@ -195,10 +201,15 @@ struct ContentView: View {
         }
     }
 
-    private static func fileTimestamp() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd-HHmmss"
-        return formatter.string(from: Date())
+    /// 各格式对应的文件类型；markdown 与 xlsx 没有系统内建类型，按扩展名动态解析
+    private static func contentType(for format: ExportFormat) -> UTType {
+        switch format {
+        case .csv: return .commaSeparatedText
+        case .json: return .json
+        case .txt: return .plainText
+        case .markdown: return UTType(filenameExtension: "md") ?? .plainText
+        case .xlsx: return UTType(filenameExtension: "xlsx") ?? .data
+        }
     }
 }
 

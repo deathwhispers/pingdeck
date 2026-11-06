@@ -282,14 +282,14 @@ final class PingDeckViewModel: ObservableObject {
     }
 
     /// 导出全部目标（不受选中影响）
-    var allEntries: [CsvExporter.Entry] {
-        rows.map { CsvExporter.Entry(target: $0.target, stats: $0.stats) }
+    var allEntries: [ExportEntry] {
+        rows.map { ExportEntry(target: $0.target, stats: $0.stats) }
     }
 
     /// 只导出选中的目标
-    var selectedEntries: [CsvExporter.Entry] {
+    var selectedEntries: [ExportEntry] {
         rows.filter { selection.contains($0.id) }
-            .map { CsvExporter.Entry(target: $0.target, stats: $0.stats) }
+            .map { ExportEntry(target: $0.target, stats: $0.stats) }
     }
 
     // MARK: - 弹窗

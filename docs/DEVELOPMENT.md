@@ -31,7 +31,7 @@
 │  PingLineParser：纯函数解析 ping 输出 → PingEvent（reply/timeout/unreachable/failure）   │
 │  BulkImportParser / TargetValidator：批量导入解析与目标校验                               │
 │  ConfigStore：JSON 配置读写 ~/Library/Application Support/PingDeck/config.json         │
-│  CsvExporter：结果导出（带 UTF-8 BOM，Excel 友好）                                       │
+│  ExportTable / ExportFile：统一表格模型与导出出口，各格式渲染器共用同一份列定义        │
 └──────────────────────────────────────────────────────────────────────────────────────┘
                                   │
                             /sbin/ping -i <间隔> <目标>
@@ -43,6 +43,9 @@
 - **并发限制**：`PingEngine` 维护固定数量的运行槽位，目标数超过 `maxConcurrent` 时按 `rotationInterval` 轮换探测，保证所有目标都被覆盖。
 - **丢包率不依赖 ping 的超时输出**：只使用 macOS `ping` 必定支持的 `-i` 参数（`-W` / `-t` 在不同 BSD 版本间语义不一致，传错会让 ping 直接报 usage 错误）。收发包计数以 `icmp_seq` 为准：`sent = 基准 + seq + 1`，回包序号跳号即说明中间丢包；进程重启导致 seq 归零时用基准值衔接。
 - **停用即终止**：关闭某一行的启用开关会让引擎停止对应进程并把状态置为「已停用」，重新启用则重新入队。
+- **导出统一表格模型**：CSV / JSON / TXT / Markdown / XLSX 都从 `ExportTable` 派生，列定义只有一份，各格式不会出现列偏差；列值带类型（文本 / 状态 / 数字 / 时间），XLSX 才能写出真正的数值单元格而不是字符串。JSON 用英文字段名与英文状态值，缺失值写 `null`；汇总信息只出现在 JSON 与 Markdown 中，CSV / TXT / XLSX 保持纯明细以兼容既有脚本。
+- **XLSX 零依赖实现**：xlsx 本质是装了 XML 的 zip 包，用自实现的 `ZipArchive`（stored 模式 + CRC32）加最小 OOXML 部件生成，不引入第三方库；产出文件已用系统 QuickLook 与 Python `zipfile` 交叉验证可正常打开。
+- **配置读写可注入**：界面层通过 `ConfigStoring` 协议读写配置，默认实现写磁盘，单元测试注入内存实现——跑测试不会写坏用户真实配置。
 - **错误处理**：解析 `ping` 的三类失败——目标无效（`cannot resolve host` → 状态「错误」并停止该目标进程）、网络不可达（`No route to host` → 状态「不可达」）、发包失败（`sendto:` → 计入丢包）。
 
 ## 目录结构
@@ -63,8 +66,17 @@
 │   │   ├── PingEngine.swift       # 并发调度器
 │   │   ├── BulkImport.swift       # 批量导入解析
 │   │   ├── TargetValidator.swift  # 目标合法性校验
-│   │   ├── ConfigStore.swift      # 配置持久化
-│   │   └── CsvExporter.swift      # CSV 导出
+│   │   ├── ConfigStore.swift      # 配置持久化（ConfigStoring 协议 + 文件实现）
+│   │   └── Export/                # 导出模块：统一表格模型 + 各格式渲染器
+│   │       ├── ExportTable.swift  # 列定义 / 列值 / 表格模型 / 汇总
+│   │       ├── ExportFormat.swift # 支持的导出格式
+│   │       ├── ExportFile.swift   # 统一出口：文件数据与默认文件名
+│   │       ├── CsvExporter.swift  # CSV（带 BOM，格式保持向后兼容）
+│   │       ├── JsonExporter.swift # JSON（英文字段名，缺失值写 null）
+│   │       ├── MarkdownExporter.swift # Markdown（标题 + 汇总 + 表格）
+│   │       ├── TextExporter.swift # TXT（按显示宽度对齐）
+│   │       ├── XlsxExporter.swift  # Excel：OOXML + 自实现 zip
+│   │       └── ZipArchive.swift    # 最小 zip 写入器（stored 模式 + CRC32）
 │   └── PingDeck/                  # SwiftUI 界面层
 │       ├── PingDeckApp.swift      # @main App + 菜单 + 单实例保护
 │       ├── PingDeckViewModel.swift
@@ -74,8 +86,8 @@
 │       ├── BulkImportSheet.swift
 │       └── SettingsSheet.swift
 ├── Tests/
-│   ├── PingCoreTests/             # 解析、统计、CSV、批量导入、引擎调度
-│   └── PingDeckTests/             # 界面层逻辑：选中、清空、导出范围、导入模式
+│   ├── PingCoreTests/             # 解析、统计、批量导入、引擎调度、各格式导出
+│   └── PingDeckTests/             # 界面层逻辑：选中、清空、导出范围、导入模式、配置注入
 └── scripts/
     ├── bundle.sh                  # 组装 .app（可指定 BIN_PATH / VERSION / 签名证书）
     ├── dmg.sh                     # 生成 DMG
