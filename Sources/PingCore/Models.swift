@@ -26,19 +26,6 @@ public enum TargetStatus: String, Codable, Sendable {
     case disabled     // 目标被停用
     case error        // 错误（目标无效等）
 
-    public var displayName: String {
-        switch self {
-        case .idle: return "未开始"
-        case .pending: return "排队中"
-        case .running: return "探测中"
-        case .alive: return "正常"
-        case .timeout: return "超时"
-        case .unreachable: return "不可达"
-        case .disabled: return "已停用"
-        case .error: return "错误"
-        }
-    }
-
     /// 排序用的严重程度：越靠前越健康
     public var sortRank: Int {
         switch self {

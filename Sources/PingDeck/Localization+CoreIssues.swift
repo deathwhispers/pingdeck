@@ -75,4 +75,19 @@ extension PingStats {
     }
 }
 
+extension TargetStatus {
+    var displayName: String {
+        switch self {
+        case .idle: return String(localized: L10n.statusIdle)
+        case .pending: return String(localized: L10n.statusPending)
+        case .running: return String(localized: L10n.statusRunning)
+        case .alive: return String(localized: L10n.statusAlive)
+        case .timeout: return String(localized: L10n.statusTimeout)
+        case .unreachable: return String(localized: L10n.statusUnreachable)
+        case .disabled: return String(localized: L10n.statusDisabled)
+        case .error: return String(localized: L10n.statusError)
+        }
+    }
+}
+
 

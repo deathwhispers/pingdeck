@@ -29,12 +29,12 @@ struct ContentView: View {
                         model.closeSheet()
                         if result.entries.count > 1 {
                             model.alert = AppAlert(
-                                title: "已添加 \(result.entries.count) 个目标",
-                                message: "网段已展开并加入列表。"
+                                title: String(localized: L10n.alertTargetsAddedTitle(result.entries.count)),
+                                message: String(localized: L10n.alertTargetsAddedMessage)
                             )
                         } else if result.entries.isEmpty {
                             model.alert = AppAlert(
-                                title: "添加失败",
+                                title: String(localized: L10n.alertAddFailedTitle),
                                 message: result.rejected.first?.reason.message
                                     ?? String(localized: L10n.alertAddFailedDefaultMessage)
                             )
@@ -54,12 +54,12 @@ struct ContentView: View {
             }
         }
         .confirmationDialog(
-            "确定要删除全部 \(model.targets.count) 个目标吗？此操作不可撤销。",
+            String(localized: L10n.confirmClearAllTitle(model.targets.count)),
             isPresented: $model.confirmingClearAllTargets,
             titleVisibility: .visible
         ) {
-            Button("全部删除", role: .destructive) { model.clearAllTargets() }
-            Button("取消", role: .cancel) { }
+            Button(String(localized: L10n.confirmClearAllConfirm), role: .destructive) { model.clearAllTargets() }
+            Button(String(localized: L10n.commonCancel), role: .cancel) { }
         }
     }
 
@@ -68,9 +68,9 @@ struct ContentView: View {
             Button {
                 model.openNewTargetSheet()
             } label: {
-                Label("添加", systemImage: "plus")
+                Label(String(localized: L10n.toolbarAdd), systemImage: "plus")
             }
-            .help("添加一个 IP 或域名")
+            .help(String(localized: L10n.toolbarAddHelp))
 
             Button {
                 model.openEditTargetSheet()
@@ -78,83 +78,97 @@ struct ContentView: View {
                 Image(systemName: "pencil")
             }
             .disabled(model.selection.count != 1)
-            .help("编辑选中的目标")
+            .help(String(localized: L10n.toolbarEditHelp))
 
             Button {
                 removeSelected()
             } label: {
-                Label(model.selection.count > 1 ? "删除 \(model.selection.count)" : "删除", systemImage: "minus")
+                Label(
+                    model.selection.count > 1
+                        ? String(localized: L10n.toolbarDeleteCount(model.selection.count))
+                        : String(localized: L10n.toolbarDelete),
+                    systemImage: "minus"
+                )
             }
             .disabled(model.selection.isEmpty)
             .keyboardShortcut(.delete, modifiers: [])
-            .help("删除选中的目标（⌘ 点击加选、⇧ 点击选区间、Delete 删除）")
+            .help(String(localized: L10n.toolbarDeleteHelp))
 
             Divider().frame(height: 18)
 
             Button {
                 model.toggleRun()
             } label: {
-                Label(model.isRunning ? "停止" : "开始", systemImage: model.isRunning ? "stop.fill" : "play.fill")
+                Label(
+                    model.isRunning
+                        ? String(localized: L10n.toolbarStop)
+                        : String(localized: L10n.toolbarStart),
+                    systemImage: model.isRunning ? "stop.fill" : "play.fill"
+                )
                     .foregroundStyle(model.isRunning ? Color.red : Color.green)
             }
-            .help(model.isRunning ? "停止全部探测" : "开始批量探测")
+            .help(
+                model.isRunning
+                    ? String(localized: L10n.toolbarStopHelp)
+                    : String(localized: L10n.toolbarStartHelp)
+            )
 
             Button {
                 model.refresh()
             } label: {
                 Image(systemName: "arrow.clockwise")
             }
-            .help("立即重新发起一轮探测")
+            .help(String(localized: L10n.toolbarRefreshHelp))
 
             Menu {
-                Button("清空结果（保留目标）") {
+                Button(String(localized: L10n.toolbarClearResults)) {
                     model.clearResults()
                 }
-                Button("清空全部目标…", role: .destructive) {
+                Button(String(localized: L10n.toolbarClearAll), role: .destructive) {
                     model.confirmingClearAllTargets = true
                 }
                 .disabled(model.targets.isEmpty)
             } label: {
-                Label("清空", systemImage: "trash")
+                Label(String(localized: L10n.toolbarClear), systemImage: "trash")
             }
             .menuStyle(.borderlessButton)
             .fixedSize()
-            .help("清空统计结果，或删除全部目标")
+            .help(String(localized: L10n.toolbarClearHelp))
 
             Spacer()
 
             Button {
                 model.openBulkImportSheet()
             } label: {
-                Label("批量导入", systemImage: "text.badge.plus")
+                Label(String(localized: L10n.toolbarImport), systemImage: "text.badge.plus")
             }
-            .help("从多行文本批量添加目标")
+            .help(String(localized: L10n.toolbarImportHelp))
 
             Menu {
                 ForEach(TargetColumn.allCases.filter { !$0.isRequired }) { column in
                     Toggle(column.title, isOn: columnBinding(column))
                 }
                 Divider()
-                Button("显示全部列") {
+                Button(String(localized: L10n.toolbarColumnsShowAll)) {
                     for column in TargetColumn.allCases {
                         columnCustomization[visibility: column.rawValue] = .visible
                     }
                 }
             } label: {
-                Label("列", systemImage: "rectangle.split.3x1")
+                Label(String(localized: L10n.toolbarColumns), systemImage: "rectangle.split.3x1")
             }
             .menuStyle(.borderlessButton)
             .fixedSize()
-            .help("显示或隐藏表格列")
+            .help(String(localized: L10n.toolbarColumnsHelp))
 
             Menu {
                 ForEach(ExportFormat.allCases, id: \.self) { format in
                     Menu {
-                        Button("导出全部 \(model.rows.count) 项") {
+                        Button(String(localized: L10n.toolbarExportAll(model.rows.count))) {
                             export(entries: model.allEntries, format: format)
                         }
                         .disabled(model.rows.isEmpty)
-                        Button("导出选中 \(model.selection.count) 项") {
+                        Button(String(localized: L10n.toolbarExportSelected(model.selection.count))) {
                             export(entries: model.selectedEntries, format: format)
                         }
                         .disabled(model.selection.isEmpty)
@@ -163,18 +177,18 @@ struct ContentView: View {
                     }
                 }
             } label: {
-                Label("导出", systemImage: "square.and.arrow.up")
+                Label(String(localized: L10n.toolbarExport), systemImage: "square.and.arrow.up")
             }
             .menuStyle(.borderlessButton)
             .fixedSize()
-            .help("导出结果：支持 CSV / JSON / TXT / Markdown / Excel，可选择导出全部或仅选中项")
+            .help(String(localized: L10n.toolbarExportHelp))
 
             Button {
                 model.openSettingsSheet()
             } label: {
                 Image(systemName: "gearshape")
             }
-            .help("设置")
+            .help(String(localized: L10n.toolbarSettings))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -184,13 +198,13 @@ struct ContentView: View {
 
     private var footerBar: some View {
         HStack(spacing: 16) {
-            Text("目标 \(model.targets.count)")
-            Text("正常 \(model.aliveCount)")
-            Text("异常 \(model.problemCount)")
-            Text("累计发包 \(model.totalSent)")
+            Text(String(localized: L10n.statusBarTargets(model.targets.count)))
+            Text(String(localized: L10n.statusBarAlive(model.aliveCount)))
+            Text(String(localized: L10n.statusBarProblems(model.problemCount)))
+            Text(String(localized: L10n.statusBarTotalSent(model.totalSent)))
             Spacer()
             if !model.selection.isEmpty {
-                Text("已选 \(model.selection.count) 项")
+                Text(String(localized: L10n.statusBarSelected(model.selection.count)))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
             }
@@ -203,11 +217,19 @@ struct ContentView: View {
     }
 
     private var statusSummary: String {
-        var base = "间隔 \(String(format: "%.1f", model.settings.interval))s · 超时 \(String(format: "%.1f", model.settings.timeout))s · 并发 \(model.settings.maxConcurrent)"
+        var base = String(
+            localized: L10n.statusBarSummary(
+                Float(model.settings.interval),
+                Float(model.settings.timeout),
+                model.settings.maxConcurrent
+            )
+        )
         if model.isRunning, model.queuedTargetCount > 0 {
-            base += " · 排队 \(model.queuedTargetCount)"
+            base += String(localized: L10n.statusBarQueued(model.queuedTargetCount))
         }
-        return model.isRunning ? "运行中 · " + base : "已停止 · " + base
+        return model.isRunning
+            ? String(localized: L10n.statusBarRunning(base))
+            : String(localized: L10n.statusBarStopped(base))
     }
 
     // MARK: - 动作
@@ -262,7 +284,10 @@ struct ContentView: View {
                 try data.write(to: url, options: .atomic)
             } catch {
                 DispatchQueue.main.async {
-                    model.alert = AppAlert(title: "导出失败", message: error.localizedDescription)
+                    model.alert = AppAlert(
+                        title: String(localized: L10n.alertExportFailedTitle),
+                        message: error.localizedDescription
+                    )
                 }
             }
         }
@@ -305,7 +330,7 @@ struct AlertBanner: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .help("关闭提示")
+            .help(String(localized: L10n.alertDismissHelp))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

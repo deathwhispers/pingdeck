@@ -18,12 +18,39 @@ enum L10n {
     }
 
     /**
+     Add target failure alert title
+     
+     Localized string for key “alert.addFailed.title” in table “Localizable.xcstrings”.
+     */
+    static var alertAddFailedTitle: LocalizedStringResource {
+        LocalizedStringResource("alert.addFailed.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Alert banner dismiss button help
+     
+     Localized string for key “alert.dismiss.help” in table “Localizable.xcstrings”.
+     */
+    static var alertDismissHelp: LocalizedStringResource {
+        LocalizedStringResource("alert.dismiss.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Generic error alert title
      
      Localized string for key “alert.error.title” in table “Localizable.xcstrings”.
      */
     static var alertErrorTitle: LocalizedStringResource {
         LocalizedStringResource("alert.error.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Export failure alert title
+     
+     Localized string for key “alert.exportFailed.title” in table “Localizable.xcstrings”.
+     */
+    static var alertExportFailedTitle: LocalizedStringResource {
+        LocalizedStringResource("alert.exportFailed.title", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -45,12 +72,57 @@ enum L10n {
     }
 
     /**
+     Add target alert message for expanded range
+     
+     Localized string for key “alert.targetsAdded.message” in table “Localizable.xcstrings”.
+     */
+    static var alertTargetsAddedMessage: LocalizedStringResource {
+        LocalizedStringResource("alert.targetsAdded.message", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Add target alert title with expanded count
+     
+     Localized string for key “alert.targetsAdded.title” in table “Localizable.xcstrings”.
+     */
+    static func alertTargetsAddedTitle(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("alert.targetsAdded.title", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Build-time smoke test for generated String Catalog symbols.
      
      Localized string for key “app.name.smoke” in table “Localizable.xcstrings”.
      */
     static var appNameSmoke: LocalizedStringResource {
         LocalizedStringResource("app.name.smoke", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Generic cancel button
+     
+     Localized string for key “common.cancel” in table “Localizable.xcstrings”.
+     */
+    static var commonCancel: LocalizedStringResource {
+        LocalizedStringResource("common.cancel", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Clear all targets confirmation button
+     
+     Localized string for key “confirm.clearAll.confirm” in table “Localizable.xcstrings”.
+     */
+    static var confirmClearAllConfirm: LocalizedStringResource {
+        LocalizedStringResource("confirm.clearAll.confirm", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Clear all targets confirmation title
+     
+     Localized string for key “confirm.clearAll.title” in table “Localizable.xcstrings”.
+     */
+    static func confirmClearAllTitle(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("confirm.clearAll.title", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -357,6 +429,429 @@ enum L10n {
      */
     static var statusUnreachable: LocalizedStringResource {
         LocalizedStringResource("status.unreachable", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Status bar alive count
+     
+     Localized string for key “statusBar.alive” in table “Localizable.xcstrings”.
+     */
+    static func statusBarAlive(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("statusBar.alive", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Status bar problem count
+     
+     Localized string for key “statusBar.problems” in table “Localizable.xcstrings”.
+     */
+    static func statusBarProblems(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("statusBar.problems", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Status bar queued count suffix
+     
+     Localized string for key “statusBar.queued” in table “Localizable.xcstrings”.
+     */
+    static func statusBarQueued(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("statusBar.queued", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Status bar running prefix
+     
+     Localized string for key “statusBar.running” in table “Localizable.xcstrings”.
+     */
+    static func statusBarRunning(_ arg1: String) -> LocalizedStringResource {
+        LocalizedStringResource("statusBar.running", defaultValue: "\(arg1)", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Status bar selected count
+     
+     Localized string for key “statusBar.selected” in table “Localizable.xcstrings”.
+     */
+    static func statusBarSelected(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("statusBar.selected", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Status bar stopped prefix
+     
+     Localized string for key “statusBar.stopped” in table “Localizable.xcstrings”.
+     */
+    static func statusBarStopped(_ arg1: String) -> LocalizedStringResource {
+        LocalizedStringResource("statusBar.stopped", defaultValue: "\(arg1)", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Status bar interval, timeout and concurrency summary
+     
+     Localized string for key “statusBar.summary” in table “Localizable.xcstrings”.
+     */
+    static func statusBarSummary(_ arg1: Float, _ arg2: Float, _ arg3: Int) -> LocalizedStringResource {
+        LocalizedStringResource("statusBar.summary", defaultValue: "\(arg1, specifier: "%.1f")\(arg2, specifier: "%.1f")\(arg3, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Status bar target count
+     
+     Localized string for key “statusBar.targets” in table “Localizable.xcstrings”.
+     */
+    static func statusBarTargets(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("statusBar.targets", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Status bar total sent count
+     
+     Localized string for key “statusBar.totalSent” in table “Localizable.xcstrings”.
+     */
+    static func statusBarTotalSent(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("statusBar.totalSent", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table column: average latency
+     
+     Localized string for key “table.column.average” in table “Localizable.xcstrings”.
+     */
+    static var tableColumnAverage: LocalizedStringResource {
+        LocalizedStringResource("table.column.average", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table column: enabled
+     
+     Localized string for key “table.column.enabled” in table “Localizable.xcstrings”.
+     */
+    static var tableColumnEnabled: LocalizedStringResource {
+        LocalizedStringResource("table.column.enabled", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table column: latest latency
+     
+     Localized string for key “table.column.last” in table “Localizable.xcstrings”.
+     */
+    static var tableColumnLast: LocalizedStringResource {
+        LocalizedStringResource("table.column.last", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table column: last response time
+     
+     Localized string for key “table.column.lastResponse” in table “Localizable.xcstrings”.
+     */
+    static var tableColumnLastResponse: LocalizedStringResource {
+        LocalizedStringResource("table.column.lastResponse", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table column: loss rate
+     
+     Localized string for key “table.column.loss” in table “Localizable.xcstrings”.
+     */
+    static var tableColumnLoss: LocalizedStringResource {
+        LocalizedStringResource("table.column.loss", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table column: maximum latency
+     
+     Localized string for key “table.column.max” in table “Localizable.xcstrings”.
+     */
+    static var tableColumnMax: LocalizedStringResource {
+        LocalizedStringResource("table.column.max", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table column: minimum latency
+     
+     Localized string for key “table.column.min” in table “Localizable.xcstrings”.
+     */
+    static var tableColumnMin: LocalizedStringResource {
+        LocalizedStringResource("table.column.min", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table column: status
+     
+     Localized string for key “table.column.status” in table “Localizable.xcstrings”.
+     */
+    static var tableColumnStatus: LocalizedStringResource {
+        LocalizedStringResource("table.column.status", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table column: target
+     
+     Localized string for key “table.column.target” in table “Localizable.xcstrings”.
+     */
+    static var tableColumnTarget: LocalizedStringResource {
+        LocalizedStringResource("table.column.target", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Empty table hint
+     
+     Localized string for key “table.empty.message” in table “Localizable.xcstrings”.
+     */
+    static var tableEmptyMessage: LocalizedStringResource {
+        LocalizedStringResource("table.empty.message", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Empty table title
+     
+     Localized string for key “table.empty.title” in table “Localizable.xcstrings”.
+     */
+    static var tableEmptyTitle: LocalizedStringResource {
+        LocalizedStringResource("table.empty.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table enabled toggle help when on
+     
+     Localized string for key “table.enabled.disable.help” in table “Localizable.xcstrings”.
+     */
+    static var tableEnabledDisableHelp: LocalizedStringResource {
+        LocalizedStringResource("table.enabled.disable.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Table enabled toggle help when off
+     
+     Localized string for key “table.enabled.enable.help” in table “Localizable.xcstrings”.
+     */
+    static var tableEnabledEnableHelp: LocalizedStringResource {
+        LocalizedStringResource("table.enabled.enable.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar add button
+     
+     Localized string for key “toolbar.add” in table “Localizable.xcstrings”.
+     */
+    static var toolbarAdd: LocalizedStringResource {
+        LocalizedStringResource("toolbar.add", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar add button help
+     
+     Localized string for key “toolbar.add.help” in table “Localizable.xcstrings”.
+     */
+    static var toolbarAddHelp: LocalizedStringResource {
+        LocalizedStringResource("toolbar.add.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar clear menu
+     
+     Localized string for key “toolbar.clear” in table “Localizable.xcstrings”.
+     */
+    static var toolbarClear: LocalizedStringResource {
+        LocalizedStringResource("toolbar.clear", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar clear all targets menu item
+     
+     Localized string for key “toolbar.clear.all” in table “Localizable.xcstrings”.
+     */
+    static var toolbarClearAll: LocalizedStringResource {
+        LocalizedStringResource("toolbar.clear.all", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar clear menu help
+     
+     Localized string for key “toolbar.clear.help” in table “Localizable.xcstrings”.
+     */
+    static var toolbarClearHelp: LocalizedStringResource {
+        LocalizedStringResource("toolbar.clear.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar clear results menu item
+     
+     Localized string for key “toolbar.clear.results” in table “Localizable.xcstrings”.
+     */
+    static var toolbarClearResults: LocalizedStringResource {
+        LocalizedStringResource("toolbar.clear.results", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar columns menu
+     
+     Localized string for key “toolbar.columns” in table “Localizable.xcstrings”.
+     */
+    static var toolbarColumns: LocalizedStringResource {
+        LocalizedStringResource("toolbar.columns", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar columns menu help
+     
+     Localized string for key “toolbar.columns.help” in table “Localizable.xcstrings”.
+     */
+    static var toolbarColumnsHelp: LocalizedStringResource {
+        LocalizedStringResource("toolbar.columns.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar columns menu: show all
+     
+     Localized string for key “toolbar.columns.showAll” in table “Localizable.xcstrings”.
+     */
+    static var toolbarColumnsShowAll: LocalizedStringResource {
+        LocalizedStringResource("toolbar.columns.showAll", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar delete button
+     
+     Localized string for key “toolbar.delete” in table “Localizable.xcstrings”.
+     */
+    static var toolbarDelete: LocalizedStringResource {
+        LocalizedStringResource("toolbar.delete", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar delete button with selected count
+     
+     Localized string for key “toolbar.delete.count” in table “Localizable.xcstrings”.
+     */
+    static func toolbarDeleteCount(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("toolbar.delete.count", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar delete button help
+     
+     Localized string for key “toolbar.delete.help” in table “Localizable.xcstrings”.
+     */
+    static var toolbarDeleteHelp: LocalizedStringResource {
+        LocalizedStringResource("toolbar.delete.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar edit button help
+     
+     Localized string for key “toolbar.edit.help” in table “Localizable.xcstrings”.
+     */
+    static var toolbarEditHelp: LocalizedStringResource {
+        LocalizedStringResource("toolbar.edit.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar export menu
+     
+     Localized string for key “toolbar.export” in table “Localizable.xcstrings”.
+     */
+    static var toolbarExport: LocalizedStringResource {
+        LocalizedStringResource("toolbar.export", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar export all items
+     
+     Localized string for key “toolbar.export.all” in table “Localizable.xcstrings”.
+     */
+    static func toolbarExportAll(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("toolbar.export.all", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar export menu help
+     
+     Localized string for key “toolbar.export.help” in table “Localizable.xcstrings”.
+     */
+    static var toolbarExportHelp: LocalizedStringResource {
+        LocalizedStringResource("toolbar.export.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar export selected items
+     
+     Localized string for key “toolbar.export.selected” in table “Localizable.xcstrings”.
+     */
+    static func toolbarExportSelected(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("toolbar.export.selected", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar bulk import button
+     
+     Localized string for key “toolbar.import” in table “Localizable.xcstrings”.
+     */
+    static var toolbarImport: LocalizedStringResource {
+        LocalizedStringResource("toolbar.import", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar bulk import button help
+     
+     Localized string for key “toolbar.import.help” in table “Localizable.xcstrings”.
+     */
+    static var toolbarImportHelp: LocalizedStringResource {
+        LocalizedStringResource("toolbar.import.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar refresh button help
+     
+     Localized string for key “toolbar.refresh.help” in table “Localizable.xcstrings”.
+     */
+    static var toolbarRefreshHelp: LocalizedStringResource {
+        LocalizedStringResource("toolbar.refresh.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar settings button help
+     
+     Localized string for key “toolbar.settings” in table “Localizable.xcstrings”.
+     */
+    static var toolbarSettings: LocalizedStringResource {
+        LocalizedStringResource("toolbar.settings", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar start button
+     
+     Localized string for key “toolbar.start” in table “Localizable.xcstrings”.
+     */
+    static var toolbarStart: LocalizedStringResource {
+        LocalizedStringResource("toolbar.start", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar start button help
+     
+     Localized string for key “toolbar.start.help” in table “Localizable.xcstrings”.
+     */
+    static var toolbarStartHelp: LocalizedStringResource {
+        LocalizedStringResource("toolbar.start.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar stop button
+     
+     Localized string for key “toolbar.stop” in table “Localizable.xcstrings”.
+     */
+    static var toolbarStop: LocalizedStringResource {
+        LocalizedStringResource("toolbar.stop", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar stop button help
+     
+     Localized string for key “toolbar.stop.help” in table “Localizable.xcstrings”.
+     */
+    static var toolbarStopHelp: LocalizedStringResource {
+        LocalizedStringResource("toolbar.stop.help", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**

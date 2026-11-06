@@ -540,6 +540,666 @@
           }
         }
       }
+    },
+    "alert.targetsAdded.title": {
+      "comment": "Add target alert title with expanded count",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已添加 %lld 个目标"
+          }
+        }
+      }
+    },
+    "alert.targetsAdded.message": {
+      "comment": "Add target alert message for expanded range",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网段已展开并加入列表。"
+          }
+        }
+      }
+    },
+    "alert.addFailed.title": {
+      "comment": "Add target failure alert title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加失败"
+          }
+        }
+      }
+    },
+    "alert.exportFailed.title": {
+      "comment": "Export failure alert title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出失败"
+          }
+        }
+      }
+    },
+    "alert.dismiss.help": {
+      "comment": "Alert banner dismiss button help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭提示"
+          }
+        }
+      }
+    },
+    "confirm.clearAll.title": {
+      "comment": "Clear all targets confirmation title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确定要删除全部 %lld 个目标吗？此操作不可撤销。"
+          }
+        }
+      }
+    },
+    "confirm.clearAll.confirm": {
+      "comment": "Clear all targets confirmation button",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部删除"
+          }
+        }
+      }
+    },
+    "common.cancel": {
+      "comment": "Generic cancel button",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
+          }
+        }
+      }
+    },
+    "toolbar.add": {
+      "comment": "Toolbar add button",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加"
+          }
+        }
+      }
+    },
+    "toolbar.add.help": {
+      "comment": "Toolbar add button help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加一个 IP 或域名"
+          }
+        }
+      }
+    },
+    "toolbar.edit.help": {
+      "comment": "Toolbar edit button help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑选中的目标"
+          }
+        }
+      }
+    },
+    "toolbar.delete": {
+      "comment": "Toolbar delete button",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
+          }
+        }
+      }
+    },
+    "toolbar.delete.count": {
+      "comment": "Toolbar delete button with selected count",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 %lld"
+          }
+        }
+      }
+    },
+    "toolbar.delete.help": {
+      "comment": "Toolbar delete button help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除选中的目标（⌘ 点击加选、⇧ 点击选区间、Delete 删除）"
+          }
+        }
+      }
+    },
+    "toolbar.start": {
+      "comment": "Toolbar start button",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始"
+          }
+        }
+      }
+    },
+    "toolbar.stop": {
+      "comment": "Toolbar stop button",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止"
+          }
+        }
+      }
+    },
+    "toolbar.start.help": {
+      "comment": "Toolbar start button help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始批量探测"
+          }
+        }
+      }
+    },
+    "toolbar.stop.help": {
+      "comment": "Toolbar stop button help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止全部探测"
+          }
+        }
+      }
+    },
+    "toolbar.refresh.help": {
+      "comment": "Toolbar refresh button help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即重新发起一轮探测"
+          }
+        }
+      }
+    },
+    "toolbar.clear": {
+      "comment": "Toolbar clear menu",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空"
+          }
+        }
+      }
+    },
+    "toolbar.clear.results": {
+      "comment": "Toolbar clear results menu item",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空结果（保留目标）"
+          }
+        }
+      }
+    },
+    "toolbar.clear.all": {
+      "comment": "Toolbar clear all targets menu item",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空全部目标…"
+          }
+        }
+      }
+    },
+    "toolbar.clear.help": {
+      "comment": "Toolbar clear menu help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空统计结果，或删除全部目标"
+          }
+        }
+      }
+    },
+    "toolbar.import": {
+      "comment": "Toolbar bulk import button",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "批量导入"
+          }
+        }
+      }
+    },
+    "toolbar.import.help": {
+      "comment": "Toolbar bulk import button help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从多行文本批量添加目标"
+          }
+        }
+      }
+    },
+    "toolbar.columns": {
+      "comment": "Toolbar columns menu",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "列"
+          }
+        }
+      }
+    },
+    "toolbar.columns.showAll": {
+      "comment": "Toolbar columns menu: show all",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示全部列"
+          }
+        }
+      }
+    },
+    "toolbar.columns.help": {
+      "comment": "Toolbar columns menu help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示或隐藏表格列"
+          }
+        }
+      }
+    },
+    "toolbar.export": {
+      "comment": "Toolbar export menu",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出"
+          }
+        }
+      }
+    },
+    "toolbar.export.all": {
+      "comment": "Toolbar export all items",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出全部 %lld 项"
+          }
+        }
+      }
+    },
+    "toolbar.export.selected": {
+      "comment": "Toolbar export selected items",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出选中 %lld 项"
+          }
+        }
+      }
+    },
+    "toolbar.export.help": {
+      "comment": "Toolbar export menu help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出结果：支持 CSV / JSON / TXT / Markdown / Excel，可选择导出全部或仅选中项"
+          }
+        }
+      }
+    },
+    "toolbar.settings": {
+      "comment": "Toolbar settings button help",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置"
+          }
+        }
+      }
+    },
+    "statusBar.targets": {
+      "comment": "Status bar target count",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标 %lld"
+          }
+        }
+      }
+    },
+    "statusBar.alive": {
+      "comment": "Status bar alive count",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正常 %lld"
+          }
+        }
+      }
+    },
+    "statusBar.problems": {
+      "comment": "Status bar problem count",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "异常 %lld"
+          }
+        }
+      }
+    },
+    "statusBar.totalSent": {
+      "comment": "Status bar total sent count",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "累计发包 %lld"
+          }
+        }
+      }
+    },
+    "statusBar.selected": {
+      "comment": "Status bar selected count",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已选 %lld 项"
+          }
+        }
+      }
+    },
+    "statusBar.summary": {
+      "comment": "Status bar interval, timeout and concurrency summary",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "间隔 %1$.1fs · 超时 %2$.1fs · 并发 %3$lld"
+          }
+        }
+      }
+    },
+    "statusBar.queued": {
+      "comment": "Status bar queued count suffix",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· 排队 %lld"
+          }
+        }
+      }
+    },
+    "statusBar.running": {
+      "comment": "Status bar running prefix",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行中 · %@"
+          }
+        }
+      }
+    },
+    "statusBar.stopped": {
+      "comment": "Status bar stopped prefix",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已停止 · %@"
+          }
+        }
+      }
+    },
+    "table.column.target": {
+      "comment": "Table column: target",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标"
+          }
+        }
+      }
+    },
+    "table.column.status": {
+      "comment": "Table column: status",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状态"
+          }
+        }
+      }
+    },
+    "table.column.last": {
+      "comment": "Table column: latest latency",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新(ms)"
+          }
+        }
+      }
+    },
+    "table.column.average": {
+      "comment": "Table column: average latency",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均(ms)"
+          }
+        }
+      }
+    },
+    "table.column.min": {
+      "comment": "Table column: minimum latency",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最小(ms)"
+          }
+        }
+      }
+    },
+    "table.column.max": {
+      "comment": "Table column: maximum latency",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最大(ms)"
+          }
+        }
+      }
+    },
+    "table.column.loss": {
+      "comment": "Table column: loss rate",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "丢包率"
+          }
+        }
+      }
+    },
+    "table.column.lastResponse": {
+      "comment": "Table column: last response time",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最后响应时间"
+          }
+        }
+      }
+    },
+    "table.column.enabled": {
+      "comment": "Table column: enabled",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用"
+          }
+        }
+      }
+    },
+    "table.enabled.enable.help": {
+      "comment": "Table enabled toggle help when off",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点击启用该目标"
+          }
+        }
+      }
+    },
+    "table.enabled.disable.help": {
+      "comment": "Table enabled toggle help when on",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点击停用该目标"
+          }
+        }
+      }
+    },
+    "table.empty.title": {
+      "comment": "Empty table title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有 Ping 目标"
+          }
+        }
+      }
+    },
+    "table.empty.message": {
+      "comment": "Empty table hint",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点击左上角「添加」加入 IP 或域名"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
