@@ -158,3 +158,40 @@ final class StartWithLoadedConfigurationTests: XCTestCase {
         )
     }
 }
+
+/// 「添加」弹窗的网段展开
+final class AddTargetsTests: XCTestCase {
+    private func makeModel(_ hosts: [String]) -> PingDeckViewModel {
+        let configuration = AppConfiguration(targets: hosts.map { PingTarget(host: $0) })
+        return PingDeckViewModel(configuration: configuration, store: InMemoryConfigStore())
+    }
+
+    func testAddTargetsExpandsRangeAndAppliesEnabled() {
+        let model = makeModel([])
+
+        let result = model.addTargets(host: "10.0.0.1-3", note: "机房 A", enabled: false)
+
+        XCTAssertEqual(result.entries.count, 3)
+        XCTAssertEqual(model.targets.count, 3)
+        XCTAssertTrue(model.targets.allSatisfy { $0.note == "机房 A" && !$0.enabled })
+    }
+
+    func testAddTargetsSkipsDuplicates() {
+        let model = makeModel(["10.0.0.1"])
+
+        let result = model.addTargets(host: "10.0.0.1-3", note: "", enabled: true)
+
+        XCTAssertEqual(result.entries.map(\.host), ["10.0.0.2", "10.0.0.3"])
+        XCTAssertEqual(model.targets.map(\.host), ["10.0.0.1", "10.0.0.2", "10.0.0.3"])
+    }
+
+    func testAddTargetsRejectsFullyDuplicateRange() {
+        let model = makeModel(["10.0.0.1", "10.0.0.2"])
+
+        let result = model.addTargets(host: "10.0.0.1-2", note: "", enabled: true)
+
+        XCTAssertTrue(result.entries.isEmpty)
+        XCTAssertEqual(model.targets.count, 2)
+        XCTAssertEqual(result.rejected.first?.reason, "与已有目标重复")
+    }
+}

@@ -229,10 +229,22 @@ final class PingDeckViewModel: ObservableObject {
 
     // MARK: - 目标管理
 
-    func addTarget(host: String, note: String, enabled: Bool) {
+    /// 添加单个目标或网段；网段会展开为多个目标并返回解析结果
+    @discardableResult
+    func addTargets(host: String, note: String, enabled: Bool) -> BulkImportParser.Result {
+        let result = BulkImportParser.parse(
+            host: host,
+            note: note,
+            existing: Set(targets.map { $0.host.lowercased() })
+        )
+        guard !result.entries.isEmpty else { return result }
+
         var updated = targets
-        updated.append(PingTarget(host: host, note: note, enabled: enabled))
+        for entry in result.entries {
+            updated.append(PingTarget(host: entry.host, note: entry.note, enabled: enabled))
+        }
         applyTargets(updated)
+        return result
     }
 
     func updateTarget(id: UUID, host: String, note: String, enabled: Bool) {

@@ -136,3 +136,27 @@ final class IPRangeImportTests: XCTestCase {
         XCTAssertEqual(hosts(result), ["10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4"])
     }
 }
+
+/// 单行解析入口（添加弹窗使用）
+final class SingleLineImportTests: XCTestCase {
+    func testSingleLineExpandsRange() {
+        let result = BulkImportParser.parse(host: "10.0.0.1-3", note: "机房 A")
+
+        XCTAssertEqual(result.entries.map(\.host), ["10.0.0.1", "10.0.0.2", "10.0.0.3"])
+        XCTAssertTrue(result.entries.allSatisfy { $0.note == "机房 A" })
+    }
+
+    func testSingleLineRejectsDuplicate() {
+        let result = BulkImportParser.parse(host: "8.8.8.8", note: "", existing: ["8.8.8.8"])
+
+        XCTAssertTrue(result.entries.isEmpty)
+        XCTAssertEqual(result.rejected.first?.reason, "与已有目标重复")
+    }
+
+    func testSingleLineKeepsHostname() {
+        let result = BulkImportParser.parse(host: "my-server-01", note: "业务机")
+
+        XCTAssertEqual(result.entries, [BulkImportParser.Entry(host: "my-server-01", note: "业务机")])
+        XCTAssertTrue(result.rejected.isEmpty)
+    }
+}

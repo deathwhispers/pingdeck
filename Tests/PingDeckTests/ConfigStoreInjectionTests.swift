@@ -22,7 +22,7 @@ final class ConfigStoreInjectionTests: XCTestCase {
         let store = InMemoryConfigStore()
         let model = PingDeckViewModel(configuration: AppConfiguration(), store: store)
 
-        model.addTarget(host: "1.1.1.1", note: "DNS", enabled: true)
+        model.addTargets(host: "1.1.1.1", note: "DNS", enabled: true)
         model.saveNow()
 
         let saved = try XCTUnwrap(store.saved)

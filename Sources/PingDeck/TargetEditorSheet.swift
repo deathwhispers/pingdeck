@@ -25,14 +25,23 @@ struct TargetEditorSheet: View {
                 .font(.headline)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("目标（IP 或域名）")
+                Text(draft.isNew ? "目标（IP、域名或网段）" : "目标（IP 或域名）")
                     .font(.subheadline)
-                TextField("例如 8.8.8.8 或 gateway.lan", text: $host)
-                    .textFieldStyle(.roundedBorder)
+                TextField(
+                    draft.isNew
+                        ? "例如 8.8.8.8、gateway.lan 或 10.0.0.0/24"
+                        : "例如 8.8.8.8 或 gateway.lan",
+                    text: $host
+                )
+                .textFieldStyle(.roundedBorder)
                 if let validationError {
                     Text(validationError)
                         .font(.caption)
                         .foregroundStyle(.red)
+                } else if let preview, preview.entries.count > 1 {
+                    Text("将添加 \(preview.entries.count) 个目标")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -56,12 +65,52 @@ struct TargetEditorSheet: View {
         .frame(width: 420)
     }
 
+    private var trimmedHost: String {
+        host.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var trimmedNote: String {
+        note.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// 添加模式下实时预览网段展开结果
+    private var preview: BulkImportParser.Result? {
+        guard draft.isNew, !trimmedHost.isEmpty else { return nil }
+        return BulkImportParser.parse(
+            host: trimmedHost,
+            note: trimmedNote,
+            existing: Set(model.targets.map { $0.host.lowercased() })
+        )
+    }
+
     private func save() {
-        let trimmedHost = host.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let error = TargetValidator.validate(trimmedHost) {
-            validationError = error
+        if trimmedHost.isEmpty {
+            validationError = "目标不能为空"
             return
         }
-        onSave(trimmedHost, note.trimmingCharacters(in: .whitespacesAndNewlines), enabled)
+
+        if draft.isNew {
+            let result = BulkImportParser.parse(
+                host: trimmedHost,
+                note: trimmedNote,
+                existing: Set(model.targets.map { $0.host.lowercased() })
+            )
+            guard !result.entries.isEmpty else {
+                validationError = result.rejected.first?.reason ?? "目标格式不正确"
+                return
+            }
+            validationError = nil
+            onSave(trimmedHost, trimmedNote, enabled)
+            return
+        }
+
+        // 编辑模式只允许单个目标，避免「一个目标变成多个」的歧义
+        let result = BulkImportParser.parse(host: trimmedHost, note: "", existing: [])
+        guard result.entries.count == 1, result.entries[0].host == trimmedHost else {
+            validationError = "编辑模式只支持单个 IP 或域名；添加网段请使用「添加」或「批量导入」"
+            return
+        }
+        validationError = nil
+        onSave(trimmedHost, trimmedNote, enabled)
     }
 }

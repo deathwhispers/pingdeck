@@ -22,10 +22,22 @@ struct ContentView: View {
             switch sheet {
             case .editor(let draft):
                 TargetEditorSheet(draft: draft) { host, note, enabled in
-                    model.closeSheet()
                     if draft.isNew {
-                        model.addTarget(host: host, note: note, enabled: enabled)
+                        let result = model.addTargets(host: host, note: note, enabled: enabled)
+                        model.closeSheet()
+                        if result.entries.count > 1 {
+                            model.alert = AppAlert(
+                                title: "已添加 \(result.entries.count) 个目标",
+                                message: "网段已展开并加入列表。"
+                            )
+                        } else if result.entries.isEmpty {
+                            model.alert = AppAlert(
+                                title: "添加失败",
+                                message: result.rejected.first?.reason ?? "目标格式不正确"
+                            )
+                        }
                     } else if let id = draft.targetID {
+                        model.closeSheet()
                         model.updateTarget(id: id, host: host, note: note, enabled: enabled)
                     }
                 }
