@@ -92,6 +92,7 @@ struct ContentView: View {
                 model.toggleRun()
             } label: {
                 Label(model.isRunning ? "停止" : "开始", systemImage: model.isRunning ? "stop.fill" : "play.fill")
+                    .foregroundStyle(model.isRunning ? Color.red : Color.green)
             }
             .help(model.isRunning ? "停止全部探测" : "开始批量探测")
 
