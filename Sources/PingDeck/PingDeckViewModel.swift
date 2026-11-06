@@ -214,6 +214,16 @@ final class PingDeckViewModel: ObservableObject {
         rows.filter { $0.stats.status == .alive }.count
     }
 
+    /// 启用的目标数量
+    var enabledTargetCount: Int {
+        targets.filter { $0.enabled }.count
+    }
+
+    /// 超出并发上限、需要排队的目标数量
+    var queuedTargetCount: Int {
+        max(0, enabledTargetCount - settings.maxConcurrent)
+    }
+
     var problemCount: Int {
         rows.filter { $0.stats.status == .timeout || $0.stats.status == .unreachable || $0.stats.status == .error }.count
     }
@@ -354,8 +364,28 @@ final class PingDeckViewModel: ObservableObject {
     // MARK: - 运行控制
 
     func start() {
+        adjustConcurrencyForStart()
         engine.start()
         isRunning = true
+    }
+
+    /// 启动时把并发数提升到启用目标数，避免大量目标排队等待轮换。
+    /// 只升不降；超过上限的部分继续按轮换周期探测。
+    func adjustConcurrencyForStart() {
+        let enabled = enabledTargetCount
+        let desired = min(enabled, PingSettings.maxConcurrentLimit)
+        guard desired > settings.maxConcurrent else { return }
+
+        let previous = settings.maxConcurrent
+        settings.maxConcurrent = desired
+
+        let message: String
+        if enabled > desired {
+            message = "当前 \(enabled) 个启用目标，并发数从 \(previous) 提升到 \(desired)（上限 \(PingSettings.maxConcurrentLimit)），其余目标将按轮换周期探测。"
+        } else {
+            message = "当前 \(enabled) 个启用目标，并发数从 \(previous) 提升到 \(desired)，以便同时监控所有目标。"
+        }
+        alert = AppAlert(title: "已提升并发数", message: message)
     }
 
     func stop() {

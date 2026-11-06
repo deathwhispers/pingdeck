@@ -183,7 +183,10 @@ struct ContentView: View {
     }
 
     private var statusSummary: String {
-        let base = "间隔 \(String(format: "%.1f", model.settings.interval))s · 超时 \(String(format: "%.1f", model.settings.timeout))s · 并发上限 \(model.settings.maxConcurrent)"
+        var base = "间隔 \(String(format: "%.1f", model.settings.interval))s · 超时 \(String(format: "%.1f", model.settings.timeout))s · 并发 \(model.settings.maxConcurrent)"
+        if model.isRunning, model.queuedTargetCount > 0 {
+            base += " · 排队 \(model.queuedTargetCount)"
+        }
         return model.isRunning ? "运行中 · " + base : "已停止 · " + base
     }
 

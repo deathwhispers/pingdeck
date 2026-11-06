@@ -138,6 +138,9 @@ public enum AppearanceMode: String, Codable, CaseIterable, Hashable, Sendable {
 
 /// 运行参数
 public struct PingSettings: Codable, Sendable, Equatable {
+    /// 最大并发数上限
+    public static let maxConcurrentLimit = 512
+
     /// 发包间隔（秒），macOS 下非 root 建议 >= 0.2
     public var interval: Double
     /// 单包等待超时（秒）

@@ -195,3 +195,62 @@ final class AddTargetsTests: XCTestCase {
         XCTAssertEqual(result.rejected.first?.reason, "与已有目标重复")
     }
 }
+
+/// 启动时自动匹配并发数
+final class ConcurrencyAdjustmentTests: XCTestCase {
+    private func makeModel(hosts: [String], concurrent: Int, disabled: Set<Int> = []) -> PingDeckViewModel {
+        let targets = hosts.enumerated().map { index, host in
+            PingTarget(host: host, enabled: !disabled.contains(index))
+        }
+        let configuration = AppConfiguration(
+            targets: targets,
+            settings: PingSettings(maxConcurrent: concurrent)
+        )
+        return PingDeckViewModel(configuration: configuration, store: InMemoryConfigStore())
+    }
+
+    func testAdjustRaisesConcurrencyToEnabledTargetCount() {
+        let hosts = (1...20).map { "10.0.0.\($0)" }
+        let model = makeModel(hosts: hosts, concurrent: 4)
+
+        model.adjustConcurrencyForStart()
+
+        XCTAssertEqual(model.settings.maxConcurrent, 20)
+        XCTAssertNotNil(model.alert)
+    }
+
+    func testAdjustCapsAtLimit() {
+        let hosts = (0..<600).map { "10.0.\($0 / 256).\($0 % 256)" }
+        let model = makeModel(hosts: hosts, concurrent: 16)
+
+        model.adjustConcurrencyForStart()
+
+        XCTAssertEqual(model.settings.maxConcurrent, PingSettings.maxConcurrentLimit)
+    }
+
+    func testAdjustIgnoresDisabledTargets() {
+        let hosts = (1...20).map { "10.0.0.\($0)" }
+        let model = makeModel(hosts: hosts, concurrent: 4, disabled: Set(0..<5))
+
+        model.adjustConcurrencyForStart()
+
+        XCTAssertEqual(model.settings.maxConcurrent, 15)
+    }
+
+    func testAdjustDoesNotLowerConcurrency() {
+        let model = makeModel(hosts: ["1.1.1.1"], concurrent: 64)
+
+        model.adjustConcurrencyForStart()
+
+        XCTAssertEqual(model.settings.maxConcurrent, 64)
+        XCTAssertNil(model.alert)
+    }
+
+    func testQueuedCountReflectsTargetsBeyondConcurrency() {
+        let hosts = (1...20).map { "10.0.0.\($0)" }
+        let model = makeModel(hosts: hosts, concurrent: 4)
+
+        XCTAssertEqual(model.enabledTargetCount, 20)
+        XCTAssertEqual(model.queuedTargetCount, 16)
+    }
+}

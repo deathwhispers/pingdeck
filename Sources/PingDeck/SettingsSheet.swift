@@ -53,7 +53,7 @@ struct SettingsSheet: View {
 
             Stepper(
                 value: $model.settings.maxConcurrent,
-                in: 1...64
+                in: 1...PingSettings.maxConcurrentLimit
             ) {
                 HStack {
                     Text("最大并发数")
@@ -63,7 +63,7 @@ struct SettingsSheet: View {
                         .monospacedDigit()
                 }
             }
-            Text("同时运行的 ping 进程上限，建议不小于目标数量")
+            Text("同时运行的 ping 进程上限；启动时会自动提升到启用目标数量（最多 \(PingSettings.maxConcurrentLimit)）")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
 
