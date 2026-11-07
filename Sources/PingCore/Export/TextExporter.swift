@@ -4,13 +4,13 @@ import Foundation
 ///
 /// 与 CSV 一样只输出明细，不附加汇总与导出时间，保证两类文件都是纯数据。
 public enum TextExporter {
-    public static func text(for entries: [ExportEntry]) -> String {
-        let table = ExportTable(entries: entries)
+    public static func text(for entries: [ExportEntry], labels: ExportLabels) -> String {
+        let table = ExportTable(entries: entries, labels: labels)
 
         let headers = table.columns.map(\.title)
         let rows = table.rows.map { row in
             row.enumerated().map { offset, value in
-                ExportValueFormatter.display(value, format: table.columns[offset].format)
+                ExportValueFormatter.display(value, format: table.columns[offset].format, labels: labels)
             }
         }
         let widths = (0..<table.columns.count).map { column in

@@ -30,14 +30,14 @@ final class IPRangeImportTests: XCTestCase {
 
         XCTAssertTrue(result.entries.isEmpty)
         XCTAssertEqual(result.rejected.count, 1)
-        XCTAssertTrue(result.rejected[0].reason.contains("网络地址"))
+        XCTAssertEqual(result.rejected[0].reason, .invalidRange(.cidrNotNetworkAddress))
     }
 
     func testInvalidPrefixIsRejected() {
         let result = BulkImportParser.parse("10.0.0.0/33")
 
         XCTAssertTrue(result.entries.isEmpty)
-        XCTAssertTrue(result.rejected[0].reason.contains("网段"))
+        XCTAssertEqual(result.rejected[0].reason, .invalidRange(.malformedCIDR))
     }
 
     /// /21 会展开 2048 个地址，超过单段上限
@@ -45,7 +45,7 @@ final class IPRangeImportTests: XCTestCase {
         let result = BulkImportParser.parse("10.0.0.0/21")
 
         XCTAssertTrue(result.entries.isEmpty)
-        XCTAssertTrue(result.rejected[0].reason.contains("1024"))
+        XCTAssertEqual(result.rejected[0].reason, .invalidRange(.rangeTooLarge(limit: 1024)))
     }
 
     /// /22 正好 1024 个地址，应当接受
@@ -78,14 +78,14 @@ final class IPRangeImportTests: XCTestCase {
         let result = BulkImportParser.parse("10.0.0.10-10.0.0.1")
 
         XCTAssertTrue(result.entries.isEmpty)
-        XCTAssertTrue(result.rejected[0].reason.contains("结束地址"))
+        XCTAssertEqual(result.rejected[0].reason, .invalidRange(.endBeforeStart))
     }
 
     func testRangeTooLargeIsRejected() {
         let result = BulkImportParser.parse("10.0.0.0-10.0.4.0")
 
         XCTAssertTrue(result.entries.isEmpty)
-        XCTAssertTrue(result.rejected[0].reason.contains("1024"))
+        XCTAssertEqual(result.rejected[0].reason, .invalidRange(.rangeTooLarge(limit: 1024)))
     }
 
     /// 主机名里的连字符不能被误判为范围
@@ -101,7 +101,7 @@ final class IPRangeImportTests: XCTestCase {
         let result = BulkImportParser.parse("10.0.0.1-")
 
         XCTAssertTrue(result.entries.isEmpty)
-        XCTAssertTrue(result.rejected[0].reason.contains("网段"))
+        XCTAssertEqual(result.rejected[0].reason, .invalidRange(.malformedRange))
     }
 
     // MARK: - 备注与去重
@@ -126,7 +126,7 @@ final class IPRangeImportTests: XCTestCase {
 
         XCTAssertTrue(result.entries.isEmpty)
         XCTAssertEqual(result.rejected.count, 1)
-        XCTAssertTrue(result.rejected[0].reason.contains("重复"))
+        XCTAssertEqual(result.rejected[0].reason, .duplicate)
     }
 
     /// 同一批输入里的重叠网段只保留一次
@@ -150,7 +150,7 @@ final class SingleLineImportTests: XCTestCase {
         let result = BulkImportParser.parse(host: "8.8.8.8", note: "", existing: ["8.8.8.8"])
 
         XCTAssertTrue(result.entries.isEmpty)
-        XCTAssertEqual(result.rejected.first?.reason, "与已有目标重复")
+        XCTAssertEqual(result.rejected.first?.reason, .duplicate)
     }
 
     func testSingleLineKeepsHostname() {

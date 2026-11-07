@@ -5,3 +5,4 @@ dist/
 *.xcodeproj
 xcodebuild.log
 AppIcon-1024.png
+pngout.png

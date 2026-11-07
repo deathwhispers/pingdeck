@@ -17,15 +17,15 @@ enum TargetColumn: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .target: return "目标"
-        case .status: return "状态"
-        case .last: return "最新(ms)"
-        case .average: return "平均(ms)"
-        case .minimum: return "最小(ms)"
-        case .maximum: return "最大(ms)"
-        case .loss: return "丢包率"
-        case .lastResponse: return "最后响应时间"
-        case .enabled: return "启用"
+        case .target: return String(localized: L10n.tableColumnTarget)
+        case .status: return String(localized: L10n.tableColumnStatus)
+        case .last: return String(localized: L10n.tableColumnLast)
+        case .average: return String(localized: L10n.tableColumnAverage)
+        case .minimum: return String(localized: L10n.tableColumnMin)
+        case .maximum: return String(localized: L10n.tableColumnMax)
+        case .loss: return String(localized: L10n.tableColumnLoss)
+        case .lastResponse: return String(localized: L10n.tableColumnLastResponse)
+        case .enabled: return String(localized: L10n.tableColumnEnabled)
         }
     }
 
@@ -190,11 +190,11 @@ struct TargetsTableView: View {
                             .lineLimit(1)
                     }
                 }
-                .help(row.stats.message.isEmpty ? row.stats.status.displayName : row.stats.message)
+                .help(row.stats.displayMessage.isEmpty ? row.stats.status.displayName : row.stats.displayMessage)
             }
 
             tableColumn(.status) { row in
-                StatusBadge(status: row.stats.status, message: row.stats.message)
+                StatusBadge(status: row.stats.status, message: row.stats.displayMessage)
             }
 
             tableColumn(.last) { row in
@@ -230,7 +230,7 @@ struct TargetsTableView: View {
                 ))
                 .labelsHidden()
                 .toggleStyle(.switch)
-                .help(row.target.enabled ? "点击停用该目标" : "点击启用该目标")
+                .help(String(localized: row.target.enabled ? L10n.tableEnabledDisableHelp : L10n.tableEnabledEnableHelp))
             }
         }
         .tableStyle(.inset(alternatesRowBackgrounds: false))
@@ -275,9 +275,9 @@ struct TargetsTableView: View {
             Image(systemName: "network")
                 .font(.system(size: 30))
                 .foregroundStyle(.tertiary)
-            Text("还没有 Ping 目标")
+            Text(L10n.tableEmptyTitle)
                 .foregroundStyle(.secondary)
-            Text("点击左上角「添加」加入 IP 或域名")
+            Text(L10n.tableEmptyMessage)
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }

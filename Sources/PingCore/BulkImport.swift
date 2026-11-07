@@ -1,5 +1,15 @@
 import Foundation
 
+/// 网段解析错误
+public enum IPv4RangeError: Equatable, Sendable {
+    case ipv6Unsupported
+    case malformedCIDR
+    case cidrNotNetworkAddress
+    case rangeTooLarge(limit: Int)
+    case malformedRange
+    case endBeforeStart
+}
+
 /// 解析出来的 IPv4 网段
 struct IPv4Range: Equatable {
     /// 单个网段最多展开的地址数，避免误输入 /8 之类的大网段拖垮界面
@@ -20,7 +30,7 @@ struct IPv4Range: Equatable {
         case notARange
         case range(IPv4Range)
         /// 看起来是网段但格式不对
-        case invalid(String)
+        case invalid(IPv4RangeError)
     }
 
     /// 支持 CIDR、完整范围与末段简写：
@@ -44,24 +54,24 @@ struct IPv4Range: Equatable {
         guard parts.count == 2 else { return .notARange }
         let addressText = String(parts[0])
         guard !addressText.contains(":") else {
-            return .invalid("暂不支持 IPv6 网段，请填写 IPv4 网段")
+            return .invalid(.ipv6Unsupported)
         }
         guard let address = parseIPv4(addressText) else { return .notARange }
         guard parts[1].allSatisfy(isASCIIDigit),
               let prefix = Int(parts[1]),
               (0...32).contains(prefix) else {
-            return .invalid("网段格式不正确：请写成 10.0.0.0/24 这样的 CIDR")
+            return .invalid(.malformedCIDR)
         }
 
         let mask: UInt32 = prefix == 0 ? 0 : UInt32.max << UInt32(32 - prefix)
         // 只接受规范 CIDR：主机位必须为 0
         guard address & ~mask == 0 else {
-            return .invalid("网段格式不正确：CIDR 请填写网络地址，例如 10.0.0.0/24")
+            return .invalid(.cidrNotNetworkAddress)
         }
 
         let range = IPv4Range(start: address, end: address | ~mask)
         guard range.count <= maxAddressCount else {
-            return .invalid("网段过大：单个网段最多支持 \(maxAddressCount) 个地址")
+            return .invalid(.rangeTooLarge(limit: maxAddressCount))
         }
         return .range(range)
     }
@@ -73,7 +83,7 @@ struct IPv4Range: Equatable {
         guard let start = parseIPv4(startText) else { return .notARange }
         let endText = String(text[text.index(after: separator)...])
         guard !endText.isEmpty else {
-            return .invalid("网段格式不正确：请写成 10.0.0.1-10.0.0.254 或 10.0.0.1-254")
+            return .invalid(.malformedRange)
         }
 
         let end: UInt32
@@ -84,15 +94,15 @@ struct IPv4Range: Equatable {
                   lastOctet <= 255 {
             end = (start & 0xFFFF_FF00) | lastOctet
         } else {
-            return .invalid("网段格式不正确：请写成 10.0.0.1-10.0.0.254 或 10.0.0.1-254")
+            return .invalid(.malformedRange)
         }
 
         guard end >= start else {
-            return .invalid("网段格式不正确：结束地址不能小于起始地址")
+            return .invalid(.endBeforeStart)
         }
         let range = IPv4Range(start: start, end: end)
         guard range.count <= maxAddressCount else {
-            return .invalid("网段过大：单个网段最多支持 \(maxAddressCount) 个地址")
+            return .invalid(.rangeTooLarge(limit: maxAddressCount))
         }
         return .range(range)
     }
@@ -137,12 +147,18 @@ public enum BulkImportParser {
         }
     }
 
+    public enum RejectionReason: Equatable, Sendable {
+        case duplicate
+        case invalidTarget(TargetValidationIssue)
+        case invalidRange(IPv4RangeError)
+    }
+
     public struct Rejected: Equatable, Sendable {
         public let line: Int
         public let text: String
-        public let reason: String
+        public let reason: RejectionReason
 
-        public init(line: Int, text: String, reason: String) {
+        public init(line: Int, text: String, reason: RejectionReason) {
             self.line = line
             self.text = text
             self.reason = reason
@@ -240,23 +256,23 @@ public enum BulkImportParser {
                 added += 1
             }
             if added == 0 {
-                rejected.append(Rejected(line: lineNumber, text: rawLine, reason: "与已有目标重复"))
+                rejected.append(Rejected(line: lineNumber, text: rawLine, reason: .duplicate))
             }
             return
-        case .invalid(let reason):
-            rejected.append(Rejected(line: lineNumber, text: rawLine, reason: reason))
+        case .invalid(let error):
+            rejected.append(Rejected(line: lineNumber, text: rawLine, reason: .invalidRange(error)))
             return
         case .notARange:
             break
         }
 
-        if let error = TargetValidator.validate(host) {
-            rejected.append(Rejected(line: lineNumber, text: rawLine, reason: error))
+        if let issue = TargetValidator.validate(host) {
+            rejected.append(Rejected(line: lineNumber, text: rawLine, reason: .invalidTarget(issue)))
             return
         }
         let key = host.lowercased()
         if seen.contains(key) {
-            rejected.append(Rejected(line: lineNumber, text: rawLine, reason: "与已有目标重复"))
+            rejected.append(Rejected(line: lineNumber, text: rawLine, reason: .duplicate))
             return
         }
         seen.insert(key)

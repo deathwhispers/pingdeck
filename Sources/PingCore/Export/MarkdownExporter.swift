@@ -2,21 +2,25 @@ import Foundation
 
 /// Markdown 导出：标题 + 汇总 + 表格
 public enum MarkdownExporter {
-    public static func markdown(for entries: [ExportEntry], exportedAt: Date = Date()) -> String {
-        let table = ExportTable(entries: entries)
+    public static func markdown(
+        for entries: [ExportEntry],
+        labels: ExportLabels,
+        exportedAt: Date = Date()
+    ) -> String {
+        let table = ExportTable(entries: entries, labels: labels)
         let summary = ExportSummary(entries: entries)
 
         var lines: [String] = []
-        lines.append("# PingDeck 导出结果")
+        lines.append("# \(labels.markdownTitle)")
         lines.append("")
-        lines.append("- 导出时间：\(ExportValueFormatter.dateFormatter.string(from: exportedAt))")
-        lines.append("- \(summary.description)")
+        lines.append("- \(labels.exportedAtLabel): \(ExportValueFormatter.dateFormatter.string(from: exportedAt))")
+        lines.append("- \(labels.summary(summary))")
         lines.append("")
         lines.append("| " + table.columns.map(\.title).joined(separator: " | ") + " |")
         lines.append("| " + table.columns.map { _ in "---" }.joined(separator: " | ") + " |")
         for row in table.rows {
             let cells = row.enumerated().map { offset, value in
-                escape(ExportValueFormatter.display(value, format: table.columns[offset].format))
+                escape(ExportValueFormatter.display(value, format: table.columns[offset].format, labels: labels))
             }
             lines.append("| " + cells.joined(separator: " | ") + " |")
         }

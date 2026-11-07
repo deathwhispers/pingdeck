@@ -2,12 +2,6 @@ import XCTest
 @testable import PingCore
 
 final class AppearanceModeTests: XCTestCase {
-    func testDisplayNames() {
-        XCTAssertEqual(AppearanceMode.system.displayName, "跟随系统")
-        XCTAssertEqual(AppearanceMode.light.displayName, "浅色")
-        XCTAssertEqual(AppearanceMode.dark.displayName, "深色")
-    }
-
     func testDefaultIsSystem() {
         XCTAssertEqual(PingSettings().appearance, .system)
     }

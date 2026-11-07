@@ -5,8 +5,8 @@ import Foundation
 /// 生成的是一个标准的 OOXML 包（zip + XML），Excel / Numbers 都能直接打开。
 /// 延迟与丢包率写成真正的数值单元格，方便在表格里继续排序、筛选、画图。
 public enum XlsxExporter {
-    public static func xlsx(for entries: [ExportEntry]) -> Data {
-        let table = ExportTable(entries: entries)
+    public static func xlsx(for entries: [ExportEntry], labels: ExportLabels) -> Data {
+        let table = ExportTable(entries: entries, labels: labels)
 
         var archive = ZipArchive()
         archive.addFile(name: "[Content_Types].xml", data: data(contentTypesXML))
@@ -14,13 +14,13 @@ public enum XlsxExporter {
         archive.addFile(name: "xl/workbook.xml", data: data(workbookXML))
         archive.addFile(name: "xl/_rels/workbook.xml.rels", data: data(workbookRelationshipsXML))
         archive.addFile(name: "xl/styles.xml", data: data(stylesXML))
-        archive.addFile(name: "xl/worksheets/sheet1.xml", data: data(sheetXML(table)))
+        archive.addFile(name: "xl/worksheets/sheet1.xml", data: data(sheetXML(table, labels: labels)))
         return archive.build()
     }
 
     // MARK: - 表格
 
-    private static func sheetXML(_ table: ExportTable) -> String {
+    private static func sheetXML(_ table: ExportTable, labels: ExportLabels) -> String {
         var rows: [String] = []
 
         let headerCells = table.columns.enumerated().map { index, column in
@@ -31,7 +31,7 @@ public enum XlsxExporter {
         for (rowIndex, row) in table.rows.enumerated() {
             let rowNumber = rowIndex + 2
             let cells = row.enumerated().map { index, value in
-                dataCell(reference: "\(columnName(index))\(rowNumber)", value: value)
+                dataCell(reference: "\(columnName(index))\(rowNumber)", value: value, labels: labels)
             }
             rows.append("<row r=\"\(rowNumber)\">\(cells.joined())</row>")
         }
@@ -50,12 +50,12 @@ public enum XlsxExporter {
     }
 
     /// 数据单元格：数值写成数字，缺失的值留空
-    private static func dataCell(reference: String, value: ExportValue) -> String {
+    private static func dataCell(reference: String, value: ExportValue, labels: ExportLabels) -> String {
         switch value {
         case .text(let text):
             return cell(reference: reference, style: nil, text: text)
         case .status(let status):
-            return cell(reference: reference, style: nil, text: status.displayName)
+            return cell(reference: reference, style: nil, text: labels.statusName(status))
         case .number(let number):
             guard let number else { return "<c r=\"\(reference)\"/>" }
             return "<c r=\"\(reference)\"><v>\(number)</v></c>"

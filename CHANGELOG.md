@@ -2,6 +2,21 @@
 
 本文件记录 PingDeck 的重要变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [未发布]
+
+### 新增
+
+- 支持简体中文、English、日本語三种界面语言
+- 设置中新增语言选择：跟随系统 / 简体中文 / English / 日本語，写入 `AppleLanguages`，重启后生效
+- 导出文件的表头、状态名、摘要与 Markdown 标题跟随应用语言
+
+### 改进
+
+- 核心层校验、导入与引擎错误改为类型化结果，界面文案与核心逻辑解耦
+- 导出模块通过 `ExportLabels` 注入文案；JSON 字段名与状态值保持英文
+- 使用 String Catalog 管理文案并生成类型安全符号，新增三语言覆盖率测试
+- 打包时复制本地化资源，声明 `CFBundleLocalizations` 并签名嵌套资源包
+
 ## [0.0.5] - 2026-11-06
 
 ### 变更

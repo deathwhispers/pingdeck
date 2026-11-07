@@ -1,5 +1,9 @@
 import Foundation
 
+public enum PingEngineIssue: Equatable, Sendable {
+    case launchFailed(host: String, error: PingProcessError)
+}
+
 /// 并发受限的 ping 调度器
 ///
 /// 每个目标对应一个持续运行的 `/sbin/ping` 子进程，发包节奏由内核定时器控制，
@@ -39,7 +43,7 @@ public final class PingEngine {
     /// 统计更新回调（在引擎内部队列上触发）
     public var onStats: ((UUID, PingStats) -> Void)?
     /// 引擎级错误回调（例如无法启动 ping 进程）
-    public var onError: ((String) -> Void)?
+    public var onError: ((PingEngineIssue) -> Void)?
 
     public init() {}
 
@@ -135,7 +139,8 @@ public final class PingEngine {
             var value = stats[target.id] ?? PingStats()
             if value.status != .disabled {
                 value.status = .disabled
-                value.message = "已停用"
+                value.message = ""
+                value.detail = .disabled
                 stats[target.id] = value
                 emitLocked(target.id)
             }
@@ -216,15 +221,18 @@ public final class PingEngine {
             value.beginSession(sentBefore: value.sent)
             value.status = .running
             value.message = ""
+            value.detail = nil
             stats[target.id] = value
             emitLocked(target.id)
         } catch {
+            let pingError = (error as? PingProcessError) ?? .launchFailed(message: error.localizedDescription)
             var value = stats[target.id] ?? PingStats()
             value.status = .error
-            value.message = error.localizedDescription
+            value.message = ""
+            value.detail = .launchFailed(host: target.host, error: pingError)
             stats[target.id] = value
             emitLocked(target.id)
-            onError?("无法启动对 \(target.host) 的探测：\(error.localizedDescription)")
+            onError?(.launchFailed(host: target.host, error: pingError))
         }
     }
 
@@ -261,6 +269,7 @@ public final class PingEngine {
             var value = stats[id] ?? PingStats()
             value.status = .error
             value.message = failure
+            value.detail = nil
             stats[id] = value
             emitLocked(id)
             pumpLocked()
@@ -275,7 +284,8 @@ public final class PingEngine {
         if code != 0 {
             var value = stats[id] ?? PingStats()
             value.status = .error
-            value.message = "ping 进程异常退出（代码 \(code)）"
+            value.message = ""
+            value.detail = .processExited(code: code)
             stats[id] = value
             emitLocked(id)
         }

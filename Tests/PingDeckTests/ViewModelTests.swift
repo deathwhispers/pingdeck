@@ -73,6 +73,24 @@ final class SettingsSheetTests: XCTestCase {
             return XCTFail("期望呈现设置 sheet，实际为 \(String(describing: model.sheet))")
         }
     }
+
+    func testSetLanguageUpdatesSettingsAndShowsRestartAlert() {
+        let suiteName = "ViewModelLanguageTests-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let model = PingDeckViewModel(
+            configuration: AppConfiguration(),
+            store: InMemoryConfigStore(),
+            languageDefaults: defaults
+        )
+
+        model.setLanguage(.english)
+
+        XCTAssertEqual(model.settings.language, .english)
+        XCTAssertEqual(defaults.stringArray(forKey: "AppleLanguages"), ["en"])
+        XCTAssertNotNil(model.alert)
+    }
 }
 
 final class ClearAllTargetsTests: XCTestCase {
@@ -208,7 +226,7 @@ final class AddTargetsTests: XCTestCase {
 
         XCTAssertTrue(result.entries.isEmpty)
         XCTAssertEqual(model.targets.count, 2)
-        XCTAssertEqual(result.rejected.first?.reason, "与已有目标重复")
+        XCTAssertEqual(result.rejected.first?.reason, .duplicate)
     }
 }
 

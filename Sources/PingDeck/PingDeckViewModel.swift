@@ -81,8 +81,8 @@ enum ImportMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .append: return "追加"
-        case .replace: return "替换"
+        case .append: return String(localized: L10n.importModeAppend)
+        case .replace: return String(localized: L10n.importModeReplace)
         }
     }
 }
@@ -107,6 +107,7 @@ final class PingDeckViewModel: ObservableObject {
 
     private let engine = PingEngine()
     private let store: ConfigStoring
+    private let languageDefaults: UserDefaults
     private var pendingStats: [UUID: PingStats] = [:]
     private var flushTimer: Timer?
     private var saveTimer: Timer?
@@ -117,8 +118,13 @@ final class PingDeckViewModel: ObservableObject {
         return formatter
     }()
 
-    init(configuration: AppConfiguration? = nil, store: ConfigStoring = FileConfigStore()) {
+    init(
+        configuration: AppConfiguration? = nil,
+        store: ConfigStoring = FileConfigStore(),
+        languageDefaults: UserDefaults = .standard
+    ) {
         self.store = store
+        self.languageDefaults = languageDefaults
         let configuration = configuration ?? store.load()
         targets = configuration.targets
         settings = configuration.settings
@@ -129,9 +135,12 @@ final class PingDeckViewModel: ObservableObject {
                 self?.enqueue(id: id, stats: value)
             }
         }
-        engine.onError = { [weak self] message in
+        engine.onError = { [weak self] issue in
             DispatchQueue.main.async {
-                self?.alert = AppAlert(title: "错误", message: message)
+                self?.alert = AppAlert(
+                    title: String(localized: L10n.alertErrorTitle),
+                    message: issue.message
+                )
             }
         }
         engine.updateSettings(Self.engineSettings(from: settings))
@@ -311,6 +320,16 @@ final class PingDeckViewModel: ObservableObject {
         sheet = .settings
     }
 
+    func setLanguage(_ language: AppLanguage) {
+        guard settings.language != language else { return }
+        settings.language = language
+        LanguagePreference.apply(language, defaults: languageDefaults)
+        alert = AppAlert(
+            title: String(localized: L10n.alertLanguageTitle),
+            message: String(localized: L10n.alertLanguageRestart)
+        )
+    }
+
     func openBulkImportSheet() {
         sheet = .bulkImport
     }
@@ -362,11 +381,20 @@ final class PingDeckViewModel: ObservableObject {
 
         let message: String
         if enabled > desired {
-            message = "当前 \(enabled) 个启用目标，并发数从 \(previous) 提升到 \(desired)（上限 \(PingSettings.maxConcurrentLimit)），其余目标将按轮换周期探测。"
+            message = String(
+                localized: L10n.alertConcurrencyAtLimit(
+                    enabled,
+                    previous,
+                    desired,
+                    PingSettings.maxConcurrentLimit
+                )
+            )
         } else {
-            message = "当前 \(enabled) 个启用目标，并发数从 \(previous) 提升到 \(desired)，以便同时监控所有目标。"
+            message = String(
+                localized: L10n.alertConcurrencyBelowLimit(enabled, previous, desired)
+            )
         }
-        alert = AppAlert(title: "已提升并发数", message: message)
+        alert = AppAlert(title: String(localized: L10n.alertConcurrencyTitle), message: message)
     }
 
     func stop() {
@@ -429,7 +457,10 @@ final class PingDeckViewModel: ObservableObject {
         do {
             try store.save(AppConfiguration(targets: targets, settings: settings))
         } catch {
-            alert = AppAlert(title: "保存配置失败", message: error.localizedDescription)
+            alert = AppAlert(
+                title: String(localized: L10n.alertSaveFailedTitle),
+                message: error.localizedDescription
+            )
         }
     }
 

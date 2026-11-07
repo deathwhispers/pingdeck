@@ -23,6 +23,16 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/PingDeck"
 
+# 复制 SwiftPM 生成的本地化资源包
+BIN_DIR="$(cd "$(dirname "$BIN")" && pwd -P)"
+RESOURCE_BUNDLE_NAME="PingDeck_PingDeck.bundle"
+RESOURCE_BUNDLE="$(find "$BIN_DIR" -maxdepth 1 -name "$RESOURCE_BUNDLE_NAME" -print -quit)"
+if [[ -z "$RESOURCE_BUNDLE" ]]; then
+  echo "未找到本地化资源包 $RESOURCE_BUNDLE_NAME（目录：$BIN_DIR）" >&2
+  exit 1
+fi
+cp -R "$RESOURCE_BUNDLE" "$APP/Contents/Resources/"
+
 # 生成浅色/深色图标：从 docs/images 的源图裁出透明圆角，再打包成两个 .icns
 ICON_BUILD="$ROOT/.build/AppIcon"
 ICON_LIGHT_SRC="$ROOT/docs/images/light_icon.png"
@@ -90,6 +100,14 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <string>com.pingdeck.app</string>
     <key>CFBundleExecutable</key>
     <string>PingDeck</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>zh-Hans</string>
+        <string>ja</string>
+    </array>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -111,11 +129,14 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 PLIST
 
 if [[ -n "${DEVELOPER_ID_APPLICATION:-}" ]]; then
-  # 公证要求 Hardened Runtime + 时间戳
+  # 公证要求 Hardened Runtime + 时间戳；先签嵌套资源包再签 App
+  codesign --force --options runtime --timestamp --sign "$DEVELOPER_ID_APPLICATION" \
+    "$APP/Contents/Resources/$RESOURCE_BUNDLE_NAME"
   codesign --force --options runtime --timestamp --sign "$DEVELOPER_ID_APPLICATION" "$APP"
   echo "已使用证书签名：$DEVELOPER_ID_APPLICATION"
 else
   # 本地开发用 ad-hoc 签名，避免 Gatekeeper 判定为损坏
+  codesign --force --sign - "$APP/Contents/Resources/$RESOURCE_BUNDLE_NAME" >/dev/null 2>&1 || true
   codesign --force --sign - "$APP" >/dev/null 2>&1 || true
   echo "已使用 ad-hoc 签名（正式分发请设置 DEVELOPER_ID_APPLICATION）"
 fi

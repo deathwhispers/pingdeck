@@ -6,16 +6,14 @@ import Foundation
 public enum CsvExporter {
     public typealias Entry = ExportEntry
 
-    public static let header = ExportTable.columns.map(\.title)
+    public static func csv(for entries: [Entry], labels: ExportLabels) -> String {
+        let table = ExportTable(entries: entries, labels: labels)
 
-    public static func csv(for entries: [Entry]) -> String {
-        let table = ExportTable(entries: entries)
+        var lines: [String] = [table.columns.map(\.title).map(escape).joined(separator: ",")]
 
-        var lines: [String] = [header.map(escape).joined(separator: ",")]
-
-        for (index, row) in table.rows.enumerated() {
+        for row in table.rows {
             let fields = row.enumerated().map { offset, value in
-                ExportValueFormatter.display(value, format: table.columns[offset].format)
+                ExportValueFormatter.display(value, format: table.columns[offset].format, labels: labels)
             }
             lines.append(fields.map(escape).joined(separator: ","))
         }

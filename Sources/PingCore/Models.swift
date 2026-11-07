@@ -26,19 +26,6 @@ public enum TargetStatus: String, Codable, Sendable {
     case disabled     // 目标被停用
     case error        // 错误（目标无效等）
 
-    public var displayName: String {
-        switch self {
-        case .idle: return "未开始"
-        case .pending: return "排队中"
-        case .running: return "探测中"
-        case .alive: return "正常"
-        case .timeout: return "超时"
-        case .unreachable: return "不可达"
-        case .disabled: return "已停用"
-        case .error: return "错误"
-        }
-    }
-
     /// 排序用的严重程度：越靠前越健康
     public var sortRank: Int {
         switch self {
@@ -52,6 +39,13 @@ public enum TargetStatus: String, Codable, Sendable {
     }
 }
 
+/// 由应用生成的状态细节；来自 ping 的原始输出仍放在 `message`
+public enum PingStatusDetail: Equatable, Sendable, Codable {
+    case disabled
+    case launchFailed(host: String, error: PingProcessError)
+    case processExited(code: Int32)
+}
+
 /// 目标的统计结果
 ///
 /// 收发包计数以 ping 输出的 `icmp_seq` 为准：seq 是每个目标内单调递增的包序号，
@@ -60,6 +54,7 @@ public enum TargetStatus: String, Codable, Sendable {
 public struct PingStats: Codable, Sendable, Equatable {
     public var status: TargetStatus = .idle
     public var message: String = ""
+    public var detail: PingStatusDetail?
     public var sent: Int = 0
     public var received: Int = 0
     public var lastLatency: Double?
@@ -103,22 +98,26 @@ public struct PingStats: Codable, Sendable, Equatable {
         lastResponseAt = date
         status = .alive
         message = ""
+        detail = nil
     }
 
     public mutating func recordTimeout(seq: Int?) {
         countSent(seq: seq)
         status = .timeout
+        detail = nil
     }
 
     public mutating func recordUnreachable(_ text: String, seq: Int?) {
         countSent(seq: seq)
         status = .unreachable
         message = text
+        detail = nil
     }
 
     public mutating func recordFailure(_ text: String) {
         status = .error
         message = text
+        detail = nil
     }
 
     private mutating func countSent(seq: Int?) {
@@ -138,13 +137,19 @@ public enum AppearanceMode: String, Codable, CaseIterable, Hashable, Sendable {
     case light
     /// 始终深色
     case dark
+}
 
-    public var displayName: String {
-        switch self {
-        case .system: return "跟随系统"
-        case .light: return "浅色"
-        case .dark: return "深色"
-        }
+/// 应用语言
+public enum AppLanguage: String, Codable, CaseIterable, Hashable, Sendable {
+    /// 跟随系统
+    case system
+    case simplifiedChinese = "zh-Hans"
+    case english = "en"
+    case japanese = "ja"
+
+    /// 写入 AppleLanguages 的语言代码；跟随系统时返回 nil
+    public var localeIdentifier: String? {
+        self == .system ? nil : rawValue
     }
 }
 
@@ -163,17 +168,21 @@ public struct PingSettings: Codable, Sendable, Equatable {
     public var rotationInterval: Double
     /// 界面外观
     public var appearance: AppearanceMode
+    /// 应用语言
+    public var language: AppLanguage
 
     public init(interval: Double = 1.0,
                 timeout: Double = 2.0,
                 maxConcurrent: Int = 16,
                 rotationInterval: Double = 30,
-                appearance: AppearanceMode = .system) {
+                appearance: AppearanceMode = .system,
+                language: AppLanguage = .system) {
         self.interval = interval
         self.timeout = timeout
         self.maxConcurrent = max(1, maxConcurrent)
         self.rotationInterval = max(0, rotationInterval)
         self.appearance = appearance
+        self.language = language
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -182,9 +191,10 @@ public struct PingSettings: Codable, Sendable, Equatable {
         case maxConcurrent
         case rotationInterval
         case appearance
+        case language
     }
 
-    /// 手写解码：旧版本配置没有 appearance 字段（或值未知）时回落到跟随系统。
+    /// 手写解码：旧版本配置没有 appearance / language 字段（或值未知）时回落到默认值。
     /// 不能让整个配置解码失败，否则用户保存的目标会全部丢失。
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -193,6 +203,7 @@ public struct PingSettings: Codable, Sendable, Equatable {
         maxConcurrent = try container.decode(Int.self, forKey: .maxConcurrent)
         rotationInterval = try container.decode(Double.self, forKey: .rotationInterval)
         appearance = (try? container.decodeIfPresent(AppearanceMode.self, forKey: .appearance)) ?? .system
+        language = (try? container.decodeIfPresent(AppLanguage.self, forKey: .language)) ?? .system
     }
 
     public static let `default` = PingSettings()

@@ -13,10 +13,10 @@ struct BulkImportSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("批量导入目标")
+            Text(L10n.importTitle)
                 .font(.headline)
 
-            Picker("导入方式", selection: $mode) {
+            Picker(String(localized: L10n.importMode), selection: $mode) {
                 ForEach(ImportMode.allCases) { item in
                     Text(item.title).tag(item)
                 }
@@ -28,7 +28,7 @@ struct BulkImportSheet: View {
                 .font(.caption)
                 .foregroundStyle(mode == .replace && !model.targets.isEmpty ? .red : .secondary)
 
-            Text("每行一个目标或网段，可写成「目标」或「目标 备注」。支持 10.0.0.0/24、10.0.0.1-10.0.0.254、10.0.0.1-254；单个网段最多 1024 个地址。以 # 开头的行会被忽略；重复或格式非法的行会被跳过并列出原因。")
+            Text(L10n.importDescription)
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -44,7 +44,7 @@ struct BulkImportSheet: View {
 
             HStack {
                 Spacer()
-                Button("取消") { model.closeSheet() }
+                Button(String(localized: L10n.commonCancel)) { model.closeSheet() }
                 Button(confirmTitle) { importNow() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(preview.entries.isEmpty)
@@ -57,37 +57,37 @@ struct BulkImportSheet: View {
     private var modeHint: String {
         switch mode {
         case .append:
-            return "保留现有 \(model.targets.count) 个目标，把导入的内容追加到末尾。"
+            return String(localized: L10n.importModeAppendDescription(model.targets.count))
         case .replace:
             return model.targets.isEmpty
-                ? "用导入的内容作为完整目标列表。"
-                : "⚠️ 将丢弃现有 \(model.targets.count) 个目标（含备注与启用状态），只保留导入的内容。"
+                ? String(localized: L10n.importModeReplaceDescriptionEmpty)
+                : String(localized: L10n.importModeReplaceDescriptionWithCount(model.targets.count))
         }
     }
 
     private var confirmTitle: String {
         switch mode {
-        case .append: return "追加 \(preview.entries.count) 个"
-        case .replace: return "替换为 \(preview.entries.count) 个"
+        case .append: return String(localized: L10n.importConfirmAppend(preview.entries.count))
+        case .replace: return String(localized: L10n.importConfirmReplace(preview.entries.count))
         }
     }
 
     @ViewBuilder
     private var summary: some View {
         if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            Text("示例：\n8.8.8.8  Google DNS\n10.0.0.0/30  机房网段\n192.168.1.1-254  内网\n# 下面这行是注释")
+            Text(L10n.importExample)
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.tertiary)
         } else {
             VStack(alignment: .leading, spacing: 4) {
-                Text("可导入 \(preview.entries.count) 个，跳过 \(preview.rejected.count) 个")
+                Text(L10n.importSummary(preview.entries.count, preview.rejected.count))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 if !preview.rejected.isEmpty {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 2) {
                             ForEach(preview.rejected, id: \.line) { item in
-                                Text("第 \(item.line) 行「\(item.text)」：\(item.reason)")
+                                Text(String(localized: L10n.importRejectedLine(item.line, item.text, item.reason.message)))
                                     .font(.caption)
                                     .foregroundStyle(.orange)
                             }
@@ -103,10 +103,13 @@ struct BulkImportSheet: View {
     private func importNow() {
         let result = model.importTargets(text, mode: mode)
         model.closeSheet()
-        var message = "已导入 \(result.entries.count) 个目标。"
+        var message = String(localized: L10n.alertImportCompletedMessage(result.entries.count))
         if !result.rejected.isEmpty {
-            message += "跳过 \(result.rejected.count) 个（重复或格式非法）。"
+            message += String(localized: L10n.alertImportCompletedSkipped(result.rejected.count))
         }
-        model.alert = AppAlert(title: "批量导入完成", message: message)
+        model.alert = AppAlert(
+            title: String(localized: L10n.alertImportCompletedTitle),
+            message: message
+        )
     }
 }
