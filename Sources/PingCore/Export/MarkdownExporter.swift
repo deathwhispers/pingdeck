@@ -13,7 +13,7 @@ public enum MarkdownExporter {
         var lines: [String] = []
         lines.append("# \(labels.markdownTitle)")
         lines.append("")
-        lines.append("- \(labels.exportedAtLabel)：\(ExportValueFormatter.dateFormatter.string(from: exportedAt))")
+        lines.append("- \(labels.exportedAtLabel): \(ExportValueFormatter.dateFormatter.string(from: exportedAt))")
         lines.append("- \(labels.summary(summary))")
         lines.append("")
         lines.append("| " + table.columns.map(\.title).joined(separator: " | ") + " |")
