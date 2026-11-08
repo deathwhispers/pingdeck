@@ -323,16 +323,20 @@ final class PingDeckViewModel: ObservableObject {
         sheet = .settings
     }
 
-    func setLanguage(_ language: AppLanguage) {
-        guard settings.language != language else { return }
+    @discardableResult
+    func applyLanguage(_ language: AppLanguage, relaunch shouldRelaunch: Bool) -> Bool {
+        guard settings.language != language else { return true }
         let previous = settings.language
         settings.language = language
         guard saveNow() else {
             settings.language = previous
-            return
+            return false
         }
         LanguagePreference.apply(language, defaults: languageDefaults)
-        relaunch()
+        if shouldRelaunch {
+            relaunch()
+        }
+        return true
     }
 
     func openBulkImportSheet() {

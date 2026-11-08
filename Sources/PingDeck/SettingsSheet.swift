@@ -3,12 +3,11 @@ import PingCore
 
 struct SettingsSheet: View {
     @EnvironmentObject private var model: PingDeckViewModel
+    @State private var selectedLanguage: AppLanguage
+    @State private var showingLanguageRestartPrompt = false
 
-    private var languageBinding: Binding<AppLanguage> {
-        Binding(
-            get: { model.settings.language },
-            set: { model.setLanguage($0) }
-        )
+    init(initialLanguage: AppLanguage) {
+        _selectedLanguage = State(initialValue: initialLanguage)
     }
 
     var body: some View {
@@ -32,7 +31,7 @@ struct SettingsSheet: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(L10n.settingsLanguage)
-                Picker(String(localized: L10n.settingsLanguage), selection: languageBinding) {
+                Picker(String(localized: L10n.settingsLanguage), selection: $selectedLanguage) {
                     Text(L10n.languageSystem).tag(AppLanguage.system)
                     Text(verbatim: "简体中文").tag(AppLanguage.simplifiedChinese)
                     Text(verbatim: "English").tag(AppLanguage.english)
@@ -113,13 +112,40 @@ struct SettingsSheet: View {
             HStack {
                 Spacer()
                 Button(String(localized: L10n.commonDone)) {
-                    model.saveNow()
-                    model.closeSheet()
+                    guard selectedLanguage != model.settings.language else {
+                        model.saveNow()
+                        model.closeSheet()
+                        return
+                    }
+                    showingLanguageRestartPrompt = true
                 }
                 .keyboardShortcut(.defaultAction)
             }
         }
         .padding(20)
         .frame(width: 440)
+        .alert(
+            Text(L10n.languageRestartPromptTitle.string(for: selectedLanguage)),
+            isPresented: $showingLanguageRestartPrompt
+        ) {
+            Button(L10n.languageRestartPromptNow.string(for: selectedLanguage)) {
+                model.applyLanguage(selectedLanguage, relaunch: true)
+                model.closeSheet()
+            }
+            Button(
+                L10n.languageRestartPromptLater.string(for: selectedLanguage),
+                role: .cancel
+            ) {
+                if model.applyLanguage(selectedLanguage, relaunch: false) {
+                    model.alert = AppAlert(
+                        title: L10n.alertLanguagePendingTitle.string(for: selectedLanguage),
+                        message: L10n.alertLanguagePendingMessage.string(for: selectedLanguage)
+                    )
+                }
+                model.closeSheet()
+            }
+        } message: {
+            Text(L10n.languageRestartPromptMessage.string(for: selectedLanguage))
+        }
     }
 }

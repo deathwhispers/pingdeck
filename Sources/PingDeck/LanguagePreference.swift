@@ -13,4 +13,23 @@ enum LanguagePreference {
             defaults.set([language.rawValue], forKey: appleLanguagesKey)
         }
     }
+
+    /// 目标语言对应的资源代码；不支持的系统语言回落英文
+    static func localizationCode(for language: AppLanguage, defaults: UserDefaults = .standard) -> String {
+        switch language {
+        case .system:
+            let global = defaults.persistentDomain(forName: UserDefaults.globalDomain)
+            let languages = global?[appleLanguagesKey] as? [String]
+            let first = languages?.first ?? Locale.preferredLanguages.first ?? "en"
+            if first.hasPrefix("zh-Hans") { return "zh-Hans" }
+            if first.hasPrefix("ja") { return "ja" }
+            return "en"
+        case .simplifiedChinese:
+            return "zh-Hans"
+        case .english:
+            return "en"
+        case .japanese:
+            return "ja"
+        }
+    }
 }

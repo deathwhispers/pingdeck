@@ -108,6 +108,24 @@ enum L10n {
     }
 
     /**
+     Language saved alert message
+     
+     Localized string for key “alert.language.pending.message” in table “Localizable.xcstrings”.
+     */
+    static var alertLanguagePendingMessage: LocalizedStringResource {
+        LocalizedStringResource("alert.language.pending.message", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Language saved alert title
+     
+     Localized string for key “alert.language.pending.title” in table “Localizable.xcstrings”.
+     */
+    static var alertLanguagePendingTitle: LocalizedStringResource {
+        LocalizedStringResource("alert.language.pending.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Save configuration failure alert title
      
      Localized string for key “alert.saveFailed.title” in table “Localizable.xcstrings”.
@@ -573,6 +591,42 @@ enum L10n {
      */
     static var importTitle: LocalizedStringResource {
         LocalizedStringResource("import.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Restart later button
+     
+     Localized string for key “language.restartPrompt.later” in table “Localizable.xcstrings”.
+     */
+    static var languageRestartPromptLater: LocalizedStringResource {
+        LocalizedStringResource("language.restartPrompt.later", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Prompt message after changing language
+     
+     Localized string for key “language.restartPrompt.message” in table “Localizable.xcstrings”.
+     */
+    static var languageRestartPromptMessage: LocalizedStringResource {
+        LocalizedStringResource("language.restartPrompt.message", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Restart immediately button
+     
+     Localized string for key “language.restartPrompt.now” in table “Localizable.xcstrings”.
+     */
+    static var languageRestartPromptNow: LocalizedStringResource {
+        LocalizedStringResource("language.restartPrompt.now", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Prompt title after changing language
+     
+     Localized string for key “language.restartPrompt.title” in table “Localizable.xcstrings”.
+     */
+    static var languageRestartPromptTitle: LocalizedStringResource {
+        LocalizedStringResource("language.restartPrompt.title", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**

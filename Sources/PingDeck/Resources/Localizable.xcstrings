@@ -968,19 +968,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The app will restart automatically to apply the new language."
+            "value": "After choosing a language, click Done to restart now or later."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "新しい言語を反映するため、アプリが自動的に再起動します。"
+            "value": "言語を選択した後、「完了」を押すと今すぐ再起動するか後で再起動するかを選べます。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换后应用会自动重启以应用新语言。"
+            "value": "切换语言后，点击“完成”可选择立即重启或稍后。"
           }
         }
       }
@@ -3525,6 +3525,150 @@
           "stringUnit": {
             "state": "translated",
             "value": "設定の保存に失敗しました"
+          }
+        }
+      }
+    },
+    "language.restartPrompt.title": {
+      "comment": "Prompt title after changing language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language Changed"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "言語を変更しました"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言已更改"
+          }
+        }
+      }
+    },
+    "language.restartPrompt.message": {
+      "comment": "Prompt message after changing language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart the app now to apply the new language?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しい言語を反映するため、今すぐアプリを再起動しますか？"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "是否立即重启应用以应用新语言？"
+          }
+        }
+      }
+    },
+    "language.restartPrompt.now": {
+      "comment": "Restart immediately button",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart Now"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今すぐ再起動"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即重启"
+          }
+        }
+      }
+    },
+    "language.restartPrompt.later": {
+      "comment": "Restart later button",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "後で"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稍后"
+          }
+        }
+      }
+    },
+    "alert.language.pending.title": {
+      "comment": "Language saved alert title",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language Saved"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "言語を保存しました"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言已保存"
+          }
+        }
+      }
+    },
+    "alert.language.pending.message": {
+      "comment": "Language saved alert message",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The new language will take effect after restart."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再起動後に新しい言語が反映されます。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启应用后生效。"
           }
         }
       }

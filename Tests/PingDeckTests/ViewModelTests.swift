@@ -82,7 +82,7 @@ final class SettingsSheetTests: XCTestCase {
         }
     }
 
-    func testSetLanguageSavesAndRelaunches() {
+    func testApplyLanguageSavesAndRelaunches() {
         let suiteName = "ViewModelLanguageTests-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
@@ -96,7 +96,7 @@ final class SettingsSheetTests: XCTestCase {
             relaunch: { didRelaunch = true }
         )
 
-        model.setLanguage(.english)
+        XCTAssertTrue(model.applyLanguage(.english, relaunch: true))
 
         XCTAssertEqual(model.settings.language, .english)
         XCTAssertEqual(defaults.stringArray(forKey: "AppleLanguages"), ["en"])
@@ -105,7 +105,30 @@ final class SettingsSheetTests: XCTestCase {
         XCTAssertNil(model.alert)
     }
 
-    func testSetLanguageDoesNotRelaunchWhenSaveFails() {
+    func testApplyLanguageLaterSavesWithoutRelaunch() {
+        let suiteName = "ViewModelLanguageLaterTests-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let store = InMemoryConfigStore()
+        var didRelaunch = false
+        let model = PingDeckViewModel(
+            configuration: AppConfiguration(),
+            store: store,
+            languageDefaults: defaults,
+            relaunch: { didRelaunch = true }
+        )
+
+        XCTAssertTrue(model.applyLanguage(.japanese, relaunch: false))
+
+        XCTAssertEqual(model.settings.language, .japanese)
+        XCTAssertEqual(defaults.stringArray(forKey: "AppleLanguages"), ["ja"])
+        XCTAssertEqual(store.saved?.settings.language, .japanese)
+        XCTAssertFalse(didRelaunch)
+        XCTAssertNil(model.alert)
+    }
+
+    func testApplyLanguageDoesNotRelaunchWhenSaveFails() {
         let suiteName = "ViewModelLanguageFailureTests-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
@@ -118,7 +141,7 @@ final class SettingsSheetTests: XCTestCase {
             relaunch: { didRelaunch = true }
         )
 
-        model.setLanguage(.english)
+        XCTAssertFalse(model.applyLanguage(.english, relaunch: true))
 
         XCTAssertEqual(model.settings.language, .system)
         XCTAssertFalse(didRelaunch)

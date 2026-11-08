@@ -35,4 +35,10 @@ final class LanguagePreferenceTests: XCTestCase {
         defaults.synchronize()
         XCTAssertNil(defaults.persistentDomain(forName: suiteName)?["AppleLanguages"])
     }
+
+    func testLocalizationCodeForManualLanguages() {
+        XCTAssertEqual(LanguagePreference.localizationCode(for: .english), "en")
+        XCTAssertEqual(LanguagePreference.localizationCode(for: .japanese), "ja")
+        XCTAssertEqual(LanguagePreference.localizationCode(for: .simplifiedChinese), "zh-Hans")
+    }
 }
