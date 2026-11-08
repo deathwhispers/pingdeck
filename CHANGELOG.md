@@ -2,6 +2,12 @@
 
 本文件记录 PingDeck 的重要变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [未发布]
+
+### 改进
+
+- 切换语言后应用界面立即生效，不再需要手动重启；菜单栏菜单项在下次启动时更新
+
 ## [0.0.6] - 2026-11-07
 
 ### 新增

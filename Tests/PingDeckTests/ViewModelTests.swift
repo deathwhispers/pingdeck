@@ -74,7 +74,7 @@ final class SettingsSheetTests: XCTestCase {
         }
     }
 
-    func testSetLanguageUpdatesSettingsAndShowsRestartAlert() {
+    func testSetLanguageUpdatesLocaleImmediately() {
         let suiteName = "ViewModelLanguageTests-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
@@ -89,7 +89,13 @@ final class SettingsSheetTests: XCTestCase {
 
         XCTAssertEqual(model.settings.language, .english)
         XCTAssertEqual(defaults.stringArray(forKey: "AppleLanguages"), ["en"])
-        XCTAssertNotNil(model.alert)
+        XCTAssertEqual(L10n.locale.identifier, "en")
+        XCTAssertNil(model.alert)
+    }
+
+    override func tearDown() {
+        L10n.locale = .current
+        super.tearDown()
     }
 }
 

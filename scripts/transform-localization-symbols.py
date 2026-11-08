@@ -21,6 +21,9 @@ end = max(index for index, line in enumerate(lines) if line.strip() == "}")
 
 body = "\n".join(lines[start + 1:end]).replace(
     "resourceBundleDescription", "l10nBundleDescription"
+).replace(
+    "bundle: l10nBundleDescription)",
+    "locale: locale, bundle: l10nBundleDescription)"
 )
 
 output = f"""// Auto-generated from Sources/PingDeck/Resources/Localizable.xcstrings.
@@ -33,6 +36,8 @@ private nonisolated let l10nBundle = Foundation.Bundle.module
 private nonisolated let l10nBundleDescription = LocalizedStringResource.BundleDescription.atURL(l10nBundle.bundleURL)
 
 enum L10n {{
+    /// 运行时语言；切换语言时由 ViewModel 更新
+    nonisolated(unsafe) static var locale: Locale = .current
 {body}
 }}
 """
