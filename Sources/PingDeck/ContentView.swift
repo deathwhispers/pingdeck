@@ -46,7 +46,7 @@ struct ContentView: View {
                 }
                 .environmentObject(model)
             case .settings:
-                SettingsSheet()
+                SettingsSheet(initialLanguage: model.settings.language)
                     .environmentObject(model)
             case .bulkImport:
                 BulkImportSheet()

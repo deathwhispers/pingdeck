@@ -108,6 +108,7 @@ final class PingDeckViewModel: ObservableObject {
     private let engine = PingEngine()
     private let store: ConfigStoring
     private let languageDefaults: UserDefaults
+    private let relaunch: () -> Void
     private var pendingStats: [UUID: PingStats] = [:]
     private var flushTimer: Timer?
     private var saveTimer: Timer?
@@ -121,10 +122,12 @@ final class PingDeckViewModel: ObservableObject {
     init(
         configuration: AppConfiguration? = nil,
         store: ConfigStoring = FileConfigStore(),
-        languageDefaults: UserDefaults = .standard
+        languageDefaults: UserDefaults = .standard,
+        relaunch: @escaping () -> Void = AppRelauncher.relaunch
     ) {
         self.store = store
         self.languageDefaults = languageDefaults
+        self.relaunch = relaunch
         let configuration = configuration ?? store.load()
         targets = configuration.targets
         settings = configuration.settings
@@ -320,14 +323,20 @@ final class PingDeckViewModel: ObservableObject {
         sheet = .settings
     }
 
-    func setLanguage(_ language: AppLanguage) {
-        guard settings.language != language else { return }
+    @discardableResult
+    func applyLanguage(_ language: AppLanguage, relaunch shouldRelaunch: Bool) -> Bool {
+        guard settings.language != language else { return true }
+        let previous = settings.language
         settings.language = language
+        guard saveNow() else {
+            settings.language = previous
+            return false
+        }
         LanguagePreference.apply(language, defaults: languageDefaults)
-        alert = AppAlert(
-            title: String(localized: L10n.alertLanguageTitle),
-            message: String(localized: L10n.alertLanguageRestart)
-        )
+        if shouldRelaunch {
+            relaunch()
+        }
+        return true
     }
 
     func openBulkImportSheet() {
@@ -451,16 +460,19 @@ final class PingDeckViewModel: ObservableObject {
         }
     }
 
-    func saveNow() {
+    @discardableResult
+    func saveNow() -> Bool {
         saveTimer?.invalidate()
         saveTimer = nil
         do {
             try store.save(AppConfiguration(targets: targets, settings: settings))
+            return true
         } catch {
             alert = AppAlert(
                 title: String(localized: L10n.alertSaveFailedTitle),
                 message: error.localizedDescription
             )
+            return false
         }
     }
 

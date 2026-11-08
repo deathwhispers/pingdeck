@@ -59,6 +59,14 @@ final class SelectionTests: XCTestCase {
     }
 }
 
+private final class FailingConfigStore: ConfigStoring {
+    func load() -> AppConfiguration { AppConfiguration() }
+
+    func save(_ configuration: AppConfiguration) throws {
+        throw NSError(domain: "FailingConfigStore", code: 1)
+    }
+}
+
 final class SettingsSheetTests: XCTestCase {
     /// 菜单里的“设置…”与工具栏按钮共用同一个 sheet 状态
     func testOpenSettingsSheetPresentsSettings() {
@@ -74,21 +82,69 @@ final class SettingsSheetTests: XCTestCase {
         }
     }
 
-    func testSetLanguageUpdatesSettingsAndShowsRestartAlert() {
+    func testApplyLanguageSavesAndRelaunches() {
         let suiteName = "ViewModelLanguageTests-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
 
+        let store = InMemoryConfigStore()
+        var didRelaunch = false
         let model = PingDeckViewModel(
             configuration: AppConfiguration(),
-            store: InMemoryConfigStore(),
-            languageDefaults: defaults
+            store: store,
+            languageDefaults: defaults,
+            relaunch: { didRelaunch = true }
         )
 
-        model.setLanguage(.english)
+        XCTAssertTrue(model.applyLanguage(.english, relaunch: true))
 
         XCTAssertEqual(model.settings.language, .english)
         XCTAssertEqual(defaults.stringArray(forKey: "AppleLanguages"), ["en"])
+        XCTAssertEqual(store.saved?.settings.language, .english)
+        XCTAssertTrue(didRelaunch)
+        XCTAssertNil(model.alert)
+    }
+
+    func testApplyLanguageLaterSavesWithoutRelaunch() {
+        let suiteName = "ViewModelLanguageLaterTests-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let store = InMemoryConfigStore()
+        var didRelaunch = false
+        let model = PingDeckViewModel(
+            configuration: AppConfiguration(),
+            store: store,
+            languageDefaults: defaults,
+            relaunch: { didRelaunch = true }
+        )
+
+        XCTAssertTrue(model.applyLanguage(.japanese, relaunch: false))
+
+        XCTAssertEqual(model.settings.language, .japanese)
+        XCTAssertEqual(defaults.stringArray(forKey: "AppleLanguages"), ["ja"])
+        XCTAssertEqual(store.saved?.settings.language, .japanese)
+        XCTAssertFalse(didRelaunch)
+        XCTAssertNil(model.alert)
+    }
+
+    func testApplyLanguageDoesNotRelaunchWhenSaveFails() {
+        let suiteName = "ViewModelLanguageFailureTests-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        var didRelaunch = false
+        let model = PingDeckViewModel(
+            configuration: AppConfiguration(),
+            store: FailingConfigStore(),
+            languageDefaults: defaults,
+            relaunch: { didRelaunch = true }
+        )
+
+        XCTAssertFalse(model.applyLanguage(.english, relaunch: true))
+
+        XCTAssertEqual(model.settings.language, .system)
+        XCTAssertFalse(didRelaunch)
         XCTAssertNotNil(model.alert)
     }
 }
