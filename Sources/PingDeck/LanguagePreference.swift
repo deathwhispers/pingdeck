@@ -13,16 +13,4 @@ enum LanguagePreference {
             defaults.set([language.rawValue], forKey: appleLanguagesKey)
         }
     }
-
-    /// 当前应用应使用的 locale；跟随系统时读取全局 AppleLanguages
-    static func locale(for language: AppLanguage, defaults: UserDefaults = .standard) -> Locale {
-        switch language {
-        case .system:
-            let global = defaults.persistentDomain(forName: UserDefaults.globalDomain)
-            let languages = global?[appleLanguagesKey] as? [String]
-            return Locale(identifier: languages?.first ?? Locale.current.identifier)
-        case .simplifiedChinese, .english, .japanese:
-            return Locale(identifier: language.rawValue)
-        }
-    }
 }

@@ -968,19 +968,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Applies immediately; the menu bar updates on next launch."
+            "value": "The app will restart automatically to apply the new language."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "すぐに反映されます。メニューバーは次回起動時に更新されます。"
+            "value": "新しい言語を反映するため、アプリが自動的に再起動します。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "立即生效；菜单栏将在下次启动时更新。"
+            "value": "切换后应用会自动重启以应用新语言。"
           }
         }
       }

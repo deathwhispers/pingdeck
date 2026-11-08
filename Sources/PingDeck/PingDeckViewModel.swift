@@ -108,6 +108,7 @@ final class PingDeckViewModel: ObservableObject {
     private let engine = PingEngine()
     private let store: ConfigStoring
     private let languageDefaults: UserDefaults
+    private let relaunch: () -> Void
     private var pendingStats: [UUID: PingStats] = [:]
     private var flushTimer: Timer?
     private var saveTimer: Timer?
@@ -121,10 +122,12 @@ final class PingDeckViewModel: ObservableObject {
     init(
         configuration: AppConfiguration? = nil,
         store: ConfigStoring = FileConfigStore(),
-        languageDefaults: UserDefaults = .standard
+        languageDefaults: UserDefaults = .standard,
+        relaunch: @escaping () -> Void = AppRelauncher.relaunch
     ) {
         self.store = store
         self.languageDefaults = languageDefaults
+        self.relaunch = relaunch
         let configuration = configuration ?? store.load()
         targets = configuration.targets
         settings = configuration.settings
@@ -322,9 +325,14 @@ final class PingDeckViewModel: ObservableObject {
 
     func setLanguage(_ language: AppLanguage) {
         guard settings.language != language else { return }
-        L10n.locale = LanguagePreference.locale(for: language, defaults: languageDefaults)
+        let previous = settings.language
         settings.language = language
+        guard saveNow() else {
+            settings.language = previous
+            return
+        }
         LanguagePreference.apply(language, defaults: languageDefaults)
+        relaunch()
     }
 
     func openBulkImportSheet() {
@@ -448,16 +456,19 @@ final class PingDeckViewModel: ObservableObject {
         }
     }
 
-    func saveNow() {
+    @discardableResult
+    func saveNow() -> Bool {
         saveTimer?.invalidate()
         saveTimer = nil
         do {
             try store.save(AppConfiguration(targets: targets, settings: settings))
+            return true
         } catch {
             alert = AppAlert(
                 title: String(localized: L10n.alertSaveFailedTitle),
                 message: error.localizedDescription
             )
+            return false
         }
     }
 
