@@ -48,6 +48,37 @@ final class ConfigSerializationTests: XCTestCase {
         XCTAssertEqual(settings.menuBar.showTextLabel, true)
         XCTAssertEqual(settings.menuBar.closeBehavior, .ask)
     }
+
+    func testTargetWithGroupAndColorTagRoundTrip() throws {
+        let target = PingTarget(
+            host: "10.0.0.1",
+            note: "Gateway",
+            enabled: true,
+            group: "IDC-A",
+            colorTag: .blue
+        )
+        let data = try JSONEncoder().encode(target)
+        let decoded = try JSONDecoder().decode(PingTarget.self, from: data)
+        XCTAssertEqual(decoded.host, "10.0.0.1")
+        XCTAssertEqual(decoded.group, "IDC-A")
+        XCTAssertEqual(decoded.colorTag, .blue)
+    }
+
+    func testTargetDecodesLegacyJSONWithoutGroupAndColor() throws {
+        let legacyJSON = """
+        {
+          "id": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+          "host": "1.1.1.1",
+          "note": "DNS",
+          "enabled": true
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try JSONDecoder().decode(PingTarget.self, from: legacyJSON)
+        XCTAssertEqual(decoded.host, "1.1.1.1")
+        XCTAssertEqual(decoded.group, "")
+        XCTAssertNil(decoded.colorTag)
+    }
 }
 
 /// 文件实现：读写到指定路径，不碰用户真实配置

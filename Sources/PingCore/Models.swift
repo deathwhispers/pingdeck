@@ -1,17 +1,68 @@
 import Foundation
 
+/// 目标颜色标签
+public enum TargetColorTag: String, Codable, CaseIterable, Hashable, Sendable {
+    case red
+    case orange
+    case yellow
+    case green
+    case blue
+    case purple
+    case gray
+}
+
 /// 一个 Ping 目标（IP 或域名）
 public struct PingTarget: Identifiable, Codable, Hashable, Sendable {
     public var id: UUID
     public var host: String
     public var note: String
     public var enabled: Bool
+    public var group: String
+    public var colorTag: TargetColorTag?
 
-    public init(id: UUID = UUID(), host: String, note: String = "", enabled: Bool = true) {
+    public init(
+        id: UUID = UUID(),
+        host: String,
+        note: String = "",
+        enabled: Bool = true,
+        group: String = "",
+        colorTag: TargetColorTag? = nil
+    ) {
         self.id = id
         self.host = host
         self.note = note
         self.enabled = enabled
+        self.group = group
+        self.colorTag = colorTag
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case host
+        case note
+        case enabled
+        case group
+        case colorTag
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        host = try container.decode(String.self, forKey: .host)
+        note = (try? container.decodeIfPresent(String.self, forKey: .note)) ?? ""
+        enabled = (try? container.decodeIfPresent(Bool.self, forKey: .enabled)) ?? true
+        group = (try? container.decodeIfPresent(String.self, forKey: .group)) ?? ""
+        colorTag = try? container.decodeIfPresent(TargetColorTag.self, forKey: .colorTag)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(host, forKey: .host)
+        try container.encode(note, forKey: .note)
+        try container.encode(enabled, forKey: .enabled)
+        try container.encode(group, forKey: .group)
+        try container.encodeIfPresent(colorTag, forKey: .colorTag)
     }
 }
 
