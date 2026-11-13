@@ -126,6 +126,33 @@ struct SettingsSheet: View {
                 }
             }
 
+            Divider()
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text(L10n.settingsNotchIslandSection)
+                    .font(.headline)
+
+                Toggle(isOn: $model.settings.notchIsland.enabled) {
+                    Text(L10n.settingsNotchIslandEnable)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle(isOn: $model.settings.notchIsland.showMetrics) {
+                        Text(L10n.settingsNotchIslandShowMetrics)
+                    }
+
+                    Toggle(isOn: $model.settings.notchIsland.showRecentProblems) {
+                        Text(L10n.settingsNotchIslandShowRecentProblems)
+                    }
+
+                    Toggle(isOn: $model.settings.notchIsland.showQuickControls) {
+                        Text(L10n.settingsNotchIslandShowQuickControls)
+                    }
+                }
+                .padding(.leading, 16)
+                .disabled(!model.settings.notchIsland.enabled)
+            }
+
             HStack {
                 Spacer()
                 Button(String(localized: L10n.commonDone)) {
