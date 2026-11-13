@@ -425,3 +425,172 @@ final class MenuBarMetricsTests: XCTestCase {
         XCTAssertEqual(recent[2].stats.status, .timeout)
     }
 }
+
+final class TargetGroupingAndTagsTests: XCTestCase {
+    private func makeModel(targets: [PingTarget]) -> PingDeckViewModel {
+        let configuration = AppConfiguration(targets: targets)
+        return PingDeckViewModel(configuration: configuration, store: InMemoryConfigStore())
+    }
+
+    /// 1. 测试 selectedColorFilter 过滤不同颜色标签目标
+    func testSelectedColorFilter() {
+        let t1 = PingTarget(host: "1.1.1.1", colorTag: .red)
+        let t2 = PingTarget(host: "2.2.2.2", colorTag: .green)
+        let t3 = PingTarget(host: "3.3.3.3", colorTag: nil)
+        let t4 = PingTarget(host: "4.4.4.4", colorTag: .red)
+        let model = makeModel(targets: [t1, t2, t3, t4])
+
+        // 默认不过滤
+        XCTAssertNil(model.selectedColorFilter)
+        XCTAssertEqual(model.filteredRows.count, 4)
+
+        // 过滤 red
+        model.selectedColorFilter = .red
+        XCTAssertEqual(model.filteredRows.count, 2)
+        XCTAssertTrue(model.filteredRows.allSatisfy { $0.target.colorTag == .red })
+
+        // 过滤 blue (不存在)
+        model.selectedColorFilter = .blue
+        XCTAssertEqual(model.filteredRows.count, 0)
+
+        // 重置为 nil
+        model.selectedColorFilter = nil
+        XCTAssertEqual(model.filteredRows.count, 4)
+    }
+
+    /// 2. 测试 groupedSections 正确分组与组内在线/异常统计、排序规则
+    func testGroupedSectionsGroupingAndStats() {
+        let t1 = PingTarget(host: "a.com", group: "Production")
+        let t2 = PingTarget(host: "b.com", group: "Production")
+        let t3 = PingTarget(host: "c.com", group: "Staging")
+        let t4 = PingTarget(host: "d.com", group: "") // 未分组
+        let model = makeModel(targets: [t1, t2, t3, t4])
+
+        var aliveStats = PingStats()
+        aliveStats.recordSuccess(10.0, at: Date(), seq: 1)
+
+        var timeoutStats = PingStats()
+        timeoutStats.recordTimeout(seq: 1)
+
+        var unreachableStats = PingStats()
+        unreachableStats.recordUnreachable("no route", seq: 1)
+
+        model.setStats(for: t1.id, aliveStats)
+        model.setStats(for: t2.id, timeoutStats)
+        model.setStats(for: t3.id, aliveStats)
+        model.setStats(for: t4.id, unreachableStats)
+
+        let sections = model.groupedSections
+        // 分组排序：Production, Staging, "" (未分组排在最后)
+        XCTAssertEqual(sections.count, 3)
+        XCTAssertEqual(sections.map(\.groupName), ["Production", "Staging", ""])
+
+        // Production: 2 targets, 1 alive, 1 problem
+        let prod = sections[0]
+        XCTAssertEqual(prod.groupName, "Production")
+        XCTAssertEqual(prod.totalCount, 2)
+        XCTAssertEqual(prod.aliveCount, 1)
+        XCTAssertEqual(prod.problemCount, 1)
+        XCTAssertFalse(prod.isCollapsed)
+
+        // Staging: 1 target, 1 alive, 0 problem
+        let staging = sections[1]
+        XCTAssertEqual(staging.groupName, "Staging")
+        XCTAssertEqual(staging.totalCount, 1)
+        XCTAssertEqual(staging.aliveCount, 1)
+        XCTAssertEqual(staging.problemCount, 0)
+
+        // Empty group: 1 target, 0 alive, 1 problem
+        let empty = sections[2]
+        XCTAssertEqual(empty.groupName, "")
+        XCTAssertEqual(empty.totalCount, 1)
+        XCTAssertEqual(empty.aliveCount, 0)
+        XCTAssertEqual(empty.problemCount, 1)
+    }
+
+    /// 3. 测试只有未分组目标时的 groupedSections
+    func testGroupedSectionsWithOnlyEmptyGroup() {
+        let t1 = PingTarget(host: "a.com", group: "")
+        let t2 = PingTarget(host: "b.com", group: "")
+        let model = makeModel(targets: [t1, t2])
+
+        let sections = model.groupedSections
+        XCTAssertEqual(sections.count, 1)
+        XCTAssertEqual(sections.first?.groupName, "")
+        XCTAssertEqual(sections.first?.totalCount, 2)
+    }
+
+    /// 4. 测试折叠/展开分组逻辑
+    func testToggleAndCollapseAllAndExpandAll() {
+        let t1 = PingTarget(host: "a.com", group: "G1")
+        let t2 = PingTarget(host: "b.com", group: "G2")
+        let t3 = PingTarget(host: "c.com", group: "")
+        let model = makeModel(targets: [t1, t2, t3])
+
+        XCTAssertTrue(model.collapsedGroups.isEmpty)
+        XCTAssertFalse(model.groupedSections[0].isCollapsed)
+
+        // 单个切换
+        model.toggleGroupCollapse("G1")
+        XCTAssertTrue(model.collapsedGroups.contains("G1"))
+        XCTAssertTrue(model.groupedSections[0].isCollapsed)
+
+        model.toggleGroupCollapse("G1")
+        XCTAssertFalse(model.collapsedGroups.contains("G1"))
+        XCTAssertFalse(model.groupedSections[0].isCollapsed)
+
+        // 全部折叠
+        model.collapseAllGroups()
+        XCTAssertTrue(model.collapsedGroups.contains("G1"))
+        XCTAssertTrue(model.collapsedGroups.contains("G2"))
+        XCTAssertTrue(model.collapsedGroups.contains(""))
+        XCTAssertTrue(model.groupedSections.allSatisfy(\.isCollapsed))
+
+        // 全部展开
+        model.expandAllGroups()
+        XCTAssertTrue(model.collapsedGroups.isEmpty)
+        XCTAssertTrue(model.groupedSections.allSatisfy { !$0.isCollapsed })
+    }
+
+    /// 5. 测试 availableGroups 与 colorTagCounts
+    func testAvailableGroupsAndColorTagCounts() {
+        let t1 = PingTarget(host: "a.com", group: "Beta", colorTag: .red)
+        let t2 = PingTarget(host: "b.com", group: "Alpha", colorTag: .red)
+        let t3 = PingTarget(host: "c.com", group: "Beta", colorTag: .green)
+        let t4 = PingTarget(host: "d.com", group: "", colorTag: nil)
+        let t5 = PingTarget(host: "e.com", group: "   ", colorTag: nil)
+        let model = makeModel(targets: [t1, t2, t3, t4, t5])
+
+        // availableGroups: 字母序排序，去重，排除空字符串和全空白
+        XCTAssertEqual(model.availableGroups, ["Alpha", "Beta"])
+
+        // colorTagCounts
+        XCTAssertEqual(model.colorTagCounts[.red], 2)
+        XCTAssertEqual(model.colorTagCounts[.green], 1)
+        XCTAssertNil(model.colorTagCounts[.blue])
+    }
+
+    /// 6. 测试 addTargets 与 updateTarget 支持分组与颜色标签
+    func testAddTargetAndUpdateTargetWithGroupAndColorTag() {
+        let model = makeModel(targets: [])
+
+        model.addTargets(host: "1.1.1.1", note: "DNS", enabled: true, group: "Infra", colorTag: .blue)
+        XCTAssertEqual(model.targets.count, 1)
+        XCTAssertEqual(model.targets[0].group, "Infra")
+        XCTAssertEqual(model.targets[0].colorTag, .blue)
+
+        let id = model.targets[0].id
+        model.updateTarget(id: id, host: "1.1.1.1", note: "DNS-Updated", enabled: true, group: "Core", colorTag: .purple)
+        XCTAssertEqual(model.targets[0].note, "DNS-Updated")
+        XCTAssertEqual(model.targets[0].group, "Core")
+        XCTAssertEqual(model.targets[0].colorTag, .purple)
+
+        var modified = model.targets[0]
+        modified.group = "Edge"
+        modified.colorTag = .orange
+        model.updateTarget(modified)
+        XCTAssertEqual(model.targets[0].group, "Edge")
+        XCTAssertEqual(model.targets[0].colorTag, .orange)
+    }
+}
+
