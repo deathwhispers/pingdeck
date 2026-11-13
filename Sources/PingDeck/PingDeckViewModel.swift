@@ -3,6 +3,7 @@ import SwiftUI
 import PingCore
 
 /// 表格中的一行
+typealias PingTableRow = TargetRow
 struct TargetRow: Identifiable {
     let id: UUID
     let target: PingTarget
@@ -149,6 +150,10 @@ final class PingDeckViewModel: ObservableObject {
         engine.updateSettings(Self.engineSettings(from: settings))
     }
 
+    convenience init(configStore: ConfigStoring) {
+        self.init(configuration: nil, store: configStore)
+    }
+
     deinit {
         flushTimer?.invalidate()
         saveTimer?.invalidate()
@@ -219,6 +224,29 @@ final class PingDeckViewModel: ObservableObject {
 
     var problemCount: Int {
         rows.filter { $0.stats.status == .timeout || $0.stats.status == .unreachable || $0.stats.status == .error }.count
+    }
+
+    /// 所有在线目标的平均延迟（毫秒），无在线目标时为 nil
+    var averageAliveLatency: Double? {
+        let aliveRows = rows.filter { $0.stats.status == .alive }
+        let validRtts = aliveRows.compactMap { $0.stats.averageLatency ?? $0.stats.lastLatency }
+        guard !validRtts.isEmpty else { return nil }
+        return validRtts.reduce(0, +) / Double(validRtts.count)
+    }
+
+    /// 状态异常（超时、不可达、错误）的前 5 个目标
+    var recentProblemRows: [PingTableRow] {
+        rows.filter { row in
+            row.stats.status == .timeout || row.stats.status == .unreachable || row.stats.status == .error
+        }
+        .sorted { $0.stats.status.sortRank < $1.stats.status.sortRank }
+        .prefix(5)
+        .map { $0 }
+    }
+
+    /// 菜单栏标题显示文本（例如 "在线 42  离线 3"）
+    var menuBarTitle: String {
+        String(localized: L10n.menuBarSummary(aliveCount, problemCount))
     }
 
     var totalSent: Int {
@@ -426,6 +454,11 @@ final class PingDeckViewModel: ObservableObject {
     func clearResults() {
         engine.clearStats()
         stats = [:]
+    }
+
+    /// 供测试或内部更新目标的统计结果
+    func setStats(for id: UUID, _ newStats: PingStats) {
+        stats[id] = newStats
     }
 
     // MARK: - 统计刷新

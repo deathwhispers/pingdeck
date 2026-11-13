@@ -3672,6 +3672,534 @@
           }
         }
       }
+    },
+    "menuBar.summary": {
+      "comment": "Menu bar status label with alive and problem counts",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在线 %lld  离线 %lld"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Up  %lld Down"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オンライン %lld  オフライン %lld"
+          }
+        }
+      }
+    },
+    "menuBar.overviewTitle": {
+      "comment": "Menu bar panel overview section title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康度概览"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health Overview"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステータス概要"
+          }
+        }
+      }
+    },
+    "menuBar.onlineRate": {
+      "comment": "Menu bar panel online rate label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在线率"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Online Rate"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オンライン率"
+          }
+        }
+      }
+    },
+    "menuBar.avgLatency": {
+      "comment": "Menu bar panel average latency label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均延迟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avg Latency"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均レイテンシ"
+          }
+        }
+      }
+    },
+    "menuBar.allNormal": {
+      "comment": "Menu bar panel message when all monitored targets are normal",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有监控目标均正常"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Monitored Targets Normal"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべての監視対象が正常です"
+          }
+        }
+      }
+    },
+    "menuBar.recentProblems": {
+      "comment": "Menu bar panel recent problems section title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "异常目标"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Problem Targets"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "異常なターゲット"
+          }
+        }
+      }
+    },
+    "menuBar.viewAllProblems": {
+      "comment": "Menu bar panel button to view all problem targets in main window",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在主窗口查看全部"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View All in Main Window"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メインウィンドウですべて表示"
+          }
+        }
+      }
+    },
+    "menuBar.openMainWindow": {
+      "comment": "Menu bar panel button to open main window",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开主窗口"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Main Window"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メインウィンドウを開く"
+          }
+        }
+      }
+    },
+    "menuBar.pausePing": {
+      "comment": "Menu bar panel button to pause ping engine",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂停探测"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause Ping"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "監視を一時停止"
+          }
+        }
+      }
+    },
+    "menuBar.resumePing": {
+      "comment": "Menu bar panel button to resume ping engine",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续探测"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume Ping"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "監視を再開"
+          }
+        }
+      }
+    },
+    "menuBar.quit": {
+      "comment": "Menu bar panel button to quit PingDeck",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出 PingDeck"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit PingDeck"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PingDeck を終了"
+          }
+        }
+      }
+    },
+    "closeDialog.title": {
+      "comment": "Close window dialog title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭主窗口"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close Main Window"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メインウィンドウを閉じる"
+          }
+        }
+      }
+    },
+    "closeDialog.message": {
+      "comment": "Close window dialog informative message",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你希望在菜单栏后台保持网络探测，还是直接退出应用？"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Would you like to keep PingDeck running in the menu bar, or quit the app?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーのバックグラウンドで監視を継続しますか、それともアプリケーションを終了しますか？"
+          }
+        }
+      }
+    },
+    "closeDialog.keepRunning": {
+      "comment": "Close window dialog button to keep running in background",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保持后台运行"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Running in Background"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バックグラウンドで継続"
+          }
+        }
+      }
+    },
+    "closeDialog.terminate": {
+      "comment": "Close window dialog button to quit application",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出应用"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit App"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "終了"
+          }
+        }
+      }
+    },
+    "closeDialog.remember": {
+      "comment": "Close window dialog suppression checkbox label to remember choice",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记住我的选择（可在设置中随时更改）"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remember my choice (can be changed in Settings)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選択を記憶する（設定でいつでも変更可能）"
+          }
+        }
+      }
+    },
+    "settings.menuBar.section": {
+      "comment": "Settings section header for menu bar and background options",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "菜单栏与后台"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menu Bar & Background"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーとバックグラウンド"
+          }
+        }
+      }
+    },
+    "settings.menuBar.showText": {
+      "comment": "Settings toggle label for showing text count in menu bar",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在菜单栏显示状态文本"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Status Text in Menu Bar"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーにステータステキストを表示"
+          }
+        }
+      }
+    },
+    "settings.closeBehavior": {
+      "comment": "Settings picker label for window close behavior",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭主窗口时"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When Closing Main Window"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メインウィンドウを閉じる時"
+          }
+        }
+      }
+    },
+    "settings.closeBehavior.ask": {
+      "comment": "Settings option for asking user when closing main window",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每次询问"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask Every Time"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "毎回確認する"
+          }
+        }
+      }
+    },
+    "settings.closeBehavior.keepRunning": {
+      "comment": "Settings option for keeping PingDeck running in menu bar on close",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在菜单栏保持后台运行"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Running in Background"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーでバックグラウンド実行を継続"
+          }
+        }
+      }
+    },
+    "settings.closeBehavior.terminate": {
+      "comment": "Settings option for quitting PingDeck when main window closes",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出应用"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit App"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリケーションを終了"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

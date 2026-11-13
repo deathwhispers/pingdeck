@@ -189,6 +189,51 @@ enum L10n {
     }
 
     /**
+     Close window dialog button to keep running in background
+     
+     Localized string for key “closeDialog.keepRunning” in table “Localizable.xcstrings”.
+     */
+    static var closeDialogKeepRunning: LocalizedStringResource {
+        LocalizedStringResource("closeDialog.keepRunning", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Close window dialog informative message
+     
+     Localized string for key “closeDialog.message” in table “Localizable.xcstrings”.
+     */
+    static var closeDialogMessage: LocalizedStringResource {
+        LocalizedStringResource("closeDialog.message", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Close window dialog suppression checkbox label to remember choice
+     
+     Localized string for key “closeDialog.remember” in table “Localizable.xcstrings”.
+     */
+    static var closeDialogRemember: LocalizedStringResource {
+        LocalizedStringResource("closeDialog.remember", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Close window dialog button to quit application
+     
+     Localized string for key “closeDialog.terminate” in table “Localizable.xcstrings”.
+     */
+    static var closeDialogTerminate: LocalizedStringResource {
+        LocalizedStringResource("closeDialog.terminate", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Close window dialog title
+     
+     Localized string for key “closeDialog.title” in table “Localizable.xcstrings”.
+     */
+    static var closeDialogTitle: LocalizedStringResource {
+        LocalizedStringResource("closeDialog.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Generic cancel button
      
      Localized string for key “common.cancel” in table “Localizable.xcstrings”.
@@ -648,6 +693,105 @@ enum L10n {
     }
 
     /**
+     Menu bar panel message when all monitored targets are normal
+     
+     Localized string for key “menuBar.allNormal” in table “Localizable.xcstrings”.
+     */
+    static var menuBarAllNormal: LocalizedStringResource {
+        LocalizedStringResource("menuBar.allNormal", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Menu bar panel average latency label
+     
+     Localized string for key “menuBar.avgLatency” in table “Localizable.xcstrings”.
+     */
+    static var menuBarAvgLatency: LocalizedStringResource {
+        LocalizedStringResource("menuBar.avgLatency", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Menu bar panel online rate label
+     
+     Localized string for key “menuBar.onlineRate” in table “Localizable.xcstrings”.
+     */
+    static var menuBarOnlineRate: LocalizedStringResource {
+        LocalizedStringResource("menuBar.onlineRate", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Menu bar panel button to open main window
+     
+     Localized string for key “menuBar.openMainWindow” in table “Localizable.xcstrings”.
+     */
+    static var menuBarOpenMainWindow: LocalizedStringResource {
+        LocalizedStringResource("menuBar.openMainWindow", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Menu bar panel overview section title
+     
+     Localized string for key “menuBar.overviewTitle” in table “Localizable.xcstrings”.
+     */
+    static var menuBarOverviewTitle: LocalizedStringResource {
+        LocalizedStringResource("menuBar.overviewTitle", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Menu bar panel button to pause ping engine
+     
+     Localized string for key “menuBar.pausePing” in table “Localizable.xcstrings”.
+     */
+    static var menuBarPausePing: LocalizedStringResource {
+        LocalizedStringResource("menuBar.pausePing", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Menu bar panel button to quit PingDeck
+     
+     Localized string for key “menuBar.quit” in table “Localizable.xcstrings”.
+     */
+    static var menuBarQuit: LocalizedStringResource {
+        LocalizedStringResource("menuBar.quit", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Menu bar panel recent problems section title
+     
+     Localized string for key “menuBar.recentProblems” in table “Localizable.xcstrings”.
+     */
+    static var menuBarRecentProblems: LocalizedStringResource {
+        LocalizedStringResource("menuBar.recentProblems", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Menu bar panel button to resume ping engine
+     
+     Localized string for key “menuBar.resumePing” in table “Localizable.xcstrings”.
+     */
+    static var menuBarResumePing: LocalizedStringResource {
+        LocalizedStringResource("menuBar.resumePing", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Menu bar status label with alive and problem counts
+     
+     Localized string for key “menuBar.summary” in table “Localizable.xcstrings”.
+     */
+    static func menuBarSummary(_ arg1: Int, _ arg2: Int) -> LocalizedStringResource {
+        LocalizedStringResource("menuBar.summary", defaultValue: "\(arg1, specifier: "%lld")\(arg2, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Menu bar panel button to view all problem targets in main window
+     
+     Localized string for key “menuBar.viewAllProblems” in table “Localizable.xcstrings”.
+     */
+    static var menuBarViewAllProblems: LocalizedStringResource {
+        LocalizedStringResource("menuBar.viewAllProblems", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Ping process: system ping executable not found
      
      Localized string for key “ping.error.executableNotFound” in table “Localizable.xcstrings”.
@@ -729,6 +873,42 @@ enum L10n {
     }
 
     /**
+     Settings picker label for window close behavior
+     
+     Localized string for key “settings.closeBehavior” in table “Localizable.xcstrings”.
+     */
+    static var settingsCloseBehavior: LocalizedStringResource {
+        LocalizedStringResource("settings.closeBehavior", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings option for asking user when closing main window
+     
+     Localized string for key “settings.closeBehavior.ask” in table “Localizable.xcstrings”.
+     */
+    static var settingsCloseBehaviorAsk: LocalizedStringResource {
+        LocalizedStringResource("settings.closeBehavior.ask", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings option for keeping PingDeck running in menu bar on close
+     
+     Localized string for key “settings.closeBehavior.keepRunning” in table “Localizable.xcstrings”.
+     */
+    static var settingsCloseBehaviorKeepRunning: LocalizedStringResource {
+        LocalizedStringResource("settings.closeBehavior.keepRunning", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings option for quitting PingDeck when main window closes
+     
+     Localized string for key “settings.closeBehavior.terminate” in table “Localizable.xcstrings”.
+     */
+    static var settingsCloseBehaviorTerminate: LocalizedStringResource {
+        LocalizedStringResource("settings.closeBehavior.terminate", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Settings: probe interval label
      
      Localized string for key “settings.interval” in table “Localizable.xcstrings”.
@@ -780,6 +960,24 @@ enum L10n {
      */
     static func settingsMaxConcurrentHint(_ arg1: Int) -> LocalizedStringResource {
         LocalizedStringResource("settings.maxConcurrent.hint", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings section header for menu bar and background options
+     
+     Localized string for key “settings.menuBar.section” in table “Localizable.xcstrings”.
+     */
+    static var settingsMenuBarSection: LocalizedStringResource {
+        LocalizedStringResource("settings.menuBar.section", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings toggle label for showing text count in menu bar
+     
+     Localized string for key “settings.menuBar.showText” in table “Localizable.xcstrings”.
+     */
+    static var settingsMenuBarShowText: LocalizedStringResource {
+        LocalizedStringResource("settings.menuBar.showText", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**

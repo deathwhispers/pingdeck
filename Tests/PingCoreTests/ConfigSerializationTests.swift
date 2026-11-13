@@ -22,6 +22,32 @@ final class ConfigSerializationTests: XCTestCase {
         XCTAssertEqual(decoded.targets, configuration.targets)
         XCTAssertEqual(decoded.settings, configuration.settings)
     }
+
+    func testMenuBarSettingsRoundTrip() throws {
+        let settings = MenuBarSettings(showTextLabel: false, closeBehavior: .keepRunning)
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(settings)
+        let decoded = try JSONDecoder().decode(MenuBarSettings.self, from: data)
+        XCTAssertEqual(decoded, settings)
+    }
+
+    func testPingSettingsDecodesWithoutMenuBarFallback() throws {
+        // 模拟旧版本没有 menuBar 字段的 JSON
+        let json = """
+        {
+          "interval": 1.0,
+          "timeout": 2.0,
+          "maxConcurrent": 16,
+          "rotationInterval": 30.0,
+          "appearance": "system",
+          "language": "system"
+        }
+        """.data(using: .utf8)!
+
+        let settings = try JSONDecoder().decode(PingSettings.self, from: json)
+        XCTAssertEqual(settings.menuBar.showTextLabel, true)
+        XCTAssertEqual(settings.menuBar.closeBehavior, .ask)
+    }
 }
 
 /// 文件实现：读写到指定路径，不碰用户真实配置

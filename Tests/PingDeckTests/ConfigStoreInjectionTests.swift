@@ -52,3 +52,31 @@ final class AppearanceSettingTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(store.saved).settings.appearance, .dark)
     }
 }
+
+/// 菜单栏与窗口关闭行为设置需要随配置一起持久化
+final class MenuBarSettingTests: XCTestCase {
+    func testMenuBarSettingsChangesAreSaved() throws {
+        let store = InMemoryConfigStore()
+        let model = PingDeckViewModel(configuration: AppConfiguration(), store: store)
+
+        model.settings.menuBar.showTextLabel = false
+        model.settings.menuBar.closeBehavior = .keepRunning
+        model.saveNow()
+
+        let saved = try XCTUnwrap(store.saved)
+        XCTAssertEqual(saved.settings.menuBar.showTextLabel, false)
+        XCTAssertEqual(saved.settings.menuBar.closeBehavior, .keepRunning)
+    }
+
+    func testMenuBarCloseBehaviorCanBeChangedToTerminate() throws {
+        let store = InMemoryConfigStore()
+        let model = PingDeckViewModel(configuration: AppConfiguration(), store: store)
+
+        model.settings.menuBar.closeBehavior = .terminate
+        model.saveNow()
+
+        let saved = try XCTUnwrap(store.saved)
+        XCTAssertEqual(saved.settings.menuBar.closeBehavior, .terminate)
+    }
+}
+

@@ -344,3 +344,84 @@ final class ConcurrencyAdjustmentTests: XCTestCase {
         XCTAssertEqual(model.queuedTargetCount, 16)
     }
 }
+
+final class MenuBarMetricsTests: XCTestCase {
+    func testMenuBarTitleAndMetrics() {
+        let store = InMemoryConfigStore()
+        let model = PingDeckViewModel(configStore: store)
+
+        // 添加 2 个目标
+        model.addTargets(host: "1.1.1.1", note: "DNS1", enabled: true)
+        model.addTargets(host: "1.0.0.1", note: "DNS2", enabled: true)
+
+        // 默认未探测前
+        XCTAssertEqual(model.aliveCount, 0)
+        XCTAssertEqual(model.problemCount, 0)
+        XCTAssertEqual(model.recentProblemRows.count, 0)
+        XCTAssertNil(model.averageAliveLatency)
+
+        // 验证格式化文本生成
+        let title = model.menuBarTitle
+        XCTAssertFalse(title.isEmpty)
+    }
+
+    func testAverageAliveLatencyCalculation() {
+        let store = InMemoryConfigStore()
+        let model = PingDeckViewModel(configStore: store)
+
+        model.addTargets(host: "1.1.1.1", note: "", enabled: true)
+        model.addTargets(host: "8.8.8.8", note: "", enabled: true)
+        let ids = model.targets.map(\.id)
+
+        var stats1 = PingStats()
+        stats1.recordSuccess(10.0, at: Date(), seq: 1)
+        stats1.recordSuccess(20.0, at: Date(), seq: 2) // average: 15.0
+
+        var stats2 = PingStats()
+        stats2.recordSuccess(35.0, at: Date(), seq: 1) // average: 35.0
+
+        model.setStats(for: ids[0], stats1)
+        model.setStats(for: ids[1], stats2)
+
+        XCTAssertEqual(model.aliveCount, 2)
+        XCTAssertEqual(model.averageAliveLatency, 25.0) // (15 + 35) / 2
+    }
+
+    func testRecentProblemRowsFiltersAndSortsAndCapsAtFive() {
+        let store = InMemoryConfigStore()
+        let model = PingDeckViewModel(configStore: store)
+
+        for i in 1...7 {
+            model.addTargets(host: "10.0.0.\(i)", note: "Node\(i)", enabled: true)
+        }
+        let ids = model.targets.map(\.id)
+
+        var errorStats = PingStats()
+        errorStats.recordFailure("host invalid")
+
+        var timeoutStats = PingStats()
+        timeoutStats.recordTimeout(seq: 1)
+
+        var unreachableStats = PingStats()
+        unreachableStats.recordUnreachable("no route", seq: 1)
+
+        var aliveStats = PingStats()
+        aliveStats.recordSuccess(5.0, at: Date(), seq: 1)
+
+        model.setStats(for: ids[0], timeoutStats)      // rank 2
+        model.setStats(for: ids[1], unreachableStats)  // rank 3
+        model.setStats(for: ids[2], errorStats)        // rank 4
+        model.setStats(for: ids[3], timeoutStats)      // rank 2
+        model.setStats(for: ids[4], unreachableStats)  // rank 3
+        model.setStats(for: ids[5], timeoutStats)      // rank 2
+        model.setStats(for: ids[6], aliveStats)        // alive (not problem)
+
+        XCTAssertEqual(model.problemCount, 6)
+        let recent = model.recentProblemRows
+        XCTAssertEqual(recent.count, 5, "最多截取 5 个异常节点")
+        // 前 3 个应为 timeout (rank 2)
+        XCTAssertEqual(recent[0].stats.status, .timeout)
+        XCTAssertEqual(recent[1].stats.status, .timeout)
+        XCTAssertEqual(recent[2].stats.status, .timeout)
+    }
+}
