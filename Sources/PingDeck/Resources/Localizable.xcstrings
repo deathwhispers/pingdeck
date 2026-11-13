@@ -4704,6 +4704,198 @@
           }
         }
       }
+    },
+    "settings.notchIsland.section": {
+      "comment": "Settings section header for Notch Island",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刘海灵动岛"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notch Island"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ノッチアイランド"
+          }
+        }
+      }
+    },
+    "settings.notchIsland.enable": {
+      "comment": "Settings toggle to enable Notch Island",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用刘海灵动岛"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Notch Island"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ノッチアイランドを有効にする"
+          }
+        }
+      }
+    },
+    "settings.notchIsland.showMetrics": {
+      "comment": "Settings toggle to show health metrics in Notch Island",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示核心指标卡片"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Health Metrics"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メトリクスを表示"
+          }
+        }
+      }
+    },
+    "settings.notchIsland.showRecentProblems": {
+      "comment": "Settings toggle to show recent problem nodes in Notch Island",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示异常节点速览"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Recent Problems"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "問題ノードの概要を表示"
+          }
+        }
+      }
+    },
+    "settings.notchIsland.showQuickControls": {
+      "comment": "Settings toggle to show quick controls in Notch Island",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示快捷控制栏"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Quick Controls"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クイックコントロールを表示"
+          }
+        }
+      }
+    },
+    "notchIsland.pinHelp": {
+      "comment": "Help tooltip to pin Notch Island panel",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "固定面板"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pin Island"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "固定する"
+          }
+        }
+      }
+    },
+    "notchIsland.unpinHelp": {
+      "comment": "Help tooltip to unpin Notch Island panel",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消固定"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unpin Island"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "固定を解除"
+          }
+        }
+      }
+    },
+    "notchIsland.allNormal": {
+      "comment": "Notch Island message when all nodes are healthy",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有节点正常"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Nodes Healthy"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全ノード正常"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
