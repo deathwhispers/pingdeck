@@ -46,7 +46,9 @@ public struct TargetGroupSection: Identifiable, Sendable {
 /// 表格排序：字段 + 方向
 struct SortSpec: Equatable {
     enum Field: String, CaseIterable {
+        case colorTag
         case target
+        case group
         case status
         case last
         case average
@@ -92,15 +94,25 @@ struct TargetEditorDraft: Identifiable {
     var host: String
     var note: String
     var enabled: Bool
+    var group: String
+    var colorTag: TargetColorTag?
     var isNew: Bool
     var targetID: UUID?
 
     static func new() -> TargetEditorDraft {
-        TargetEditorDraft(host: "", note: "", enabled: true, isNew: true, targetID: nil)
+        TargetEditorDraft(host: "", note: "", enabled: true, group: "", colorTag: nil, isNew: true, targetID: nil)
     }
 
     static func edit(_ target: PingTarget) -> TargetEditorDraft {
-        TargetEditorDraft(host: target.host, note: target.note, enabled: target.enabled, isNew: false, targetID: target.id)
+        TargetEditorDraft(
+            host: target.host,
+            note: target.note,
+            enabled: target.enabled,
+            group: target.group,
+            colorTag: target.colorTag,
+            isNew: false,
+            targetID: target.id
+        )
     }
 }
 
@@ -279,8 +291,12 @@ final class PingDeckViewModel: ObservableObject {
     private func compareRows(_ left: TargetRow, _ right: TargetRow) -> Bool {
         let ordering: ComparisonResult
         switch sort.field {
+        case .colorTag:
+            ordering = ordered(left.target.colorTag?.rawValue, right.target.colorTag?.rawValue)
         case .target:
             ordering = left.target.host.localizedStandardCompare(right.target.host)
+        case .group:
+            ordering = left.target.group.localizedStandardCompare(right.target.group)
         case .status:
             ordering = ordered(left.stats.status.sortRank, right.stats.status.sortRank)
         case .last:
