@@ -140,10 +140,19 @@ public enum BulkImportParser {
     public struct Entry: Equatable, Sendable {
         public let host: String
         public let note: String
+        public let group: String
+        public let colorTag: TargetColorTag?
 
-        public init(host: String, note: String) {
+        public init(
+            host: String,
+            note: String,
+            group: String = "",
+            colorTag: TargetColorTag? = nil
+        ) {
             self.host = host
             self.note = note
+            self.group = group
+            self.colorTag = colorTag
         }
     }
 
@@ -177,7 +186,12 @@ public enum BulkImportParser {
 
     /// 解析多行文本
     /// - Parameter existing: 已存在的目标（用于去重），比较时忽略大小写
-    public static func parse(_ text: String, existing: Set<String> = []) -> Result {
+    public static func parse(
+        _ text: String,
+        existing: Set<String> = [],
+        defaultGroup: String = "",
+        defaultColorTag: TargetColorTag? = nil
+    ) -> Result {
         var entries: [Entry] = []
         var rejected: [Rejected] = []
         var seen = Set(existing.map { $0.lowercased() })
@@ -188,10 +202,16 @@ public enum BulkImportParser {
             let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
             if line.isEmpty || line.hasPrefix("#") { continue }
 
-            let (host, note) = split(line)
+            let (host, note, group, colorTag) = split(
+                line,
+                defaultGroup: defaultGroup,
+                defaultColorTag: defaultColorTag
+            )
             append(
                 host: host,
                 note: note,
+                group: group,
+                colorTag: colorTag,
                 lineNumber: index + 1,
                 rawLine: line,
                 seen: &seen,
@@ -203,19 +223,38 @@ public enum BulkImportParser {
         return Result(entries: entries, rejected: rejected)
     }
 
+    /// 便捷重载：支持 labeled `text:` 参数
+    public static func parse(
+        text: String,
+        existing: Set<String> = [],
+        defaultGroup: String = "",
+        defaultColorTag: TargetColorTag? = nil
+    ) -> Result {
+        parse(text, existing: existing, defaultGroup: defaultGroup, defaultColorTag: defaultColorTag)
+    }
+
     /// 解析单个输入（目标或网段），供「添加」弹窗使用
     /// - Parameter existing: 已存在的目标（用于去重），比较时忽略大小写
-    public static func parse(host: String, note: String, existing: Set<String> = []) -> Result {
+    public static func parse(
+        host: String,
+        note: String,
+        group: String = "",
+        colorTag: TargetColorTag? = nil,
+        existing: Set<String> = []
+    ) -> Result {
         var entries: [Entry] = []
         var rejected: [Rejected] = []
         var seen = Set(existing.map { $0.lowercased() })
 
         let trimmedHost = host.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedNote = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedGroup = group.trimmingCharacters(in: .whitespacesAndNewlines)
         let rawLine = trimmedNote.isEmpty ? trimmedHost : "\(trimmedHost) \(trimmedNote)"
         append(
             host: trimmedHost,
             note: trimmedNote,
+            group: trimmedGroup,
+            colorTag: colorTag,
             lineNumber: 1,
             rawLine: rawLine,
             seen: &seen,
@@ -225,20 +264,51 @@ public enum BulkImportParser {
         return Result(entries: entries, rejected: rejected)
     }
 
-    /// 第一个空白字符之前是目标，之后整体作为备注
-    private static func split(_ line: String) -> (host: String, note: String) {
+    /// 支持逗号分隔（如 CSV 格式 `host,note,group,colorTag`）以及空白分隔
+    private static func split(
+        _ line: String,
+        defaultGroup: String,
+        defaultColorTag: TargetColorTag?
+    ) -> (host: String, note: String, group: String, colorTag: TargetColorTag?) {
+        if line.contains(",") {
+            let parts = line.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            // 如果第一列包含空格，说明逗号出现在备注内部（如 "1.1.1.1 DNS, Gateway"）而非作为 CSV 列分隔符，回退为空白字符分隔
+            if let first = parts.first, !first.contains(where: { $0.isWhitespace }) {
+                let host = first
+                let note = parts.count > 1 ? parts[1] : ""
+                let group: String
+                if parts.count >= 3 && !parts[2].isEmpty {
+                    group = parts[2]
+                } else {
+                    group = defaultGroup
+                }
+                let colorTag: TargetColorTag?
+                if parts.count >= 4 {
+                    let colorText = parts[3].trimmingCharacters(in: .whitespaces).lowercased()
+                    colorTag = TargetColorTag(rawValue: colorText) ?? defaultColorTag
+                } else {
+                    colorTag = defaultColorTag
+                }
+                return (host, note, group, colorTag)
+            }
+        }
+
         if let boundary = line.firstIndex(where: { $0 == " " || $0 == "\t" }) {
             return (
                 String(line[line.startIndex..<boundary]),
-                String(line[line.index(after: boundary)...]).trimmingCharacters(in: .whitespaces)
+                String(line[line.index(after: boundary)...]).trimmingCharacters(in: .whitespaces),
+                defaultGroup,
+                defaultColorTag
             )
         }
-        return (line, "")
+        return (line, "", defaultGroup, defaultColorTag)
     }
 
     private static func append(
         host: String,
         note: String,
+        group: String,
+        colorTag: TargetColorTag?,
         lineNumber: Int,
         rawLine: String,
         seen: inout Set<String>,
@@ -252,7 +322,7 @@ public enum BulkImportParser {
                 let key = address.lowercased()
                 guard !seen.contains(key) else { continue }
                 seen.insert(key)
-                entries.append(Entry(host: address, note: note))
+                entries.append(Entry(host: address, note: note, group: group, colorTag: colorTag))
                 added += 1
             }
             if added == 0 {
@@ -276,6 +346,6 @@ public enum BulkImportParser {
             return
         }
         seen.insert(key)
-        entries.append(Entry(host: host, note: note))
+        entries.append(Entry(host: host, note: note, group: group, colorTag: colorTag))
     }
 }

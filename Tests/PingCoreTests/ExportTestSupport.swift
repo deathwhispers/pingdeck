@@ -3,7 +3,7 @@ import PingCore
 enum TestExportLabels {
     static let chinese = ExportLabels(
         columnTitles: [
-            "目标", "备注", "状态", "最新延迟(ms)", "平均延迟(ms)",
+            "目标", "备注", "分组", "标签", "状态", "最新延迟(ms)", "平均延迟(ms)",
             "最小延迟(ms)", "最大延迟(ms)", "丢包率(%)", "最后响应时间",
         ],
         statusName: { status in
@@ -25,7 +25,7 @@ enum TestExportLabels {
 
     static let english = ExportLabels(
         columnTitles: [
-            "Target", "Note", "Status", "Last (ms)", "Average (ms)",
+            "Target", "Note", "Group", "Tag", "Status", "Last (ms)", "Average (ms)",
             "Min (ms)", "Max (ms)", "Loss (%)", "Last Response",
         ],
         statusName: { status in

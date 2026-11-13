@@ -16,16 +16,28 @@ struct ContentView: View {
             }
             toolbarBar
             Divider()
-            TargetsTableView(columnCustomization: $columnCustomization)
+            ColorFilterBar()
+            Divider()
+            if model.isGroupedView {
+                GroupedTargetsTableView()
+            } else {
+                TargetsTableView(columnCustomization: $columnCustomization)
+            }
             Divider()
             footerBar
         }
         .sheet(item: $model.sheet) { sheet in
             switch sheet {
             case .editor(let draft):
-                TargetEditorSheet(draft: draft) { host, note, enabled in
+                TargetEditorSheet(draft: draft) { host, note, enabled, group, colorTag in
                     if draft.isNew {
-                        let result = model.addTargets(host: host, note: note, enabled: enabled)
+                        let result = model.addTargets(
+                            host: host,
+                            note: note,
+                            enabled: enabled,
+                            group: group,
+                            colorTag: colorTag
+                        )
                         model.closeSheet()
                         if result.entries.count > 1 {
                             model.alert = AppAlert(
@@ -41,7 +53,14 @@ struct ContentView: View {
                         }
                     } else if let id = draft.targetID {
                         model.closeSheet()
-                        model.updateTarget(id: id, host: host, note: note, enabled: enabled)
+                        model.updateTarget(
+                            id: id,
+                            host: host,
+                            note: note,
+                            enabled: enabled,
+                            group: group,
+                            colorTag: colorTag
+                        )
                     }
                 }
                 .environmentObject(model)
@@ -253,6 +272,8 @@ struct ContentView: View {
             columnTitles: [
                 String(localized: L10n.exportColumnTarget),
                 String(localized: L10n.exportColumnNote),
+                String(localized: L10n.groupColumnTitle),
+                String(localized: L10n.colorTagColumnTitle),
                 String(localized: L10n.exportColumnStatus),
                 String(localized: L10n.exportColumnLastLatency),
                 String(localized: L10n.exportColumnAverageLatency),

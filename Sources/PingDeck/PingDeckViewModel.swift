@@ -3,17 +3,52 @@ import SwiftUI
 import PingCore
 
 /// 表格中的一行
-typealias PingTableRow = TargetRow
-struct TargetRow: Identifiable {
-    let id: UUID
-    let target: PingTarget
-    let stats: PingStats
+public typealias PingTableRow = TargetRow
+public struct TargetRow: Identifiable, Sendable {
+    public let id: UUID
+    public let target: PingTarget
+    public let stats: PingStats
+
+    public init(id: UUID, target: PingTarget, stats: PingStats) {
+        self.id = id
+        self.target = target
+        self.stats = stats
+    }
+}
+
+/// 分组折叠分段
+public struct TargetGroupSection: Identifiable, Sendable {
+    public var id: String { groupName }
+    public let groupName: String // 空字符串对应未分组/默认分组
+    public let rows: [PingTableRow]
+    public let aliveCount: Int
+    public let problemCount: Int
+    public let totalCount: Int
+    public let isCollapsed: Bool
+
+    public init(
+        groupName: String,
+        rows: [PingTableRow],
+        aliveCount: Int,
+        problemCount: Int,
+        totalCount: Int,
+        isCollapsed: Bool
+    ) {
+        self.groupName = groupName
+        self.rows = rows
+        self.aliveCount = aliveCount
+        self.problemCount = problemCount
+        self.totalCount = totalCount
+        self.isCollapsed = isCollapsed
+    }
 }
 
 /// 表格排序：字段 + 方向
 struct SortSpec: Equatable {
     enum Field: String, CaseIterable {
+        case colorTag
         case target
+        case group
         case status
         case last
         case average
@@ -59,15 +94,25 @@ struct TargetEditorDraft: Identifiable {
     var host: String
     var note: String
     var enabled: Bool
+    var group: String
+    var colorTag: TargetColorTag?
     var isNew: Bool
     var targetID: UUID?
 
     static func new() -> TargetEditorDraft {
-        TargetEditorDraft(host: "", note: "", enabled: true, isNew: true, targetID: nil)
+        TargetEditorDraft(host: "", note: "", enabled: true, group: "", colorTag: nil, isNew: true, targetID: nil)
     }
 
     static func edit(_ target: PingTarget) -> TargetEditorDraft {
-        TargetEditorDraft(host: target.host, note: target.note, enabled: target.enabled, isNew: false, targetID: target.id)
+        TargetEditorDraft(
+            host: target.host,
+            note: target.note,
+            enabled: target.enabled,
+            group: target.group,
+            colorTag: target.colorTag,
+            isNew: false,
+            targetID: target.id
+        )
     }
 }
 
@@ -98,6 +143,9 @@ final class PingDeckViewModel: ObservableObject {
     @Published var sheet: AppSheet?
     @Published var alert: AppAlert?
     @Published var sort: SortSpec = .default
+    @Published public var selectedColorFilter: TargetColorTag? = nil
+    @Published public var isGroupedView: Bool = false
+    @Published public var collapsedGroups: Set<String> = []
     @Published var settings: PingSettings = .default {
         didSet {
             guard settings != oldValue else { return }
@@ -166,12 +214,89 @@ final class PingDeckViewModel: ObservableObject {
         return list.sorted(by: compareRows)
     }
 
+    public var filteredRows: [PingTableRow] {
+        guard let filter = selectedColorFilter else {
+            return rows
+        }
+        return rows.filter { $0.target.colorTag == filter }
+    }
+
+    public var availableGroups: [String] {
+        let groups = targets.map(\.group).filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        return Array(Set(groups)).sorted()
+    }
+
+    public var colorTagCounts: [TargetColorTag: Int] {
+        var counts: [TargetColorTag: Int] = [:]
+        for target in targets {
+            if let tag = target.colorTag {
+                counts[tag, default: 0] += 1
+            }
+        }
+        return counts
+    }
+
+    public var groupedSections: [TargetGroupSection] {
+        var groupedRows: [String: [PingTableRow]] = [:]
+        for row in filteredRows {
+            groupedRows[row.target.group, default: []].append(row)
+        }
+
+        if groupedRows.isEmpty {
+            return []
+        }
+
+        let namedKeys = groupedRows.keys.filter { !$0.isEmpty }.sorted()
+        var resultKeys = namedKeys
+        if groupedRows.keys.contains("") {
+            resultKeys.append("")
+        }
+
+        return resultKeys.map { name in
+            let groupRows = groupedRows[name] ?? []
+            let alive = groupRows.filter { $0.stats.status == .alive }.count
+            let problem = groupRows.filter {
+                $0.stats.status == .timeout || $0.stats.status == .unreachable || $0.stats.status == .error
+            }.count
+            let total = groupRows.count
+            let isCollapsed = collapsedGroups.contains(name)
+            return TargetGroupSection(
+                groupName: name,
+                rows: groupRows,
+                aliveCount: alive,
+                problemCount: problem,
+                totalCount: total,
+                isCollapsed: isCollapsed
+            )
+        }
+    }
+
+    public func toggleGroupCollapse(_ groupName: String) {
+        if collapsedGroups.contains(groupName) {
+            collapsedGroups.remove(groupName)
+        } else {
+            collapsedGroups.insert(groupName)
+        }
+    }
+
+    public func collapseAllGroups() {
+        collapsedGroups.formUnion(targets.map(\.group))
+    }
+
+    public func expandAllGroups() {
+        collapsedGroups.removeAll()
+    }
+
     /// 按当前排序规则比较两行
     private func compareRows(_ left: TargetRow, _ right: TargetRow) -> Bool {
         let ordering: ComparisonResult
         switch sort.field {
+        case .colorTag:
+            ordering = ordered(left.target.colorTag?.rawValue, right.target.colorTag?.rawValue)
         case .target:
             ordering = left.target.host.localizedStandardCompare(right.target.host)
+        case .group:
+            ordering = left.target.group.localizedStandardCompare(right.target.group)
         case .status:
             ordering = ordered(left.stats.status.sortRank, right.stats.status.sortRank)
         case .last:
@@ -262,28 +387,68 @@ final class PingDeckViewModel: ObservableObject {
 
     /// 添加单个目标或网段；网段会展开为多个目标并返回解析结果
     @discardableResult
-    func addTargets(host: String, note: String, enabled: Bool) -> BulkImportParser.Result {
+    public func addTargets(
+        host: String,
+        note: String,
+        enabled: Bool,
+        group: String = "",
+        colorTag: TargetColorTag? = nil
+    ) -> BulkImportParser.Result {
         let result = BulkImportParser.parse(
             host: host,
             note: note,
+            group: group,
+            colorTag: colorTag,
             existing: Set(targets.map { $0.host.lowercased() })
         )
         guard !result.entries.isEmpty else { return result }
 
         var updated = targets
         for entry in result.entries {
-            updated.append(PingTarget(host: entry.host, note: entry.note, enabled: enabled))
+            updated.append(PingTarget(
+                host: entry.host,
+                note: entry.note,
+                enabled: enabled,
+                group: entry.group,
+                colorTag: entry.colorTag
+            ))
         }
         applyTargets(updated)
         return result
     }
 
-    func updateTarget(id: UUID, host: String, note: String, enabled: Bool) {
+    public func addTarget(
+        host: String,
+        note: String = "",
+        enabled: Bool = true,
+        group: String = "",
+        colorTag: TargetColorTag? = nil
+    ) {
+        addTargets(host: host, note: note, enabled: enabled, group: group, colorTag: colorTag)
+    }
+
+    public func updateTarget(
+        id: UUID,
+        host: String,
+        note: String,
+        enabled: Bool,
+        group: String = "",
+        colorTag: TargetColorTag? = nil
+    ) {
         var updated = targets
         guard let index = updated.firstIndex(where: { $0.id == id }) else { return }
         updated[index].host = host
         updated[index].note = note
         updated[index].enabled = enabled
+        updated[index].group = group
+        updated[index].colorTag = colorTag
+        applyTargets(updated)
+    }
+
+    public func updateTarget(_ target: PingTarget) {
+        var updated = targets
+        guard let index = updated.firstIndex(where: { $0.id == target.id }) else { return }
+        updated[index] = target
         applyTargets(updated)
     }
 
@@ -378,20 +543,46 @@ final class PingDeckViewModel: ObservableObject {
     // MARK: - 批量导入
 
     /// 预览批量导入结果，不改动目标列表
-    func previewBulkImport(_ text: String, mode: ImportMode = .append) -> BulkImportParser.Result {
+    func previewBulkImport(
+        _ text: String,
+        mode: ImportMode = .append,
+        defaultGroup: String = "",
+        defaultColorTag: TargetColorTag? = nil
+    ) -> BulkImportParser.Result {
         // 替换模式不与现有目标去重，因为现有目标本来就会被丢弃
         let existing = mode == .append ? Set(targets.map { $0.host.lowercased() }) : []
-        return BulkImportParser.parse(text, existing: existing)
+        return BulkImportParser.parse(
+            text,
+            existing: existing,
+            defaultGroup: defaultGroup,
+            defaultColorTag: defaultColorTag
+        )
     }
 
     /// 执行批量导入，返回可导入条目与被跳过的行
     @discardableResult
-    func importTargets(_ text: String, mode: ImportMode = .append) -> BulkImportParser.Result {
-        let result = previewBulkImport(text, mode: mode)
+    func importTargets(
+        _ text: String,
+        mode: ImportMode = .append,
+        defaultGroup: String = "",
+        defaultColorTag: TargetColorTag? = nil
+    ) -> BulkImportParser.Result {
+        let result = previewBulkImport(
+            text,
+            mode: mode,
+            defaultGroup: defaultGroup,
+            defaultColorTag: defaultColorTag
+        )
         guard !result.entries.isEmpty else { return result }
         var updated = mode == .append ? targets : []
         for entry in result.entries {
-            updated.append(PingTarget(host: entry.host, note: entry.note, enabled: true))
+            updated.append(PingTarget(
+                host: entry.host,
+                note: entry.note,
+                enabled: true,
+                group: entry.group,
+                colorTag: entry.colorTag
+            ))
         }
         clearSelection()
         applyTargets(updated)

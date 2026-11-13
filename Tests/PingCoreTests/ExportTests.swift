@@ -18,19 +18,24 @@ final class ExportTableTests: XCTestCase {
 
     /// 列值带类型：延迟是数字、状态是文本、最后响应时间是日期
     func testRowCarriesTypedValues() {
-        let entry = ExportEntry(target: PingTarget(host: "8.8.8.8", note: "网关"), stats: makeStats())
+        let entry = ExportEntry(
+            target: PingTarget(host: "8.8.8.8", note: "网关", group: "生产", colorTag: .blue),
+            stats: makeStats()
+        )
 
         let row = ExportTable(entries: [entry], labels: TestExportLabels.chinese).rows[0]
 
         XCTAssertEqual(row[0], .text("8.8.8.8"))
         XCTAssertEqual(row[1], .text("网关"))
-        XCTAssertEqual(row[2], .status(.alive))
-        XCTAssertEqual(row[3], .number(12.5))
-        XCTAssertEqual(row[4], .number(12.5))
+        XCTAssertEqual(row[2], .text("生产"))
+        XCTAssertEqual(row[3], .text("blue"))
+        XCTAssertEqual(row[4], .status(.alive))
         XCTAssertEqual(row[5], .number(12.5))
         XCTAssertEqual(row[6], .number(12.5))
-        XCTAssertEqual(row[7], .number(0))
-        XCTAssertEqual(row[8], .date(Date(timeIntervalSince1970: 1_700_000_000)))
+        XCTAssertEqual(row[7], .number(12.5))
+        XCTAssertEqual(row[8], .number(12.5))
+        XCTAssertEqual(row[9], .number(0))
+        XCTAssertEqual(row[10], .date(Date(timeIntervalSince1970: 1_700_000_000)))
     }
 
     /// 缺失的延迟与响应时间表示为空数值，不是 0
@@ -39,9 +44,11 @@ final class ExportTableTests: XCTestCase {
 
         let row = ExportTable(entries: [entry], labels: TestExportLabels.chinese).rows[0]
 
-        XCTAssertEqual(row[3], .number(nil))
-        XCTAssertEqual(row[8], .date(nil))
-        XCTAssertEqual(row[7], .number(0))
+        XCTAssertEqual(row[2], .text(""))
+        XCTAssertEqual(row[3], .text(""))
+        XCTAssertEqual(row[5], .number(nil))
+        XCTAssertEqual(row[10], .date(nil))
+        XCTAssertEqual(row[9], .number(0))
     }
 
     /// 丢包率以百分比数值保存（5% 存 5 而不是 0.05），与表头「丢包率(%)」一致
@@ -53,7 +60,7 @@ final class ExportTableTests: XCTestCase {
 
         let row = ExportTable(entries: [entry], labels: TestExportLabels.chinese).rows[0]
 
-        XCTAssertEqual(row[7], .number(50))
+        XCTAssertEqual(row[9], .number(50))
     }
 }
 
@@ -70,22 +77,28 @@ final class CsvExporterCompatibilityTests: XCTestCase {
         var stats = PingStats()
         let date = Date(timeIntervalSince1970: 1_700_000_000)
         stats.recordSuccess(12.5, at: date, seq: 0)
-        let entry = ExportEntry(target: PingTarget(host: "8.8.8.8", note: "网关"), stats: stats)
+        let entry = ExportEntry(
+            target: PingTarget(host: "8.8.8.8", note: "网关", group: "生产", colorTag: .blue),
+            stats: stats
+        )
 
         let csv = CsvExporter.csv(for: [entry], labels: TestExportLabels.chinese)
 
-        let expected = "\u{FEFF}目标,备注,状态,最新延迟(ms),平均延迟(ms),最小延迟(ms),最大延迟(ms),丢包率(%),最后响应时间\r\n"
-            + "8.8.8.8,网关,正常,12.500,12.500,12.500,12.500,0.00,\(expectedDateString(date))\r\n"
+        let expected = "\u{FEFF}目标,备注,分组,标签,状态,最新延迟(ms),平均延迟(ms),最小延迟(ms),最大延迟(ms),丢包率(%),最后响应时间\r\n"
+            + "8.8.8.8,网关,生产,blue,正常,12.500,12.500,12.500,12.500,0.00,\(expectedDateString(date))\r\n"
         XCTAssertEqual(csv, expected)
     }
 
     func testCSVUsesProvidedLabels() {
-        let entry = ExportEntry(target: PingTarget(host: "8.8.8.8"), stats: PingStats())
+        let entry = ExportEntry(
+            target: PingTarget(host: "8.8.8.8", group: "Servers", colorTag: .red),
+            stats: PingStats()
+        )
 
         let csv = CsvExporter.csv(for: [entry], labels: TestExportLabels.english)
 
-        XCTAssertTrue(csv.contains("Target,Note,Status"))
-        XCTAssertTrue(csv.contains("8.8.8.8,,Idle"))
+        XCTAssertTrue(csv.contains("Target,Note,Group,Tag,Status"))
+        XCTAssertTrue(csv.contains("8.8.8.8,,Servers,red,Idle"))
     }
 
     func testCSVEscapingIsUnchanged() {
@@ -103,7 +116,12 @@ final class JsonExporterTests: XCTestCase {
     private func makeEntries() -> [ExportEntry] {
         var stats = PingStats()
         stats.recordSuccess(12.5, at: Date(timeIntervalSince1970: 1_700_000_000), seq: 0)
-        return [ExportEntry(target: PingTarget(host: "8.8.8.8", note: "网关"), stats: stats)]
+        return [
+            ExportEntry(
+                target: PingTarget(host: "8.8.8.8", note: "网关", group: "生产", colorTag: .blue),
+                stats: stats
+            )
+        ]
     }
 
     func testJSONContainsSummaryAndTargets() throws {
@@ -122,6 +140,8 @@ final class JsonExporterTests: XCTestCase {
         let target = try XCTUnwrap(targets.first)
         XCTAssertEqual(target["host"] as? String, "8.8.8.8")
         XCTAssertEqual(target["note"] as? String, "网关")
+        XCTAssertEqual(target["group"] as? String, "生产")
+        XCTAssertEqual(target["colorTag"] as? String, "blue")
         XCTAssertEqual(target["status"] as? String, "alive")
         XCTAssertEqual(target["lastLatencyMs"] as? Double, 12.5)
         XCTAssertEqual(target["lossRatePercent"] as? Double, 0)
@@ -137,6 +157,8 @@ final class JsonExporterTests: XCTestCase {
         let root = try XCTUnwrap(try JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
         let targets = try XCTUnwrap(root["targets"] as? [[String: Any]])
         let target = try XCTUnwrap(targets.first)
+        XCTAssertEqual(target["group"] as? String, "")
+        XCTAssertEqual(target["colorTag"] as? String, "")
         XCTAssertTrue(target["lastLatencyMs"] is NSNull)
         XCTAssertTrue(target["lastResponseAt"] is NSNull)
     }
@@ -147,7 +169,10 @@ final class MarkdownExporterTests: XCTestCase {
     func testMarkdownContainsTableHeaderSeparatorAndRows() {
         var stats = PingStats()
         stats.recordSuccess(12.5, at: Date(timeIntervalSince1970: 1_700_000_000), seq: 0)
-        let entry = ExportEntry(target: PingTarget(host: "8.8.8.8", note: "网关"), stats: stats)
+        let entry = ExportEntry(
+            target: PingTarget(host: "8.8.8.8", note: "网关", group: "生产", colorTag: .blue),
+            stats: stats
+        )
 
         let markdown = MarkdownExporter.markdown(
             for: [entry],
@@ -155,9 +180,9 @@ final class MarkdownExporterTests: XCTestCase {
             exportedAt: Date(timeIntervalSince1970: 1_700_000_000)
         )
 
-        XCTAssertTrue(markdown.contains("| 目标 | 备注 | 状态 | 最新延迟(ms) |"))
-        XCTAssertTrue(markdown.contains("| --- | --- | --- | --- |"))
-        XCTAssertTrue(markdown.contains("| 8.8.8.8 | 网关 | 正常 | 12.500 |"))
+        XCTAssertTrue(markdown.contains("| 目标 | 备注 | 分组 | 标签 | 状态 | 最新延迟(ms) |"))
+        XCTAssertTrue(markdown.contains("| --- | --- | --- | --- | --- | --- |"))
+        XCTAssertTrue(markdown.contains("| 8.8.8.8 | 网关 | 生产 | blue | 正常 | 12.500 |"))
         XCTAssertTrue(markdown.contains("目标 1"))
         XCTAssertTrue(markdown.contains("正常 1"))
     }
@@ -168,13 +193,18 @@ final class TextExporterTests: XCTestCase {
     func testTextContainsHeaderAndRow() {
         var stats = PingStats()
         stats.recordSuccess(12.5, at: Date(timeIntervalSince1970: 1_700_000_000), seq: 0)
-        let entry = ExportEntry(target: PingTarget(host: "8.8.8.8", note: "网关"), stats: stats)
+        let entry = ExportEntry(
+            target: PingTarget(host: "8.8.8.8", note: "网关", group: "生产", colorTag: .blue),
+            stats: stats
+        )
 
         let text = TextExporter.text(for: [entry], labels: TestExportLabels.chinese)
 
         XCTAssertTrue(text.contains("目标"))
         XCTAssertTrue(text.contains("8.8.8.8"))
         XCTAssertTrue(text.contains("网关"))
+        XCTAssertTrue(text.contains("生产"))
+        XCTAssertTrue(text.contains("blue"))
         XCTAssertTrue(text.contains("正常"))
         XCTAssertTrue(text.contains("12.500"))
     }
@@ -199,7 +229,10 @@ final class XlsxExporterTests: XCTestCase {
     private func makeEntry() -> ExportEntry {
         var stats = PingStats()
         stats.recordSuccess(12.5, at: Date(timeIntervalSince1970: 1_700_000_000), seq: 0)
-        return ExportEntry(target: PingTarget(host: "8.8.8.8", note: "网关"), stats: stats)
+        return ExportEntry(
+            target: PingTarget(host: "8.8.8.8", note: "网关", group: "生产", colorTag: .blue),
+            stats: stats
+        )
     }
 
     func testXLSXIsZipArchiveWithRequiredParts() throws {
@@ -223,9 +256,13 @@ final class XlsxExporterTests: XCTestCase {
         let parts = try MiniZip.contents(of: data)
         let sheet = try XCTUnwrap(parts["xl/worksheets/sheet1.xml"])
         XCTAssertTrue(sheet.contains("<c r=\"A1\" s=\"1\" t=\"inlineStr\"><is><t>目标</t></is></c>"))
+        XCTAssertTrue(sheet.contains("<c r=\"C1\" s=\"1\" t=\"inlineStr\"><is><t>分组</t></is></c>"))
+        XCTAssertTrue(sheet.contains("<c r=\"D1\" s=\"1\" t=\"inlineStr\"><is><t>标签</t></is></c>"))
         XCTAssertTrue(sheet.contains("<c r=\"A2\" t=\"inlineStr\"><is><t>8.8.8.8</t></is></c>"))
-        XCTAssertTrue(sheet.contains("<c r=\"D2\"><v>12.5</v></c>"))
-        XCTAssertTrue(sheet.contains("<c r=\"C2\" t=\"inlineStr\"><is><t>正常</t></is></c>"))
+        XCTAssertTrue(sheet.contains("<c r=\"C2\" t=\"inlineStr\"><is><t>生产</t></is></c>"))
+        XCTAssertTrue(sheet.contains("<c r=\"D2\" t=\"inlineStr\"><is><t>blue</t></is></c>"))
+        XCTAssertTrue(sheet.contains("<c r=\"E2\" t=\"inlineStr\"><is><t>正常</t></is></c>"))
+        XCTAssertTrue(sheet.contains("<c r=\"F2\"><v>12.5</v></c>"))
     }
 
     /// 单元格内容里的 XML 特殊字符必须转义

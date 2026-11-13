@@ -3,7 +3,9 @@ import PingCore
 
 /// 表格列
 enum TargetColumn: String, CaseIterable, Identifiable {
+    case colorTag
     case target
+    case group
     case status
     case last
     case average
@@ -17,7 +19,9 @@ enum TargetColumn: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
+        case .colorTag: return String(localized: L10n.colorTagColumnTitle)
         case .target: return String(localized: L10n.tableColumnTarget)
+        case .group: return String(localized: L10n.groupColumnTitle)
         case .status: return String(localized: L10n.tableColumnStatus)
         case .last: return String(localized: L10n.tableColumnLast)
         case .average: return String(localized: L10n.tableColumnAverage)
@@ -31,7 +35,9 @@ enum TargetColumn: String, CaseIterable, Identifiable {
 
     var sortField: SortSpec.Field {
         switch self {
+        case .colorTag: return .colorTag
         case .target: return .target
+        case .group: return .group
         case .status: return .status
         case .last: return .last
         case .average: return .average
@@ -45,7 +51,8 @@ enum TargetColumn: String, CaseIterable, Identifiable {
 
     var alignment: TableColumnAlignment {
         switch self {
-        case .target, .status: return .leading
+        case .colorTag: return .center
+        case .target, .status, .group: return .leading
         default: return .trailing
         }
     }
@@ -55,7 +62,9 @@ enum TargetColumn: String, CaseIterable, Identifiable {
 
     var minWidth: CGFloat {
         switch self {
+        case .colorTag: return 24
         case .target: return 160
+        case .group: return 70
         case .status: return 70
         case .last, .average, .minimum, .maximum: return 60
         case .loss: return 60
@@ -66,7 +75,9 @@ enum TargetColumn: String, CaseIterable, Identifiable {
 
     var idealWidth: CGFloat {
         switch self {
+        case .colorTag: return 32
         case .target: return 320
+        case .group: return 100
         case .status: return 92
         case .last, .average, .minimum, .maximum: return 80
         case .loss: return 76
@@ -77,7 +88,9 @@ enum TargetColumn: String, CaseIterable, Identifiable {
 
     var maxWidth: CGFloat {
         switch self {
+        case .colorTag: return 40
         case .target: return 800
+        case .group: return 200
         case .status: return 160
         case .last, .average, .minimum, .maximum: return 140
         case .loss: return 120
@@ -100,8 +113,12 @@ struct TargetRowComparator: SortComparator {
     func compare(_ lhs: TargetRow, _ rhs: TargetRow) -> ComparisonResult {
         let result: ComparisonResult
         switch field {
+        case .colorTag:
+            result = ordered(lhs.target.colorTag?.rawValue, rhs.target.colorTag?.rawValue)
         case .target:
             result = ordered(lhs.target.host.localizedStandardCompare(rhs.target.host))
+        case .group:
+            result = ordered(lhs.target.group.localizedStandardCompare(rhs.target.group))
         case .status:
             result = ordered(lhs.stats.status.sortRank, rhs.stats.status.sortRank)
         case .last:
@@ -164,7 +181,7 @@ struct TargetsTableView: View {
     @Binding var columnCustomization: TableColumnCustomization<TargetRow>
 
     var body: some View {
-        if model.rows.isEmpty {
+        if model.filteredRows.isEmpty {
             emptyState
         } else {
             table
@@ -173,65 +190,75 @@ struct TargetsTableView: View {
 
     private var table: some View {
         Table(
-            model.rows,
+            model.filteredRows,
             selection: $model.selection,
             sortOrder: sortOrder,
             columnCustomization: $columnCustomization
         ) {
-            tableColumn(.target) { row in
-                HStack(spacing: 6) {
-                    Text(row.target.host)
-                        .font(.system(.body, design: .monospaced))
-                        .lineLimit(1)
-                    if !row.target.note.isEmpty {
-                        Text(row.target.note)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+            TableColumnBuilder<TargetRow, TargetRowComparator>.buildBlock(
+                tableColumn(.colorTag) { row in
+                    if let tag = row.target.colorTag {
+                        Circle()
+                            .fill(tag.color)
+                            .frame(width: 8, height: 8)
+                            .help(tag.localizedName)
                     }
+                },
+                tableColumn(.target) { row in
+                    HStack(spacing: 6) {
+                        Text(row.target.host)
+                            .font(.system(.body, design: .monospaced))
+                            .lineLimit(1)
+                        if !row.target.note.isEmpty {
+                            Text(row.target.note)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    .help(row.stats.displayMessage.isEmpty ? row.stats.status.displayName : row.stats.displayMessage)
+                },
+                tableColumn(.group) { row in
+                    Text(row.target.group.isEmpty ? String(localized: L10n.groupDefaultName) : row.target.group)
+                        .foregroundStyle(row.target.group.isEmpty ? .secondary : .primary)
+                        .lineLimit(1)
+                },
+                tableColumn(.status) { row in
+                    StatusBadge(status: row.stats.status, message: row.stats.displayMessage)
+                },
+                tableColumn(.last) { row in
+                    LatencyCell(value: row.stats.lastLatency)
+                },
+                tableColumn(.average) { row in
+                    LatencyCell(value: row.stats.averageLatency)
                 }
-                .help(row.stats.displayMessage.isEmpty ? row.stats.status.displayName : row.stats.displayMessage)
-            }
+            )
 
-            tableColumn(.status) { row in
-                StatusBadge(status: row.stats.status, message: row.stats.displayMessage)
-            }
-
-            tableColumn(.last) { row in
-                LatencyCell(value: row.stats.lastLatency)
-            }
-
-            tableColumn(.average) { row in
-                LatencyCell(value: row.stats.averageLatency)
-            }
-
-            tableColumn(.minimum) { row in
-                LatencyCell(value: row.stats.minLatency)
-            }
-
-            tableColumn(.maximum) { row in
-                LatencyCell(value: row.stats.maxLatency)
-            }
-
-            tableColumn(.loss) { row in
-                Text(row.stats.sent > 0 ? String(format: "%.1f%%", row.stats.lossRate * 100) : "-")
-                    .monospacedDigit()
-            }
-
-            tableColumn(.lastResponse) { row in
-                Text(model.formattedTime(row.stats.lastResponseAt))
-                    .font(.system(size: 11, design: .monospaced))
-            }
-
-            tableColumn(.enabled) { row in
-                Toggle("", isOn: Binding(
-                    get: { row.target.enabled },
-                    set: { model.setEnabled(id: row.id, enabled: $0) }
-                ))
-                .labelsHidden()
-                .toggleStyle(.switch)
-                .help(String(localized: row.target.enabled ? L10n.tableEnabledDisableHelp : L10n.tableEnabledEnableHelp))
-            }
+            TableColumnBuilder<TargetRow, TargetRowComparator>.buildBlock(
+                tableColumn(.minimum) { row in
+                    LatencyCell(value: row.stats.minLatency)
+                },
+                tableColumn(.maximum) { row in
+                    LatencyCell(value: row.stats.maxLatency)
+                },
+                tableColumn(.loss) { row in
+                    Text(row.stats.sent > 0 ? String(format: "%.1f%%", row.stats.lossRate * 100) : "-")
+                        .monospacedDigit()
+                },
+                tableColumn(.lastResponse) { row in
+                    Text(model.formattedTime(row.stats.lastResponseAt))
+                        .font(.system(size: 11, design: .monospaced))
+                },
+                tableColumn(.enabled) { row in
+                    Toggle("", isOn: Binding(
+                        get: { row.target.enabled },
+                        set: { model.setEnabled(id: row.id, enabled: $0) }
+                    ))
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .help(String(localized: row.target.enabled ? L10n.tableEnabledDisableHelp : L10n.tableEnabledEnableHelp))
+                }
+            )
         }
         .tableStyle(.inset(alternatesRowBackgrounds: false))
     }
@@ -240,11 +267,20 @@ struct TargetsTableView: View {
         _ column: TargetColumn,
         @ViewBuilder content: @escaping (TargetRow) -> Content
     ) -> some TableColumnContent<TargetRow, TargetRowComparator> {
-        TableColumn(column.title, sortUsing: TargetRowComparator(field: column.sortField)) { row in
+        let frameAlignment: Alignment = {
+            switch column.alignment {
+            case .leading: return .leading
+            case .center: return .center
+            case .trailing: return .trailing
+            default: return .leading
+            }
+        }()
+
+        return TableColumn(column.title, sortUsing: TargetRowComparator(field: column.sortField)) { row in
             content(row)
                 .frame(
                     maxWidth: .infinity,
-                    alignment: column.alignment == .trailing ? .trailing : .leading
+                    alignment: frameAlignment
                 )
         }
         .width(min: column.minWidth, ideal: column.idealWidth, max: column.maxWidth)
