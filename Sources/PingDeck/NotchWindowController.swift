@@ -279,34 +279,6 @@ struct NotchIslandContainerView: View {
     @ObservedObject var model: PingDeckViewModel
 
     var body: some View {
-        NotchIslandPlaceholderView(controller: controller, model: model)
-    }
-}
-
-/// 灵动岛占位视图，在 Task 5 实现 NotchIslandView 之前提供安全宿主
-public struct NotchIslandPlaceholderView: View {
-    @ObservedObject var controller: NotchWindowController
-    @ObservedObject var model: PingDeckViewModel
-
-    init(controller: NotchWindowController, model: PingDeckViewModel) {
-        self.controller = controller
-        self.model = model
-    }
-
-    public var body: some View {
-        ZStack {
-            if controller.isExpanded {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.black.opacity(0.85))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                    )
-            } else {
-                Color.black.opacity(0.001)
-            }
-        }
-        .contentShape(Rectangle())
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        NotchIslandView(controller: controller, model: model)
     }
 }
