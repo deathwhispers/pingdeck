@@ -109,6 +109,23 @@ struct SettingsSheet: View {
                 .font(.caption)
                 .foregroundStyle(.tertiary)
 
+            Divider()
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text(L10n.settingsMenuBarSection)
+                    .font(.headline)
+
+                Toggle(isOn: $model.settings.menuBar.showTextLabel) {
+                    Text(L10n.settingsMenuBarShowText)
+                }
+
+                Picker(L10n.settingsCloseBehavior, selection: $model.settings.menuBar.closeBehavior) {
+                    Text(L10n.settingsCloseBehaviorKeepRunning).tag(WindowCloseBehavior.keepRunning)
+                    Text(L10n.settingsCloseBehaviorTerminate).tag(WindowCloseBehavior.terminate)
+                    Text(L10n.settingsCloseBehaviorAsk).tag(WindowCloseBehavior.ask)
+                }
+            }
+
             HStack {
                 Spacer()
                 Button(String(localized: L10n.commonDone)) {
