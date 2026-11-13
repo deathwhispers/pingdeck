@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/deathwhispers/pingdeck/releases/latest"><img alt="版本" src="https://img.shields.io/badge/version-0.0.8-green"></a>
+  <a href="https://github.com/deathwhispers/pingdeck/releases/latest"><img alt="版本" src="https://img.shields.io/badge/version-0.0.9-green"></a>
   <img alt="平台" src="https://img.shields.io/badge/macOS-14.4%2B-blue">
   <img alt="体积" src="https://img.shields.io/badge/app-1.9%20MB-lightgrey">
   <img alt="依赖" src="https://img.shields.io/badge/dependencies-none-lightgrey">
