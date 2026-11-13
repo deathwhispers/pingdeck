@@ -50,7 +50,7 @@ struct BulkImportSheet: View {
                             .textFieldStyle(.roundedBorder)
                         if !model.availableGroups.isEmpty {
                             Menu {
-                                Button(String(localized: L10n.targetEditorNoColorTag)) {
+                                Button(String(localized: L10n.groupDefaultName)) {
                                     defaultGroup = ""
                                 }
                                 Divider()
