@@ -31,6 +31,32 @@ final class ConfigSerializationTests: XCTestCase {
         XCTAssertEqual(decoded, settings)
     }
 
+    func testNotchIslandSettingsRoundTrip() throws {
+        let settings = NotchIslandSettings(enabled: true, showMetrics: true, showRecentProblems: false, showQuickControls: true)
+        let data = try JSONEncoder().encode(settings)
+        let decoded = try JSONDecoder().decode(NotchIslandSettings.self, from: data)
+        XCTAssertEqual(decoded, settings)
+    }
+
+    func testPingSettingsDecodesLegacyJSONWithoutNotchIsland() throws {
+        let legacyJSON = """
+        {
+          "interval": 1.0,
+          "timeout": 2.0,
+          "maxConcurrent": 16,
+          "rotationInterval": 30.0,
+          "appearance": "system",
+          "language": "system"
+        }
+        """.data(using: .utf8)!
+
+        let settings = try JSONDecoder().decode(PingSettings.self, from: legacyJSON)
+        XCTAssertEqual(settings.notchIsland.enabled, true)
+        XCTAssertEqual(settings.notchIsland.showMetrics, true)
+        XCTAssertEqual(settings.notchIsland.showRecentProblems, true)
+        XCTAssertEqual(settings.notchIsland.showQuickControls, true)
+    }
+
     func testPingSettingsDecodesWithoutMenuBarFallback() throws {
         // 模拟旧版本没有 menuBar 字段的 JSON
         let json = """

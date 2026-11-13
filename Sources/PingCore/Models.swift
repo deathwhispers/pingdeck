@@ -225,6 +225,41 @@ public struct MenuBarSettings: Codable, Equatable, Sendable {
     }
 }
 
+/// 刘海灵动岛偏好设置
+public struct NotchIslandSettings: Codable, Equatable, Sendable {
+    public var enabled: Bool
+    public var showMetrics: Bool
+    public var showRecentProblems: Bool
+    public var showQuickControls: Bool
+
+    public init(
+        enabled: Bool = true,
+        showMetrics: Bool = true,
+        showRecentProblems: Bool = true,
+        showQuickControls: Bool = true
+    ) {
+        self.enabled = enabled
+        self.showMetrics = showMetrics
+        self.showRecentProblems = showRecentProblems
+        self.showQuickControls = showQuickControls
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case enabled
+        case showMetrics
+        case showRecentProblems
+        case showQuickControls
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        enabled = (try? container.decodeIfPresent(Bool.self, forKey: .enabled)) ?? true
+        showMetrics = (try? container.decodeIfPresent(Bool.self, forKey: .showMetrics)) ?? true
+        showRecentProblems = (try? container.decodeIfPresent(Bool.self, forKey: .showRecentProblems)) ?? true
+        showQuickControls = (try? container.decodeIfPresent(Bool.self, forKey: .showQuickControls)) ?? true
+    }
+}
+
 /// 运行参数
 public struct PingSettings: Codable, Sendable, Equatable {
     /// 最大并发数上限
@@ -244,6 +279,8 @@ public struct PingSettings: Codable, Sendable, Equatable {
     public var language: AppLanguage
     /// 菜单栏与后台常驻偏好
     public var menuBar: MenuBarSettings
+    /// 灵动岛偏好
+    public var notchIsland: NotchIslandSettings
 
     public init(interval: Double = 1.0,
                 timeout: Double = 2.0,
@@ -251,7 +288,8 @@ public struct PingSettings: Codable, Sendable, Equatable {
                 rotationInterval: Double = 30,
                 appearance: AppearanceMode = .system,
                 language: AppLanguage = .system,
-                menuBar: MenuBarSettings = MenuBarSettings()) {
+                menuBar: MenuBarSettings = MenuBarSettings(),
+                notchIsland: NotchIslandSettings = NotchIslandSettings()) {
         self.interval = interval
         self.timeout = timeout
         self.maxConcurrent = max(1, maxConcurrent)
@@ -259,6 +297,7 @@ public struct PingSettings: Codable, Sendable, Equatable {
         self.appearance = appearance
         self.language = language
         self.menuBar = menuBar
+        self.notchIsland = notchIsland
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -269,9 +308,10 @@ public struct PingSettings: Codable, Sendable, Equatable {
         case appearance
         case language
         case menuBar
+        case notchIsland
     }
 
-    /// 手写解码：旧版本配置没有 appearance / language / menuBar 字段（或值未知）时回落到默认值。
+    /// 手写解码：旧版本配置没有 appearance / language / menuBar / notchIsland 字段（或值未知）时回落到默认值。
     /// 不能让整个配置解码失败，否则用户保存的目标会全部丢失。
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -282,6 +322,7 @@ public struct PingSettings: Codable, Sendable, Equatable {
         appearance = (try? container.decodeIfPresent(AppearanceMode.self, forKey: .appearance)) ?? .system
         language = (try? container.decodeIfPresent(AppLanguage.self, forKey: .language)) ?? .system
         menuBar = (try? container.decodeIfPresent(MenuBarSettings.self, forKey: .menuBar)) ?? MenuBarSettings()
+        notchIsland = (try? container.decodeIfPresent(NotchIslandSettings.self, forKey: .notchIsland)) ?? NotchIslandSettings()
     }
 
     public static let `default` = PingSettings()
