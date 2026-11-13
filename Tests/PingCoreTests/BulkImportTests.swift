@@ -118,4 +118,12 @@ final class BulkImportTests: XCTestCase {
         XCTAssertEqual(result.entries[0], BulkImportParser.Entry(host: "1.1.1.1", note: "Cloudflare", group: "Anycast", colorTag: .green))
         XCTAssertTrue(result.rejected.isEmpty)
     }
+
+    func testParseSpaceSeparatedTargetWithCommaInNote() {
+        let result = BulkImportParser.parse("192.168.1.1 北京机房, 核心交换机")
+        XCTAssertEqual(result.entries.count, 1)
+        XCTAssertEqual(result.entries[0].host, "192.168.1.1")
+        XCTAssertEqual(result.entries[0].note, "北京机房, 核心交换机")
+        XCTAssertTrue(result.rejected.isEmpty)
+    }
 }

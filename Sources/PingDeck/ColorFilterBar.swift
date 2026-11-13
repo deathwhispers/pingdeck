@@ -96,7 +96,11 @@ struct ColorFilterBar: View {
                 Text("\(count)")
                     .font(.caption)
                     .monospacedDigit()
-                    .foregroundStyle(isSelected ? Color.white.opacity(0.9) : Color.secondary)
+                    .foregroundStyle(
+                        isSelected
+                            ? (color == .yellow ? Color.black.opacity(0.85) : Color.white.opacity(0.9))
+                            : Color.secondary
+                    )
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
@@ -108,7 +112,11 @@ struct ColorFilterBar: View {
                 Capsule()
                     .strokeBorder(isSelected ? Color.clear : color.color.opacity(0.3), lineWidth: 1)
             )
-            .foregroundStyle(isSelected ? Color.white : Color.primary)
+            .foregroundStyle(
+                isSelected
+                    ? (color == .yellow ? Color.black : Color.white)
+                    : Color.primary
+            )
         }
         .buttonStyle(.plain)
         .help(color.localizedName)

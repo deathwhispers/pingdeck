@@ -66,6 +66,10 @@ struct TargetEditorSheet: View {
 
                     if !model.availableGroups.isEmpty {
                         Menu {
+                            Button(String(localized: L10n.groupDefaultName)) {
+                                group = ""
+                            }
+                            Divider()
                             ForEach(model.availableGroups, id: \.self) { g in
                                 Button(g.isEmpty ? String(localized: L10n.groupDefaultName) : g) {
                                     group = g

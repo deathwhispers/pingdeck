@@ -64,23 +64,16 @@ struct GroupSectionCard: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.18)) {
-                    model.toggleGroupCollapse(section.groupName)
-                }
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: section.isCollapsed ? "chevron.right" : "chevron.down")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 12)
+            HStack(spacing: 8) {
+                Image(systemName: section.isCollapsed ? "chevron.right" : "chevron.down")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 12)
 
-                    Text(section.groupName.isEmpty ? String(localized: L10n.groupDefaultName) : section.groupName)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                }
+                Text(section.groupName.isEmpty ? String(localized: L10n.groupDefaultName) : section.groupName)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
             }
-            .buttonStyle(.plain)
 
             // 统计胶囊
             HStack(spacing: 6) {

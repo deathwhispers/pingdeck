@@ -272,22 +272,25 @@ public enum BulkImportParser {
     ) -> (host: String, note: String, group: String, colorTag: TargetColorTag?) {
         if line.contains(",") {
             let parts = line.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-            let host = parts.isEmpty ? "" : parts[0]
-            let note = parts.count > 1 ? parts[1] : ""
-            let group: String
-            if parts.count >= 3 && !parts[2].isEmpty {
-                group = parts[2]
-            } else {
-                group = defaultGroup
+            // 如果第一列包含空格，说明逗号出现在备注内部（如 "1.1.1.1 DNS, Gateway"）而非作为 CSV 列分隔符，回退为空白字符分隔
+            if let first = parts.first, !first.contains(where: { $0.isWhitespace }) {
+                let host = first
+                let note = parts.count > 1 ? parts[1] : ""
+                let group: String
+                if parts.count >= 3 && !parts[2].isEmpty {
+                    group = parts[2]
+                } else {
+                    group = defaultGroup
+                }
+                let colorTag: TargetColorTag?
+                if parts.count >= 4 {
+                    let colorText = parts[3].trimmingCharacters(in: .whitespaces).lowercased()
+                    colorTag = TargetColorTag(rawValue: colorText) ?? defaultColorTag
+                } else {
+                    colorTag = defaultColorTag
+                }
+                return (host, note, group, colorTag)
             }
-            let colorTag: TargetColorTag?
-            if parts.count >= 4 {
-                let colorText = parts[3].trimmingCharacters(in: .whitespaces).lowercased()
-                colorTag = TargetColorTag(rawValue: colorText) ?? defaultColorTag
-            } else {
-                colorTag = defaultColorTag
-            }
-            return (host, note, group, colorTag)
         }
 
         if let boundary = line.firstIndex(where: { $0 == " " || $0 == "\t" }) {
