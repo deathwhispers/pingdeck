@@ -253,6 +253,8 @@ struct ContentView: View {
             columnTitles: [
                 String(localized: L10n.exportColumnTarget),
                 String(localized: L10n.exportColumnNote),
+                String(localized: L10n.groupColumnTitle),
+                String(localized: L10n.colorTagColumnTitle),
                 String(localized: L10n.exportColumnStatus),
                 String(localized: L10n.exportColumnLastLatency),
                 String(localized: L10n.exportColumnAverageLatency),

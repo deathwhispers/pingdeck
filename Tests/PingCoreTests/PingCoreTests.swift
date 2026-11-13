@@ -92,7 +92,7 @@ final class CsvExporterTests: XCTestCase {
         )
 
         XCTAssertTrue(csv.hasPrefix("\u{FEFF}"))
-        XCTAssertTrue(csv.contains("目标,备注,状态"))
+        XCTAssertTrue(csv.contains("目标,备注,分组,标签,状态"))
         XCTAssertTrue(csv.contains("8.8.8.8"))
         XCTAssertTrue(csv.contains("12.500"))
     }

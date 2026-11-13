@@ -84,6 +84,8 @@ public struct ExportTable: Sendable {
     private static let definitions: [(key: String, format: ExportColumn.Format)] = [
         ("host", .text),
         ("note", .text),
+        ("group", .text),
+        ("colorTag", .text),
         ("status", .status),
         ("lastLatencyMs", .milliseconds),
         ("averageLatencyMs", .milliseconds),
@@ -121,6 +123,8 @@ public struct ExportTable: Sendable {
             return [
                 .text(entry.target.host),
                 .text(entry.target.note),
+                .text(entry.target.group),
+                .text(entry.target.colorTag?.rawValue ?? ""),
                 .status(stats.status),
                 .number(stats.lastLatency),
                 .number(stats.averageLatency),
