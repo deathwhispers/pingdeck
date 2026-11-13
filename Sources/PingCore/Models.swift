@@ -153,6 +153,27 @@ public enum AppLanguage: String, Codable, CaseIterable, Hashable, Sendable {
     }
 }
 
+/// 主窗口关闭时的处理行为
+public enum WindowCloseBehavior: String, Codable, CaseIterable, Sendable {
+    case ask              // 首次未决定，关闭时弹窗询问
+    case keepRunning      // 保持后台常驻继续探测
+    case terminate        // 直接退出应用
+}
+
+/// 菜单栏与后台生命周期偏好
+public struct MenuBarSettings: Codable, Equatable, Sendable {
+    public var showTextLabel: Bool
+    public var closeBehavior: WindowCloseBehavior
+
+    public init(
+        showTextLabel: Bool = true,
+        closeBehavior: WindowCloseBehavior = .ask
+    ) {
+        self.showTextLabel = showTextLabel
+        self.closeBehavior = closeBehavior
+    }
+}
+
 /// 运行参数
 public struct PingSettings: Codable, Sendable, Equatable {
     /// 最大并发数上限
@@ -170,19 +191,23 @@ public struct PingSettings: Codable, Sendable, Equatable {
     public var appearance: AppearanceMode
     /// 应用语言
     public var language: AppLanguage
+    /// 菜单栏与后台常驻偏好
+    public var menuBar: MenuBarSettings
 
     public init(interval: Double = 1.0,
                 timeout: Double = 2.0,
                 maxConcurrent: Int = 16,
                 rotationInterval: Double = 30,
                 appearance: AppearanceMode = .system,
-                language: AppLanguage = .system) {
+                language: AppLanguage = .system,
+                menuBar: MenuBarSettings = MenuBarSettings()) {
         self.interval = interval
         self.timeout = timeout
         self.maxConcurrent = max(1, maxConcurrent)
         self.rotationInterval = max(0, rotationInterval)
         self.appearance = appearance
         self.language = language
+        self.menuBar = menuBar
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -192,9 +217,10 @@ public struct PingSettings: Codable, Sendable, Equatable {
         case rotationInterval
         case appearance
         case language
+        case menuBar
     }
 
-    /// 手写解码：旧版本配置没有 appearance / language 字段（或值未知）时回落到默认值。
+    /// 手写解码：旧版本配置没有 appearance / language / menuBar 字段（或值未知）时回落到默认值。
     /// 不能让整个配置解码失败，否则用户保存的目标会全部丢失。
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -204,6 +230,7 @@ public struct PingSettings: Codable, Sendable, Equatable {
         rotationInterval = try container.decode(Double.self, forKey: .rotationInterval)
         appearance = (try? container.decodeIfPresent(AppearanceMode.self, forKey: .appearance)) ?? .system
         language = (try? container.decodeIfPresent(AppLanguage.self, forKey: .language)) ?? .system
+        menuBar = (try? container.decodeIfPresent(MenuBarSettings.self, forKey: .menuBar)) ?? MenuBarSettings()
     }
 
     public static let `default` = PingSettings()
