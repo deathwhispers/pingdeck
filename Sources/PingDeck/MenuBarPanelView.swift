@@ -209,6 +209,7 @@ private struct ProblemRowItemView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .help("\(row.target.host)\(row.target.note.isEmpty ? "" : " (\(row.target.note))") - \(row.stats.displayMessage.isEmpty ? row.stats.status.displayName : row.stats.displayMessage)")
         .onHover { isHovered = $0 }
     }
 

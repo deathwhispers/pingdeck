@@ -62,11 +62,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag {
-            let window = WindowCloseInterceptor.shared.mainWindow ?? sender.windows.first(where: { !$0.isStatusBarWindow })
-            if let window {
-                window.makeKeyAndOrderFront(nil)
-                sender.activate(ignoringOtherApps: true)
+        let targetWindow = WindowCloseInterceptor.shared.mainWindow ?? sender.windows.first(where: { !$0.isStatusBarWindow && !($0 is NSPanel) })
+        if !flag || (targetWindow?.isVisible == false) {
+            if let targetWindow {
+                targetWindow.makeKeyAndOrderFront(nil)
+                if #available(macOS 14.0, *) {
+                    sender.activate()
+                } else {
+                    sender.activate(ignoringOtherApps: true)
+                }
                 return true
             }
         }
@@ -106,17 +110,25 @@ struct PingDeckApp: App {
             MenuBarPanelView(
                 model: model,
                 onOpenMainWindow: {
-                    let window = WindowCloseInterceptor.shared.mainWindow ?? NSApp.windows.first(where: { !$0.isStatusBarWindow })
+                    let window = WindowCloseInterceptor.shared.mainWindow ?? NSApp.windows.first(where: { !$0.isStatusBarWindow && !($0 is NSPanel) })
                     if let window {
                         window.makeKeyAndOrderFront(nil)
-                        NSApp.activate(ignoringOtherApps: true)
+                        if #available(macOS 14.0, *) {
+                            NSApp.activate()
+                        } else {
+                            NSApp.activate(ignoringOtherApps: true)
+                        }
                     }
                 },
                 onOpenSettings: {
-                    let window = WindowCloseInterceptor.shared.mainWindow ?? NSApp.windows.first(where: { !$0.isStatusBarWindow })
+                    let window = WindowCloseInterceptor.shared.mainWindow ?? NSApp.windows.first(where: { !$0.isStatusBarWindow && !($0 is NSPanel) })
                     if let window {
                         window.makeKeyAndOrderFront(nil)
-                        NSApp.activate(ignoringOtherApps: true)
+                        if #available(macOS 14.0, *) {
+                            NSApp.activate()
+                        } else {
+                            NSApp.activate(ignoringOtherApps: true)
+                        }
                     }
                     model.openSettingsSheet()
                 }

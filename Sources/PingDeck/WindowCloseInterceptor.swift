@@ -2,6 +2,7 @@ import AppKit
 import PingCore
 import SwiftUI
 
+@MainActor
 final class WindowCloseInterceptor: NSObject, NSWindowDelegate {
     static let shared = WindowCloseInterceptor()
     private weak var model: PingDeckViewModel?
@@ -110,7 +111,7 @@ struct WindowAccessor: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: Context) {
         if let view = nsView as? WindowAccessorView {
             view.onWindow = onWindow
-            if let window = view.window {
+            if let window = view.window, window !== WindowCloseInterceptor.shared.mainWindow {
                 DispatchQueue.main.async { [weak view, weak window] in
                     guard let window else { return }
                     view?.onWindow?(window)
