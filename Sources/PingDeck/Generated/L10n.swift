@@ -189,6 +189,24 @@ enum L10n {
     }
 
     /**
+     Bulk import color tag field label
+     
+     Localized string for key “bulkImport.colorTag” in table “Localizable.xcstrings”.
+     */
+    static var bulkImportColorTag: LocalizedStringResource {
+        LocalizedStringResource("bulkImport.colorTag", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Bulk import group field label
+     
+     Localized string for key “bulkImport.group” in table “Localizable.xcstrings”.
+     */
+    static var bulkImportGroup: LocalizedStringResource {
+        LocalizedStringResource("bulkImport.group", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Close window dialog button to keep running in background
      
      Localized string for key “closeDialog.keepRunning” in table “Localizable.xcstrings”.
@@ -231,6 +249,87 @@ enum L10n {
      */
     static var closeDialogTitle: LocalizedStringResource {
         LocalizedStringResource("closeDialog.title", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Collapse all group sections
+     
+     Localized string for key “collapse.allGroups” in table “Localizable.xcstrings”.
+     */
+    static var collapseAllGroups: LocalizedStringResource {
+        LocalizedStringResource("collapse.allGroups", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Color tag name: blue
+     
+     Localized string for key “color.blue” in table “Localizable.xcstrings”.
+     */
+    static var colorBlue: LocalizedStringResource {
+        LocalizedStringResource("color.blue", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Color tag name: gray
+     
+     Localized string for key “color.gray” in table “Localizable.xcstrings”.
+     */
+    static var colorGray: LocalizedStringResource {
+        LocalizedStringResource("color.gray", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Color tag name: green
+     
+     Localized string for key “color.green” in table “Localizable.xcstrings”.
+     */
+    static var colorGreen: LocalizedStringResource {
+        LocalizedStringResource("color.green", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Color tag name: orange
+     
+     Localized string for key “color.orange” in table “Localizable.xcstrings”.
+     */
+    static var colorOrange: LocalizedStringResource {
+        LocalizedStringResource("color.orange", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Color tag name: purple
+     
+     Localized string for key “color.purple” in table “Localizable.xcstrings”.
+     */
+    static var colorPurple: LocalizedStringResource {
+        LocalizedStringResource("color.purple", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Color tag name: red
+     
+     Localized string for key “color.red” in table “Localizable.xcstrings”.
+     */
+    static var colorRed: LocalizedStringResource {
+        LocalizedStringResource("color.red", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Color tag name: yellow
+     
+     Localized string for key “color.yellow” in table “Localizable.xcstrings”.
+     */
+    static var colorYellow: LocalizedStringResource {
+        LocalizedStringResource("color.yellow", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Color tag column title in table
+     
+     Localized string for key “colorTag.columnTitle” in table “Localizable.xcstrings”.
+     */
+    static var colorTagColumnTitle: LocalizedStringResource {
+        LocalizedStringResource("colorTag.columnTitle", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -405,6 +504,15 @@ enum L10n {
     }
 
     /**
+     Expand all group sections
+     
+     Localized string for key “expand.allGroups” in table “Localizable.xcstrings”.
+     */
+    static var expandAllGroups: LocalizedStringResource {
+        LocalizedStringResource("expand.allGroups", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Export column: average latency
      
      Localized string for key “export.column.averageLatency” in table “Localizable.xcstrings”.
@@ -510,6 +618,33 @@ enum L10n {
      */
     static func exportSummary(_ arg1: Int, _ arg2: Int, _ arg3: Int, _ arg4: Int) -> LocalizedStringResource {
         LocalizedStringResource("export.summary", defaultValue: "\(arg1, specifier: "%lld")\(arg2, specifier: "%lld")\(arg3, specifier: "%lld")\(arg4, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     All tags filter option label
+     
+     Localized string for key “filter.allTags” in table “Localizable.xcstrings”.
+     */
+    static var filterAllTags: LocalizedStringResource {
+        LocalizedStringResource("filter.allTags", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Group column title in table
+     
+     Localized string for key “group.columnTitle” in table “Localizable.xcstrings”.
+     */
+    static var groupColumnTitle: LocalizedStringResource {
+        LocalizedStringResource("group.columnTitle", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Default fallback group name
+     
+     Localized string for key “group.defaultName” in table “Localizable.xcstrings”.
+     */
+    static var groupDefaultName: LocalizedStringResource {
+        LocalizedStringResource("group.defaultName", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
@@ -1296,6 +1431,42 @@ enum L10n {
     }
 
     /**
+     Color tag field label in target editor
+     
+     Localized string for key “targetEditor.colorTag” in table “Localizable.xcstrings”.
+     */
+    static var targetEditorColorTag: LocalizedStringResource {
+        LocalizedStringResource("targetEditor.colorTag", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Group field label in target editor
+     
+     Localized string for key “targetEditor.group” in table “Localizable.xcstrings”.
+     */
+    static var targetEditorGroup: LocalizedStringResource {
+        LocalizedStringResource("targetEditor.group", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Placeholder for group input in target editor
+     
+     Localized string for key “targetEditor.groupPlaceholder” in table “Localizable.xcstrings”.
+     */
+    static var targetEditorGroupPlaceholder: LocalizedStringResource {
+        LocalizedStringResource("targetEditor.groupPlaceholder", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Option for no color tag in target editor
+     
+     Localized string for key “targetEditor.noColorTag” in table “Localizable.xcstrings”.
+     */
+    static var targetEditorNoColorTag: LocalizedStringResource {
+        LocalizedStringResource("targetEditor.noColorTag", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Toolbar add button
      
      Localized string for key “toolbar.add” in table “Localizable.xcstrings”.
@@ -1581,5 +1752,23 @@ enum L10n {
      */
     static var validationWhitespace: LocalizedStringResource {
         LocalizedStringResource("validation.whitespace", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Flat view mode toggle
+     
+     Localized string for key “viewMode.flat” in table “Localizable.xcstrings”.
+     */
+    static var viewModeFlat: LocalizedStringResource {
+        LocalizedStringResource("viewMode.flat", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Grouped view mode toggle
+     
+     Localized string for key “viewMode.grouped” in table “Localizable.xcstrings”.
+     */
+    static var viewModeGrouped: LocalizedStringResource {
+        LocalizedStringResource("viewMode.grouped", table: "Localizable", bundle: l10nBundleDescription)
     }
 }
