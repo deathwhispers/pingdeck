@@ -64,9 +64,7 @@ public struct NotchGeometry: Equatable, Sendable {
         let expandedSize = CGSize(width: resolvedExpandedWidth, height: resolvedExpandedHeight)
 
         let notchCenter = notchX + notchWidth / 2
-        let collapsedWidth = showEars ? resolvedExpandedWidth : notchWidth
-        let collapsedX = showEars ? (notchCenter - resolvedExpandedWidth / 2) : notchX
-        let collapsedPanelFrame = CGRect(x: collapsedX, y: notchY, width: collapsedWidth, height: notchHeight)
+        let collapsedPanelFrame = CGRect(x: notchX, y: notchY, width: notchWidth, height: notchHeight)
         let expandedPanelFrame = CGRect(
             x: notchCenter - expandedSize.width / 2,
             y: screenFrame.maxY - expandedSize.height,
@@ -76,7 +74,7 @@ public struct NotchGeometry: Equatable, Sendable {
 
         return NotchGeometry(
             hasPhysicalNotch: hasPhysicalNotch,
-            notchRect: CGRect(x: notchX, y: notchY, width: notchWidth, height: notchHeight),
+            notchRect: collapsedPanelFrame,
             expandedSize: expandedSize,
             collapsedPanelFrame: collapsedPanelFrame,
             expandedPanelFrame: expandedPanelFrame

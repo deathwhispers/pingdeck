@@ -93,14 +93,15 @@ public final class NotchWindowController: NSObject, ObservableObject {
 
     public func updateLayout() {
         let geometry = currentGeometry()
-        panel?.setFrame(geometry.expandedPanelFrame, display: true)
+        let targetFrame = isExpanded ? geometry.expandedPanelFrame : geometry.collapsedPanelFrame
+        panel?.setFrame(targetFrame, display: true)
     }
 
     private func setupPanelIfNeeded() {
         guard panel == nil else { return }
 
         let geometry = currentGeometry()
-        let initialFrame = geometry.expandedPanelFrame
+        let initialFrame = isExpanded ? geometry.expandedPanelFrame : geometry.collapsedPanelFrame
 
         let newPanel = NSPanel(
             contentRect: initialFrame,
@@ -108,8 +109,8 @@ public final class NotchWindowController: NSObject, ObservableObject {
             backing: .buffered,
             defer: false
         )
-        // 浮窗层级严格置于系统菜单栏上方，确保纯黑背景能完全覆盖物理刘海与顶沿菜单栏
-        newPanel.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 2)
+        // 浮窗层级使用 .mainMenu，覆盖系统菜单栏背景的同时严格保证鼠标光标（Cursor）始终位于最顶层，不被浮窗遮挡
+        newPanel.level = .mainMenu
         newPanel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
         newPanel.isOpaque = false
         newPanel.backgroundColor = .clear
@@ -175,6 +176,7 @@ public final class NotchWindowController: NSObject, ObservableObject {
         collapseTimer = nil
 
         guard !isExpanded else { return }
+        guard expandTimer == nil else { return }
 
         expandTimer?.invalidate()
         let timer = Timer(timeInterval: expandDelay, repeats: false) { [weak self] _ in
@@ -192,6 +194,7 @@ public final class NotchWindowController: NSObject, ObservableObject {
 
         guard !isPinned else { return }
         guard isExpanded else { return }
+        guard collapseTimer == nil else { return }
 
         collapseTimer?.invalidate()
         let timer = Timer(timeInterval: collapseDelay, repeats: false) { [weak self] _ in
@@ -206,26 +209,35 @@ public final class NotchWindowController: NSObject, ObservableObject {
     public func expand() {
         expandTimer?.invalidate()
         expandTimer = nil
-        isExpanded = true
-    }
-
-    public func expandImmediately() {
-        expandTimer?.invalidate()
-        expandTimer = nil
         collapseTimer?.invalidate()
         collapseTimer = nil
+
+        guard !isExpanded else { return }
         isExpanded = true
+
+        let geometry = currentGeometry()
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.28
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            panel?.animator().setFrame(geometry.expandedPanelFrame, display: true)
+        }
     }
 
     public func collapse() {
         collapseTimer?.invalidate()
         collapseTimer = nil
-        isExpanded = false
-    }
+        expandTimer?.invalidate()
+        expandTimer = nil
 
-    public func cancelCollapse() {
-        collapseTimer?.invalidate()
-        collapseTimer = nil
+        guard isExpanded else { return }
+        isExpanded = false
+
+        let geometry = currentGeometry()
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.24
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            panel?.animator().setFrame(geometry.collapsedPanelFrame, display: true)
+        }
     }
 
     public func togglePin() {
@@ -233,28 +245,6 @@ public final class NotchWindowController: NSObject, ObservableObject {
         if isPinned {
             collapseTimer?.invalidate()
             collapseTimer = nil
-        }
-    }
-
-    /// 当前允许响应鼠标点击/悬停的有效区域（折叠态仅限刘海矩形，不阻挡两侧菜单栏）
-    public func activeHitTestRect(in bounds: NSRect) -> NSRect {
-        let geometry = currentGeometry()
-        if isExpanded {
-            return NSRect(
-                x: 0,
-                y: bounds.height - geometry.expandedSize.height,
-                width: geometry.expandedSize.width,
-                height: geometry.expandedSize.height
-            )
-        } else {
-            let notchX = (bounds.width - geometry.notchRect.width) / 2
-            let notchY = bounds.height - geometry.notchRect.height
-            return NSRect(
-                x: notchX,
-                y: notchY,
-                width: geometry.notchRect.width,
-                height: geometry.notchRect.height
-            )
         }
     }
 }
@@ -285,7 +275,7 @@ final class NotchTrackingHostingView: NSHostingView<AnyView> {
         }
         let area = NSTrackingArea(
             rect: bounds,
-            options: [.mouseEnteredAndExited, .mouseMoved, .activeAlways, .inVisibleRect],
+            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
             owner: self,
             userInfo: nil
         )
@@ -293,43 +283,9 @@ final class NotchTrackingHostingView: NSHostingView<AnyView> {
         trackingArea = area
     }
 
-    override func hitTest(_ point: NSPoint) -> NSView? {
-        guard let controller else { return nil }
-        let activeRect = controller.activeHitTestRect(in: bounds)
-        guard activeRect.contains(point) else {
-            // 当鼠标不在灵动岛当前有效范围内时（例如折叠态下的两侧菜单栏），返回 nil 让系统穿透点击菜单栏
-            return nil
-        }
-        return super.hitTest(point)
-    }
-
-    override func mouseMoved(with event: NSEvent) {
-        super.mouseMoved(with: event)
-        guard let controller else { return }
-        let point = convert(event.locationInWindow, from: nil)
-        let activeRect = controller.activeHitTestRect(in: bounds)
-
-        if !controller.isExpanded {
-            if activeRect.contains(point) {
-                controller.onMouseEnter()
-            } else {
-                controller.onMouseLeave()
-            }
-        } else {
-            if activeRect.contains(point) {
-                controller.cancelCollapse()
-            } else {
-                controller.onMouseLeave()
-            }
-        }
-    }
-
     override func mouseEntered(with event: NSEvent) {
         super.mouseEntered(with: event)
-        let point = convert(event.locationInWindow, from: nil)
-        if let controller, controller.activeHitTestRect(in: bounds).contains(point) {
-            controller.onMouseEnter()
-        }
+        controller?.onMouseEnter()
     }
 
     override func mouseExited(with event: NSEvent) {
@@ -338,14 +294,10 @@ final class NotchTrackingHostingView: NSHostingView<AnyView> {
     }
 
     override func mouseDown(with event: NSEvent) {
-        let point = convert(event.locationInWindow, from: nil)
         if let controller, !controller.isExpanded {
-            let activeRect = controller.activeHitTestRect(in: bounds)
-            if activeRect.contains(point) {
-                // 点击物理刘海区域立即展开，无需等待 150ms 延时
-                controller.expandImmediately()
-                return
-            }
+            // 点击未展开的刘海区域直接立即展开
+            controller.expand()
+            return
         }
         super.mouseDown(with: event)
     }

@@ -161,8 +161,9 @@ final class NotchGeometryTests: XCTestCase {
         )
 
         XCTAssertTrue(geometry.hasPhysicalNotch)
-        XCTAssertEqual(geometry.collapsedPanelFrame.width, 380)
+        XCTAssertEqual(geometry.collapsedPanelFrame.width, 172)
         XCTAssertEqual(geometry.collapsedPanelFrame.height, 34)
+        XCTAssertEqual(geometry.collapsedPanelFrame, geometry.notchRect)
         XCTAssertEqual(geometry.collapsedPanelFrame.midX, geometry.expandedPanelFrame.midX)
         XCTAssertEqual(geometry.collapsedPanelFrame.maxY, screenFrame.maxY)
     }

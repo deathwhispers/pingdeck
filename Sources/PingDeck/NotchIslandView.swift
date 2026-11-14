@@ -30,7 +30,7 @@ struct NotchIslandUStroke: Shape {
     }
 }
 
-/// 灵动岛 SwiftUI 视图：平时仅占据硬件刘海尺寸（不遮挡菜单栏），悬停/点击时流畅弹性展开
+/// 灵动岛 SwiftUI 视图：平时与物理刘海尺寸和底部弧度 100% 严丝合缝，点击或悬停时丝滑向外延展展开
 @MainActor
 public struct NotchIslandView: View {
     @ObservedObject var controller: NotchWindowController
@@ -54,52 +54,59 @@ public struct NotchIslandView: View {
 
     public var body: some View {
         let isExpanded = controller.isExpanded
-        let width: CGFloat = isExpanded ? geometry.expandedSize.width : geometry.notchRect.width
-        let height: CGFloat = isExpanded ? geometry.expandedSize.height : geometry.notchRect.height
-        let cornerRadius: CGFloat = isExpanded ? 22 : 12
+        let bottomRadius: CGFloat = isExpanded ? 20 : 10
 
-        VStack(spacing: 0) {
-            ZStack(alignment: .top) {
-                // 纯黑背景与高光描边（与刘海硬件融合为一体）
-                UnevenRoundedRectangle(
-                    topLeadingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 22 : 12),
-                    bottomLeadingRadius: cornerRadius,
-                    bottomTrailingRadius: cornerRadius,
-                    topTrailingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 22 : 12),
-                    style: .continuous
+        ZStack(alignment: .top) {
+            // 背景与边框：纯黑材质与物理刘海无缝融合
+            UnevenRoundedRectangle(
+                topLeadingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 20 : 12),
+                bottomLeadingRadius: bottomRadius,
+                bottomTrailingRadius: bottomRadius,
+                topTrailingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 20 : 12),
+                style: .continuous
+            )
+            .fill(Color.black)
+            .overlay(
+                NotchIslandUStroke(
+                    hasPhysicalNotch: geometry.hasPhysicalNotch,
+                    cornerRadius: bottomRadius
                 )
-                .fill(Color.black)
-                .overlay(
-                    NotchIslandUStroke(
-                        hasPhysicalNotch: geometry.hasPhysicalNotch,
-                        cornerRadius: cornerRadius
-                    )
-                    .stroke(isExpanded ? Color.white.opacity(0.18) : Color.white.opacity(0.06), lineWidth: 1)
-                )
-                .shadow(
-                    color: isExpanded ? Color.black.opacity(0.65) : Color.clear,
-                    radius: isExpanded ? 20 : 0,
-                    x: 0,
-                    y: isExpanded ? 12 : 0
-                )
+                .stroke(isExpanded ? Color.white.opacity(0.18) : Color.white.opacity(0.08), lineWidth: 1)
+            )
+            .shadow(
+                color: isExpanded ? Color.black.opacity(0.65) : Color.clear,
+                radius: isExpanded ? 20 : 0,
+                x: 0,
+                y: isExpanded ? 10 : 0
+            )
 
-                if isExpanded {
-                    expandedContent
-                        .frame(width: geometry.expandedSize.width, height: geometry.expandedSize.height, alignment: .topLeading)
-                        .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
-                } else {
-                    // 折叠态：完全贴合物理刘海大小，中心为透明感应区
-                    Color.black
-                        .frame(width: geometry.notchRect.width, height: geometry.notchRect.height)
-                }
+            if isExpanded {
+                expandedContent
+                    .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
+            } else {
+                collapsedIndicator
             }
-            .frame(width: width, height: height, alignment: .top)
-            .clipped()
-
-            Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .animation(.spring(response: 0.38, dampingFraction: 0.72, blendDuration: 0.15), value: controller.isExpanded)
+        .clipped()
+        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: controller.isExpanded)
+        .preferredColorScheme(.dark)
+    }
+
+    // MARK: - Collapsed Indicator (初始折叠态：完全贴合物理刘海大小与弧度)
+
+    private var collapsedIndicator: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(model.problemCount > 0 ? Color.orange : Color.green.opacity(0.85))
+                .frame(width: 5, height: 5)
+            Text("\(model.aliveCount)")
+                .font(.system(size: 9, weight: .bold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.75))
+                .monospacedDigit()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .contentShape(Rectangle())
     }
 
     // MARK: - Expanded Content
@@ -129,10 +136,9 @@ public struct NotchIslandView: View {
         .padding(.horizontal, 14)
         .padding(.bottom, 12)
         .padding(.top, geometry.hasPhysicalNotch ? 4 : 10)
-        .preferredColorScheme(.dark)
     }
 
-    // MARK: - Header (与物理刘海无缝融合的首行：左侧 Logo，中间刘海避让，右侧图钉)
+    // MARK: - Header (首行：左侧 Logo，中间刘海避让，右侧图钉)
 
     private var headerView: some View {
         HStack(alignment: .center) {
@@ -153,7 +159,7 @@ public struct NotchIslandView: View {
 
             Spacer()
 
-            // 物理刘海屏幕下避让居中硬件摄像头，不放置任何文字，防止被遮挡
+            // 物理刘海屏幕下避让居中硬件摄像头，不放置任何文字
             if geometry.hasPhysicalNotch {
                 Spacer()
                     .frame(width: max(0, geometry.notchRect.width - 120))

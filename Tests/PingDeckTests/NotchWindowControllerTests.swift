@@ -42,7 +42,7 @@ final class NotchWindowControllerTests: XCTestCase {
             return
         }
 
-        XCTAssertEqual(panel.level, NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 2))
+        XCTAssertEqual(panel.level, .mainMenu)
         XCTAssertFalse(panel.isOpaque)
         XCTAssertEqual(panel.backgroundColor, .clear)
         XCTAssertFalse(panel.hasShadow)
@@ -55,17 +55,12 @@ final class NotchWindowControllerTests: XCTestCase {
 
     func testExpandAndCollapseDirectly() {
         controller.start(with: model)
-        let geometry = controller.currentGeometry()
 
         controller.expand()
         XCTAssertTrue(controller.isExpanded)
-        let expandedHitRect = controller.activeHitTestRect(in: CGRect(origin: .zero, size: geometry.expandedSize))
-        XCTAssertEqual(expandedHitRect.size.width, geometry.expandedSize.width)
 
         controller.collapse()
         XCTAssertFalse(controller.isExpanded)
-        let collapsedHitRect = controller.activeHitTestRect(in: CGRect(origin: .zero, size: geometry.expandedSize))
-        XCTAssertEqual(collapsedHitRect.size.width, geometry.notchRect.width)
     }
 
     func testHoverExpandStateMachine() async throws {
