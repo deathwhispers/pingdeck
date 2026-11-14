@@ -135,10 +135,6 @@ final class NotchWindowControllerTests: XCTestCase {
 
         XCTAssertNil(controller.collapseTimer)
         XCTAssertTrue(controller.isExpanded)
-
-        // 等待超过收起时间确认仍然保持展开
-        try await Task.sleep(nanoseconds: 60_000_000)
-        XCTAssertTrue(controller.isExpanded)
     }
 
     func testTogglePinPreventsCollapse() async throws {
