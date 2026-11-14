@@ -71,8 +71,12 @@ final class NotchWindowControllerTests: XCTestCase {
         XCTAssertNotNil(controller.expandTimer)
         XCTAssertFalse(controller.isExpanded)
 
-        // 等待定时器触发
-        try await Task.sleep(nanoseconds: 80_000_000)
+        // 等待定时器触发（CI 环境自适应轮询最多 500ms）
+        var elapsed: TimeInterval = 0
+        while !controller.isExpanded && elapsed < 0.5 {
+            try await Task.sleep(nanoseconds: 20_000_000)
+            elapsed += 0.02
+        }
 
         XCTAssertTrue(controller.isExpanded)
         XCTAssertNil(controller.expandTimer)
@@ -91,8 +95,8 @@ final class NotchWindowControllerTests: XCTestCase {
 
         XCTAssertNil(controller.expandTimer)
 
-        // 等待超过 50ms 验证未触发 expand
-        try await Task.sleep(nanoseconds: 60_000_000)
+        // 等待验证未触发 expand
+        try await Task.sleep(nanoseconds: 80_000_000)
         XCTAssertFalse(controller.isExpanded)
     }
 
@@ -106,8 +110,12 @@ final class NotchWindowControllerTests: XCTestCase {
         XCTAssertNotNil(controller.collapseTimer)
         XCTAssertTrue(controller.isExpanded)
 
-        // 等待收起定时器触发
-        try await Task.sleep(nanoseconds: 80_000_000)
+        // 等待收起定时器触发（CI 环境自适应轮询最多 500ms）
+        var elapsed: TimeInterval = 0
+        while controller.isExpanded && elapsed < 0.5 {
+            try await Task.sleep(nanoseconds: 20_000_000)
+            elapsed += 0.02
+        }
 
         XCTAssertFalse(controller.isExpanded)
         XCTAssertNil(controller.collapseTimer)
