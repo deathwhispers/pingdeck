@@ -52,22 +52,32 @@ public struct NotchIslandView: View {
         self.model = model
     }
 
+    private var shapeSpring: Animation {
+        if controller.isExpanded {
+            // 展开动画：阻尼 0.82，温润舒展，带有 Apple 官方高级液态弹性
+            return .spring(response: 0.40, dampingFraction: 0.82, blendDuration: 0.15)
+        } else {
+            // 收起动画：阻尼 0.88，干脆敏捷，磁吸式快速缩回物理刘海
+            return .spring(response: 0.28, dampingFraction: 0.88, blendDuration: 0.10)
+        }
+    }
+
     public var body: some View {
         let isExpanded = controller.isExpanded
         let notchWidth = geometry.notchRect.width
         let notchHeight = geometry.notchRect.height
         let currentWidth = isExpanded ? geometry.expandedSize.width : notchWidth
         let currentHeight = isExpanded ? geometry.expandedSize.height : notchHeight
-        let bottomRadius: CGFloat = isExpanded ? 20 : 10
+        let bottomRadius: CGFloat = isExpanded ? 22 : 10
 
         VStack(spacing: 0) {
             ZStack(alignment: .top) {
-                // 背景与边框：纯黑材质与物理刘海无缝融合
+                // 纯黑物理外壳：顶边贴齐边框，底边带平滑圆角
                 UnevenRoundedRectangle(
-                    topLeadingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 20 : 12),
+                    topLeadingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 22 : 12),
                     bottomLeadingRadius: bottomRadius,
                     bottomTrailingRadius: bottomRadius,
-                    topTrailingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 20 : 12),
+                    topTrailingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 22 : 12),
                     style: .continuous
                 )
                 .fill(Color.black)
@@ -78,29 +88,42 @@ public struct NotchIslandView: View {
                     )
                     .stroke(isExpanded ? Color.white.opacity(0.18) : Color.clear, lineWidth: 1)
                 )
-                .shadow(
-                    color: isExpanded ? Color.black.opacity(0.65) : Color.clear,
-                    radius: isExpanded ? 20 : 0,
-                    x: 0,
-                    y: isExpanded ? 10 : 0
-                )
 
+                // 展开内容层：微延迟渐现，等外壳舒展开后再呈现，彻底消除文字被硬性裁切的生硬感
                 if isExpanded {
                     expandedContent
                         .frame(width: geometry.expandedSize.width, height: geometry.expandedSize.height, alignment: .topLeading)
-                        .transition(.asymmetric(
-                            insertion: .opacity.combined(with: .scale(scale: 0.94, anchor: .top)),
-                            removal: .opacity.combined(with: .scale(scale: 0.90, anchor: .top))
-                        ))
+                        .opacity(isExpanded ? 1.0 : 0.0)
+                        .scaleEffect(isExpanded ? 1.0 : 0.95, anchor: .top)
+                        .animation(
+                            isExpanded
+                                ? .easeOut(duration: 0.24).delay(0.06)
+                                : .easeIn(duration: 0.14),
+                            value: isExpanded
+                        )
                 }
             }
+            .clipShape(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 22 : 12),
+                    bottomLeadingRadius: bottomRadius,
+                    bottomTrailingRadius: bottomRadius,
+                    topTrailingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 22 : 12),
+                    style: .continuous
+                )
+            )
             .frame(width: currentWidth, height: currentHeight, alignment: .top)
-            .clipped()
+            .shadow(
+                color: isExpanded ? Color.black.opacity(0.62) : Color.clear,
+                radius: isExpanded ? 22 : 0,
+                x: 0,
+                y: isExpanded ? 12 : 0
+            )
 
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .animation(.spring(response: 0.38, dampingFraction: 0.74, blendDuration: 0.18), value: controller.isExpanded)
+        .animation(shapeSpring, value: isExpanded)
         .preferredColorScheme(.dark)
     }
 
