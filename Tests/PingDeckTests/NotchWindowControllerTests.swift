@@ -162,7 +162,12 @@ final class NotchWindowControllerTests: XCTestCase {
         controller.onMouseLeave()
         XCTAssertNotNil(controller.collapseTimer)
 
-        try await Task.sleep(nanoseconds: 80_000_000)
+        // 等待收起（CI 环境自适应轮询最多 500ms）
+        var elapsed: TimeInterval = 0
+        while controller.isExpanded && elapsed < 0.5 {
+            try await Task.sleep(nanoseconds: 20_000_000)
+            elapsed += 0.02
+        }
         XCTAssertFalse(controller.isExpanded)
     }
 
