@@ -28,47 +28,11 @@ struct ContentView: View {
         }
         .sheet(item: $model.sheet) { sheet in
             switch sheet {
-            case .editor(let draft):
-                TargetEditorSheet(draft: draft) { host, note, enabled, group, colorTag in
-                    if draft.isNew {
-                        let result = model.addTargets(
-                            host: host,
-                            note: note,
-                            enabled: enabled,
-                            group: group,
-                            colorTag: colorTag
-                        )
-                        model.closeSheet()
-                        if result.entries.count > 1 {
-                            model.alert = AppAlert(
-                                title: String(localized: L10n.alertTargetsAddedTitle(result.entries.count)),
-                                message: String(localized: L10n.alertTargetsAddedMessage)
-                            )
-                        } else if result.entries.isEmpty {
-                            model.alert = AppAlert(
-                                title: String(localized: L10n.alertAddFailedTitle),
-                                message: result.rejected.first?.reason.message
-                                    ?? String(localized: L10n.alertAddFailedDefaultMessage)
-                            )
-                        }
-                    } else if let id = draft.targetID {
-                        model.closeSheet()
-                        model.updateTarget(
-                            id: id,
-                            host: host,
-                            note: note,
-                            enabled: enabled,
-                            group: group,
-                            colorTag: colorTag
-                        )
-                    }
-                }
-                .environmentObject(model)
+            case .addTargets:
+                AddTargetsSheet()
+                    .environmentObject(model)
             case .settings:
                 SettingsSheet(initialLanguage: model.settings.language)
-                    .environmentObject(model)
-            case .bulkImport:
-                BulkImportSheet()
                     .environmentObject(model)
             }
         }
@@ -85,19 +49,11 @@ struct ContentView: View {
     private var toolbarBar: some View {
         HStack(spacing: 8) {
             Button {
-                model.openNewTargetSheet()
+                model.openAddTargetsSheet()
             } label: {
                 Label(String(localized: L10n.toolbarAdd), systemImage: "plus")
             }
             .help(String(localized: L10n.toolbarAddHelp))
-
-            Button {
-                model.openEditTargetSheet()
-            } label: {
-                Image(systemName: "pencil")
-            }
-            .disabled(model.selection.count != 1)
-            .help(String(localized: L10n.toolbarEditHelp))
 
             Button {
                 removeSelected()
@@ -116,28 +72,22 @@ struct ContentView: View {
             Divider().frame(height: 18)
 
             Button {
-                model.toggleRun()
+                model.start()
             } label: {
-                Label(
-                    model.isRunning
-                        ? String(localized: L10n.toolbarStop)
-                        : String(localized: L10n.toolbarStart),
-                    systemImage: model.isRunning ? "stop.fill" : "play.fill"
-                )
-                    .foregroundStyle(model.isRunning ? Color.red : Color.green)
+                Label(String(localized: L10n.toolbarStart), systemImage: "play.fill")
+                    .foregroundStyle(Color.green)
             }
-            .help(
-                model.isRunning
-                    ? String(localized: L10n.toolbarStopHelp)
-                    : String(localized: L10n.toolbarStartHelp)
-            )
+            .disabled(model.isRunning)
+            .help(String(localized: L10n.toolbarStartHelp))
 
             Button {
-                model.refresh()
+                model.stop()
             } label: {
-                Image(systemName: "arrow.clockwise")
+                Label(String(localized: L10n.toolbarStop), systemImage: "stop.fill")
+                    .foregroundStyle(Color.red)
             }
-            .help(String(localized: L10n.toolbarRefreshHelp))
+            .disabled(!model.isRunning)
+            .help(String(localized: L10n.toolbarStopHelp))
 
             Menu {
                 Button(String(localized: L10n.toolbarClearResults)) {
@@ -155,13 +105,6 @@ struct ContentView: View {
             .help(String(localized: L10n.toolbarClearHelp))
 
             Spacer()
-
-            Button {
-                model.openBulkImportSheet()
-            } label: {
-                Label(String(localized: L10n.toolbarImport), systemImage: "text.badge.plus")
-            }
-            .help(String(localized: L10n.toolbarImportHelp))
 
             Menu {
                 ForEach(TargetColumn.allCases.filter { !$0.isRequired }) { column in

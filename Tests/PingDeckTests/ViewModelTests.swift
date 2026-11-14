@@ -594,3 +594,41 @@ final class TargetGroupingAndTagsTests: XCTestCase {
     }
 }
 
+final class UnifiedAddTargetsTests: XCTestCase {
+    private func makeModel(targets: [PingTarget] = []) -> PingDeckViewModel {
+        let configuration = AppConfiguration(targets: targets)
+        return PingDeckViewModel(configuration: configuration, store: InMemoryConfigStore())
+    }
+
+    func testExportTargetsAsEditableText() {
+        let t1 = PingTarget(host: "1.1.1.1", note: "DNS", enabled: true, group: "IDC1", colorTag: .red)
+        let t2 = PingTarget(host: "8.8.8.8", note: "", enabled: true, group: "", colorTag: nil)
+        let model = makeModel(targets: [t1, t2])
+
+        let text = model.exportTargetsAsEditableText()
+        XCTAssertTrue(text.contains("1.1.1.1, DNS, IDC1, red"))
+        XCTAssertTrue(text.contains("8.8.8.8"))
+    }
+
+    func testReplaceAllTargetsAndStart() {
+        let t1 = PingTarget(host: "old.com")
+        let model = makeModel(targets: [t1])
+
+        let input = """
+        1.1.1.1, Cloudflare, Prod, blue
+        2.2.2.2
+        """
+        let result = model.replaceAllTargetsAndStart(input)
+
+        XCTAssertEqual(result.entries.count, 2)
+        XCTAssertEqual(model.targets.count, 2)
+        XCTAssertEqual(model.targets[0].host, "1.1.1.1")
+        XCTAssertEqual(model.targets[0].note, "Cloudflare")
+        XCTAssertEqual(model.targets[0].group, "Prod")
+        XCTAssertEqual(model.targets[0].colorTag, .blue)
+        XCTAssertEqual(model.targets[1].host, "2.2.2.2")
+        XCTAssertTrue(model.isRunning)
+    }
+}
+
+

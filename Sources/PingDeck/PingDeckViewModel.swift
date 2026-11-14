@@ -67,17 +67,15 @@ struct SortSpec: Equatable {
 
 /// 当前要呈现的弹窗
 ///
-/// 只用一个 sheet 承载三种弹窗，避免多个 `.sheet` 修饰符挂在同一视图上互相抢占。
+/// 只用一个 sheet 承载弹窗，避免多个 `.sheet` 修饰符挂在同一视图上互相抢占。
 enum AppSheet: Identifiable {
-    case editor(TargetEditorDraft)
+    case addTargets
     case settings
-    case bulkImport
 
     var id: String {
         switch self {
-        case .editor(let draft): return "editor-\(draft.id.uuidString)"
+        case .addTargets: return "addTargets"
         case .settings: return "settings"
-        case .bulkImport: return "bulkImport"
         }
     }
 }
@@ -86,34 +84,6 @@ struct AppAlert: Identifiable {
     let id = UUID()
     let title: String
     let message: String
-}
-
-/// 新增 / 编辑目标时使用的草稿
-struct TargetEditorDraft: Identifiable {
-    let id = UUID()
-    var host: String
-    var note: String
-    var enabled: Bool
-    var group: String
-    var colorTag: TargetColorTag?
-    var isNew: Bool
-    var targetID: UUID?
-
-    static func new() -> TargetEditorDraft {
-        TargetEditorDraft(host: "", note: "", enabled: true, group: "", colorTag: nil, isNew: true, targetID: nil)
-    }
-
-    static func edit(_ target: PingTarget) -> TargetEditorDraft {
-        TargetEditorDraft(
-            host: target.host,
-            note: target.note,
-            enabled: target.enabled,
-            group: target.group,
-            colorTag: target.colorTag,
-            isNew: false,
-            targetID: target.id
-        )
-    }
 }
 
 /// 批量导入时的处理方式
@@ -502,18 +472,68 @@ final class PingDeckViewModel: ObservableObject {
 
     // MARK: - 弹窗
 
-    func openNewTargetSheet() {
-        sheet = .editor(.new())
+    func openAddTargetsSheet() {
+        sheet = .addTargets
     }
 
-    func openEditTargetSheet() {
-        guard let id = selection.first,
-              let target = targets.first(where: { $0.id == id }) else { return }
-        sheet = .editor(.edit(target))
+    func openNewTargetSheet() {
+        sheet = .addTargets
     }
 
     func openSettingsSheet() {
         sheet = .settings
+    }
+
+    func openBulkImportSheet() {
+        sheet = .addTargets
+    }
+
+    /// 将当前所有目标格式化为可编辑的多行文本
+    func exportTargetsAsEditableText() -> String {
+        targets.map { t in
+            var parts = [t.host]
+            if !t.note.isEmpty || !t.group.isEmpty || t.colorTag != nil {
+                parts.append(t.note)
+            }
+            if !t.group.isEmpty || t.colorTag != nil {
+                parts.append(t.group)
+            }
+            if let color = t.colorTag {
+                parts.append(color.rawValue)
+            }
+            return parts.joined(separator: ", ")
+        }.joined(separator: "\n")
+    }
+
+    /// 全量重载目标并立即重新开始探测
+    @discardableResult
+    func replaceAllTargetsAndStart(
+        _ text: String,
+        defaultGroup: String = "",
+        defaultColorTag: TargetColorTag? = nil
+    ) -> BulkImportParser.Result {
+        let result = BulkImportParser.parse(
+            text,
+            existing: [],
+            defaultGroup: defaultGroup,
+            defaultColorTag: defaultColorTag
+        )
+        guard !result.entries.isEmpty else { return result }
+
+        let newTargets = result.entries.map { entry in
+            PingTarget(
+                host: entry.host,
+                note: entry.note,
+                enabled: true,
+                group: entry.group.isEmpty ? defaultGroup : entry.group,
+                colorTag: entry.colorTag ?? defaultColorTag
+            )
+        }
+
+        applyTargets(newTargets)
+        clearResults()
+        start()
+        return result
     }
 
     @discardableResult
@@ -530,10 +550,6 @@ final class PingDeckViewModel: ObservableObject {
             relaunch()
         }
         return true
-    }
-
-    func openBulkImportSheet() {
-        sheet = .bulkImport
     }
 
     func closeSheet() {
