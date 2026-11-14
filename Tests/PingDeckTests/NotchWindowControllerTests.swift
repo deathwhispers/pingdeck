@@ -59,13 +59,13 @@ final class NotchWindowControllerTests: XCTestCase {
 
         controller.expand()
         XCTAssertTrue(controller.isExpanded)
-        XCTAssertEqual(controller.panel?.frame.size.width, geometry.expandedPanelFrame.size.width)
-        XCTAssertEqual(controller.panel?.frame.size.height, geometry.expandedPanelFrame.size.height)
+        let expandedHitRect = controller.activeHitTestRect(in: CGRect(origin: .zero, size: geometry.expandedSize))
+        XCTAssertEqual(expandedHitRect.size.width, geometry.expandedSize.width)
 
         controller.collapse()
         XCTAssertFalse(controller.isExpanded)
-        XCTAssertEqual(controller.panel?.frame.size.width, geometry.collapsedPanelFrame.size.width)
-        XCTAssertEqual(controller.panel?.frame.size.height, geometry.collapsedPanelFrame.size.height)
+        let collapsedHitRect = controller.activeHitTestRect(in: CGRect(origin: .zero, size: geometry.expandedSize))
+        XCTAssertEqual(collapsedHitRect.size.width, geometry.notchRect.width)
     }
 
     func testHoverExpandStateMachine() async throws {

@@ -30,7 +30,7 @@ struct NotchIslandUStroke: Shape {
     }
 }
 
-/// 灵动岛 SwiftUI 视图：覆盖物理刘海与顶部菜单栏，提供双耳常显与悬停展开面板
+/// 灵动岛 SwiftUI 视图：平时仅占据硬件刘海尺寸（不遮挡菜单栏），悬停/点击时流畅弹性展开
 @MainActor
 public struct NotchIslandView: View {
     @ObservedObject var controller: NotchWindowController
@@ -53,91 +53,58 @@ public struct NotchIslandView: View {
     }
 
     public var body: some View {
-        ZStack {
-            if controller.isExpanded {
-                expandedCard
-                    .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
-            } else if model.settings.notchIsland.showEars {
-                collapsedEarsBar
-                    .transition(.opacity)
-            } else {
-                Color.black.opacity(0.001)
-                    .contentShape(Rectangle())
+        let isExpanded = controller.isExpanded
+        let width: CGFloat = isExpanded ? geometry.expandedSize.width : geometry.notchRect.width
+        let height: CGFloat = isExpanded ? geometry.expandedSize.height : geometry.notchRect.height
+        let cornerRadius: CGFloat = isExpanded ? 22 : 12
+
+        VStack(spacing: 0) {
+            ZStack(alignment: .top) {
+                // 纯黑背景与高光描边（与刘海硬件融合为一体）
+                UnevenRoundedRectangle(
+                    topLeadingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 22 : 12),
+                    bottomLeadingRadius: cornerRadius,
+                    bottomTrailingRadius: cornerRadius,
+                    topTrailingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 22 : 12),
+                    style: .continuous
+                )
+                .fill(Color.black)
+                .overlay(
+                    NotchIslandUStroke(
+                        hasPhysicalNotch: geometry.hasPhysicalNotch,
+                        cornerRadius: cornerRadius
+                    )
+                    .stroke(isExpanded ? Color.white.opacity(0.18) : Color.white.opacity(0.06), lineWidth: 1)
+                )
+                .shadow(
+                    color: isExpanded ? Color.black.opacity(0.65) : Color.clear,
+                    radius: isExpanded ? 20 : 0,
+                    x: 0,
+                    y: isExpanded ? 12 : 0
+                )
+
+                if isExpanded {
+                    expandedContent
+                        .frame(width: geometry.expandedSize.width, height: geometry.expandedSize.height, alignment: .topLeading)
+                        .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
+                } else {
+                    // 折叠态：完全贴合物理刘海大小，中心为透明感应区
+                    Color.black
+                        .frame(width: geometry.notchRect.width, height: geometry.notchRect.height)
+                }
             }
+            .frame(width: width, height: height, alignment: .top)
+            .clipped()
+
+            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .animation(.spring(response: 0.35, dampingFraction: 0.78), value: controller.isExpanded)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .animation(.spring(response: 0.38, dampingFraction: 0.72, blendDuration: 0.15), value: controller.isExpanded)
     }
 
-    // MARK: - Collapsed Ears Bar (静息态：覆盖菜单栏，左右双耳显示在线/离线数字)
+    // MARK: - Expanded Content
 
-    private var collapsedEarsBar: some View {
-        HStack(alignment: .center) {
-            // 左耳：在线数
-            HStack(spacing: 5) {
-                Circle()
-                    .fill(Color.green)
-                    .frame(width: 6, height: 6)
-                Text("\(model.aliveCount)")
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .monospacedDigit()
-            }
-            .padding(.leading, 14)
-
-            Spacer()
-
-            // 物理刘海屏幕下留出刘海摄像头的黑色遮盖区域
-            if geometry.hasPhysicalNotch {
-                Spacer()
-                    .frame(width: max(0, geometry.notchRect.width - 100))
-            }
-
-            Spacer()
-
-            // 右耳：离线数
-            HStack(spacing: 5) {
-                Circle()
-                    .fill(model.problemCount > 0 ? Color.red : Color.secondary.opacity(0.6))
-                    .frame(width: 6, height: 6)
-                Text("\(model.problemCount)")
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundStyle(model.problemCount > 0 ? Color.red : Color.white.opacity(0.8))
-                    .monospacedDigit()
-            }
-            .padding(.trailing, 14)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            UnevenRoundedRectangle(
-                topLeadingRadius: geometry.hasPhysicalNotch ? 0 : 16,
-                bottomLeadingRadius: 14,
-                bottomTrailingRadius: 14,
-                topTrailingRadius: geometry.hasPhysicalNotch ? 0 : 16,
-                style: .continuous
-            )
-            .fill(Color.black)
-        )
-        .overlay(
-            NotchIslandUStroke(hasPhysicalNotch: geometry.hasPhysicalNotch, cornerRadius: 14)
-                .stroke(Color.white.opacity(0.18), lineWidth: 1)
-        )
-        .clipShape(
-            UnevenRoundedRectangle(
-                topLeadingRadius: geometry.hasPhysicalNotch ? 0 : 16,
-                bottomLeadingRadius: 14,
-                bottomTrailingRadius: 14,
-                topTrailingRadius: geometry.hasPhysicalNotch ? 0 : 16,
-                style: .continuous
-            )
-        )
-        .contentShape(Rectangle())
-        .preferredColorScheme(.dark)
-    }
-
-    // MARK: - Expanded Card Container (展开态：纯黑背景从刘海向下延展为大卡片)
-
-    private var expandedCard: some View {
+    private var expandedContent: some View {
         VStack(alignment: .leading, spacing: 8) {
             headerView
 
@@ -162,31 +129,6 @@ public struct NotchIslandView: View {
         .padding(.horizontal, 14)
         .padding(.bottom, 12)
         .padding(.top, geometry.hasPhysicalNotch ? 4 : 10)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(
-            UnevenRoundedRectangle(
-                topLeadingRadius: geometry.hasPhysicalNotch ? 0 : 22,
-                bottomLeadingRadius: 22,
-                bottomTrailingRadius: 22,
-                topTrailingRadius: geometry.hasPhysicalNotch ? 0 : 22,
-                style: .continuous
-            )
-            .fill(Color.black)
-        )
-        .overlay(
-            NotchIslandUStroke(hasPhysicalNotch: geometry.hasPhysicalNotch, cornerRadius: 22)
-                .stroke(Color.white.opacity(0.18), lineWidth: 1)
-        )
-        .clipShape(
-            UnevenRoundedRectangle(
-                topLeadingRadius: geometry.hasPhysicalNotch ? 0 : 22,
-                bottomLeadingRadius: 22,
-                bottomTrailingRadius: 22,
-                topTrailingRadius: geometry.hasPhysicalNotch ? 0 : 22,
-                style: .continuous
-            )
-        )
-        .shadow(color: Color.black.opacity(0.55), radius: 18, x: 0, y: 12)
         .preferredColorScheme(.dark)
     }
 
@@ -211,7 +153,7 @@ public struct NotchIslandView: View {
 
             Spacer()
 
-            // 物理刘海屏幕下留出刘海中央摄像头的黑色遮盖区域
+            // 物理刘海屏幕下避让居中硬件摄像头，不放置任何文字，防止被遮挡
             if geometry.hasPhysicalNotch {
                 Spacer()
                     .frame(width: max(0, geometry.notchRect.width - 120))
