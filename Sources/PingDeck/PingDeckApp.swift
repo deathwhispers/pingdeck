@@ -34,6 +34,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func applicationWillTerminate(_ notification: Notification) {
+        NotchWindowController.shared.stop()
+    }
+
     deinit {
         appearanceObservation?.invalidate()
     }
@@ -89,6 +93,9 @@ struct PingDeckApp: App {
                 .background(WindowAccessor { window in
                     WindowCloseInterceptor.shared.setup(for: window, model: model)
                 })
+                .onAppear {
+                    NotchWindowController.shared.start(with: model)
+                }
                 .environmentObject(model)
                 .preferredColorScheme(model.settings.appearance.colorScheme)
                 .frame(minWidth: 1000, minHeight: 560)

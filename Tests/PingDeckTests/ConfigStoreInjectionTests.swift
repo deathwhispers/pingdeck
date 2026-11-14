@@ -80,3 +80,42 @@ final class MenuBarSettingTests: XCTestCase {
     }
 }
 
+/// 灵动岛偏好设置需要随配置一起持久化
+final class NotchIslandSettingTests: XCTestCase {
+    func testNotchIslandSettingsChangesAreSaved() throws {
+        let store = InMemoryConfigStore()
+        let model = PingDeckViewModel(configuration: AppConfiguration(), store: store)
+
+        model.settings.notchIsland.enabled = false
+        model.settings.notchIsland.showEars = false
+        model.settings.notchIsland.showMetrics = false
+        model.settings.notchIsland.showRecentProblems = false
+        model.settings.notchIsland.showQuickControls = false
+        model.saveNow()
+
+        let saved = try XCTUnwrap(store.saved)
+        XCTAssertEqual(saved.settings.notchIsland.enabled, false)
+        XCTAssertEqual(saved.settings.notchIsland.showEars, false)
+        XCTAssertEqual(saved.settings.notchIsland.showMetrics, false)
+        XCTAssertEqual(saved.settings.notchIsland.showRecentProblems, false)
+        XCTAssertEqual(saved.settings.notchIsland.showQuickControls, false)
+    }
+
+    func testNotchIslandSettingsToggleValuesAreSaved() throws {
+        let store = InMemoryConfigStore()
+        let model = PingDeckViewModel(configuration: AppConfiguration(), store: store)
+
+        model.settings.notchIsland.enabled = true
+        model.settings.notchIsland.showMetrics = false
+        model.settings.notchIsland.showRecentProblems = true
+        model.settings.notchIsland.showQuickControls = false
+        model.saveNow()
+
+        let saved = try XCTUnwrap(store.saved)
+        XCTAssertEqual(saved.settings.notchIsland.enabled, true)
+        XCTAssertEqual(saved.settings.notchIsland.showMetrics, false)
+        XCTAssertEqual(saved.settings.notchIsland.showRecentProblems, true)
+        XCTAssertEqual(saved.settings.notchIsland.showQuickControls, false)
+    }
+}
+
