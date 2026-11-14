@@ -161,16 +161,23 @@ final class NotchWindowControllerTests: XCTestCase {
     func testSettingsEnabledChangeControlsVisibility() async throws {
         controller.start(with: model)
         XCTAssertNotNil(controller.panel)
+
+        // 初始折叠状态浮窗默认隐藏，避免启动显示黑框
+        XCTAssertFalse(controller.panel?.isVisible ?? true)
+
+        // 展开时浮窗变为可见
+        controller.expand()
         XCTAssertTrue(controller.panel?.isVisible ?? false)
 
-        // 禁用灵动岛
+        // 禁用灵动岛后浮窗关闭并隐藏
         model.settings.notchIsland.enabled = false
         try await Task.sleep(nanoseconds: 20_000_000)
         XCTAssertFalse(controller.panel?.isVisible ?? true)
 
-        // 重新启用
+        // 重新启用并在展开后可见
         model.settings.notchIsland.enabled = true
         try await Task.sleep(nanoseconds: 20_000_000)
+        controller.expand()
         XCTAssertTrue(controller.panel?.isVisible ?? false)
     }
 

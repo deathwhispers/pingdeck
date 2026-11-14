@@ -143,6 +143,8 @@ public final class NotchWindowController: NSObject, ObservableObject {
             newPanel.contentView = hostingView
         }
 
+        // 初始折叠状态下默认完全隐藏窗口，绝不展现空黑框
+        newPanel.orderOut(nil)
         self.panel = newPanel
     }
 
@@ -196,7 +198,9 @@ public final class NotchWindowController: NSObject, ObservableObject {
         if settings.enabled {
             setupPanelIfNeeded()
             updateLayout()
-            panel?.orderFrontRegardless()
+            if isExpanded {
+                panel?.orderFrontRegardless()
+            }
         } else {
             expandTimer?.invalidate()
             expandTimer = nil
@@ -334,8 +338,8 @@ public final class NotchWindowController: NSObject, ObservableObject {
         guard isExpanded else { return }
         isExpanded = false
 
-        // 待 SwiftUI 弹簧收缩动画完成（约 350ms）后隐藏浮窗，完全释放菜单栏
-        let timer = Timer(timeInterval: 0.35, repeats: false) { [weak self] _ in
+        // 待 SwiftUI 弹簧收缩动画完成（约 380ms）后隐藏浮窗，完全释放菜单栏
+        let timer = Timer(timeInterval: 0.38, repeats: false) { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self, !self.isExpanded else { return }
                 self.panel?.orderOut(nil)

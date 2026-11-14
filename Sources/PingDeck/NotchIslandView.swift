@@ -54,59 +54,54 @@ public struct NotchIslandView: View {
 
     public var body: some View {
         let isExpanded = controller.isExpanded
+        let notchWidth = geometry.notchRect.width
+        let notchHeight = geometry.notchRect.height
+        let currentWidth = isExpanded ? geometry.expandedSize.width : notchWidth
+        let currentHeight = isExpanded ? geometry.expandedSize.height : notchHeight
         let bottomRadius: CGFloat = isExpanded ? 20 : 10
 
-        ZStack(alignment: .top) {
-            // 背景与边框：纯黑材质与物理刘海无缝融合
-            UnevenRoundedRectangle(
-                topLeadingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 20 : 12),
-                bottomLeadingRadius: bottomRadius,
-                bottomTrailingRadius: bottomRadius,
-                topTrailingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 20 : 12),
-                style: .continuous
-            )
-            .fill(Color.black)
-            .overlay(
-                NotchIslandUStroke(
-                    hasPhysicalNotch: geometry.hasPhysicalNotch,
-                    cornerRadius: bottomRadius
+        VStack(spacing: 0) {
+            ZStack(alignment: .top) {
+                // 背景与边框：纯黑材质与物理刘海无缝融合
+                UnevenRoundedRectangle(
+                    topLeadingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 20 : 12),
+                    bottomLeadingRadius: bottomRadius,
+                    bottomTrailingRadius: bottomRadius,
+                    topTrailingRadius: geometry.hasPhysicalNotch ? 0 : (isExpanded ? 20 : 12),
+                    style: .continuous
                 )
-                .stroke(isExpanded ? Color.white.opacity(0.18) : Color.white.opacity(0.08), lineWidth: 1)
-            )
-            .shadow(
-                color: isExpanded ? Color.black.opacity(0.65) : Color.clear,
-                radius: isExpanded ? 20 : 0,
-                x: 0,
-                y: isExpanded ? 10 : 0
-            )
+                .fill(Color.black)
+                .overlay(
+                    NotchIslandUStroke(
+                        hasPhysicalNotch: geometry.hasPhysicalNotch,
+                        cornerRadius: bottomRadius
+                    )
+                    .stroke(isExpanded ? Color.white.opacity(0.18) : Color.clear, lineWidth: 1)
+                )
+                .shadow(
+                    color: isExpanded ? Color.black.opacity(0.65) : Color.clear,
+                    radius: isExpanded ? 20 : 0,
+                    x: 0,
+                    y: isExpanded ? 10 : 0
+                )
 
-            if isExpanded {
-                expandedContent
-                    .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
-            } else {
-                collapsedIndicator
+                if isExpanded {
+                    expandedContent
+                        .frame(width: geometry.expandedSize.width, height: geometry.expandedSize.height, alignment: .topLeading)
+                        .transition(.asymmetric(
+                            insertion: .opacity.combined(with: .scale(scale: 0.94, anchor: .top)),
+                            removal: .opacity.combined(with: .scale(scale: 0.90, anchor: .top))
+                        ))
+                }
             }
+            .frame(width: currentWidth, height: currentHeight, alignment: .top)
+            .clipped()
+
+            Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .clipped()
-        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: controller.isExpanded)
+        .animation(.spring(response: 0.38, dampingFraction: 0.74, blendDuration: 0.18), value: controller.isExpanded)
         .preferredColorScheme(.dark)
-    }
-
-    // MARK: - Collapsed Indicator (初始折叠态：完全贴合物理刘海大小与弧度)
-
-    private var collapsedIndicator: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(model.problemCount > 0 ? Color.orange : Color.green.opacity(0.85))
-                .frame(width: 5, height: 5)
-            Text("\(model.aliveCount)")
-                .font(.system(size: 9, weight: .bold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.75))
-                .monospacedDigit()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .contentShape(Rectangle())
     }
 
     // MARK: - Expanded Content
