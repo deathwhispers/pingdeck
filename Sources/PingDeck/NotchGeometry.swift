@@ -33,8 +33,8 @@ public struct NotchGeometry: Equatable, Sendable {
         safeAreaTopInset: CGFloat,
         auxiliaryTopLeft: CGRect?,
         auxiliaryTopRight: CGRect?,
-        expandedHeight: CGFloat = 220,
-        expandedWidth: CGFloat = 380,
+        expandedHeight: CGFloat = 230,
+        expandedWidth: CGFloat = 420,
         showEars: Bool = false
     ) -> NotchGeometry {
         let hasPhysicalNotch: Bool
@@ -84,8 +84,8 @@ public struct NotchGeometry: Equatable, Sendable {
     /// 根据 `NSScreen` 实例自适应计算灵动岛几何布局
     public static func calculate(
         for screen: NSScreen,
-        expandedHeight: CGFloat = 220,
-        expandedWidth: CGFloat = 380,
+        expandedHeight: CGFloat = 230,
+        expandedWidth: CGFloat = 420,
         showEars: Bool = false
     ) -> NotchGeometry {
         calculate(

@@ -3,6 +3,13 @@ import SwiftUI
 import Combine
 import PingCore
 
+/// 允许窗口直接贴齐屏幕顶沿（覆盖菜单栏高度），阻止系统默认将窗口挤出菜单栏下方
+final class NotchPanel: NSPanel {
+    override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
+        frameRect
+    }
+}
+
 /// 灵动岛无边框浮窗控制器与全局鼠标悬停/点击事件监听器
 @MainActor
 public final class NotchWindowController: NSObject, ObservableObject {
@@ -114,14 +121,14 @@ public final class NotchWindowController: NSObject, ObservableObject {
 
         let geometry = currentGeometry()
 
-        let newPanel = NSPanel(
+        let newPanel = NotchPanel(
             contentRect: geometry.expandedPanelFrame,
             styleMask: [.borderless, .nonactivatingPanel, .utilityWindow, .hudWindow],
             backing: .buffered,
             defer: false
         )
-        // 使用 .floating 层级（保证浮动在应用窗口上方，同时绝对不会覆盖系统鼠标光标）
-        newPanel.level = .floating
+        // 浮窗层级使用 .statusBar + 1（高于菜单栏与状态栏，使纯黑背景完全融入刘海），同时属于 HUD 浮窗，绝对不遮挡鼠标光标
+        newPanel.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 1)
         newPanel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
         newPanel.isOpaque = false
         newPanel.backgroundColor = .clear
