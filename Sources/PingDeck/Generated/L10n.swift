@@ -927,6 +927,33 @@ enum L10n {
     }
 
     /**
+     Notch Island message when all nodes are healthy
+     
+     Localized string for key “notchIsland.allNormal” in table “Localizable.xcstrings”.
+     */
+    static var notchIslandAllNormal: LocalizedStringResource {
+        LocalizedStringResource("notchIsland.allNormal", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Help tooltip to pin Notch Island panel
+     
+     Localized string for key “notchIsland.pinHelp” in table “Localizable.xcstrings”.
+     */
+    static var notchIslandPinHelp: LocalizedStringResource {
+        LocalizedStringResource("notchIsland.pinHelp", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Help tooltip to unpin Notch Island panel
+     
+     Localized string for key “notchIsland.unpinHelp” in table “Localizable.xcstrings”.
+     */
+    static var notchIslandUnpinHelp: LocalizedStringResource {
+        LocalizedStringResource("notchIsland.unpinHelp", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Ping process: system ping executable not found
      
      Localized string for key “ping.error.executableNotFound” in table “Localizable.xcstrings”.
@@ -1113,6 +1140,60 @@ enum L10n {
      */
     static var settingsMenuBarShowText: LocalizedStringResource {
         LocalizedStringResource("settings.menuBar.showText", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings toggle to enable Notch Island
+     
+     Localized string for key “settings.notchIsland.enable” in table “Localizable.xcstrings”.
+     */
+    static var settingsNotchIslandEnable: LocalizedStringResource {
+        LocalizedStringResource("settings.notchIsland.enable", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings section header for Notch Island
+     
+     Localized string for key “settings.notchIsland.section” in table “Localizable.xcstrings”.
+     */
+    static var settingsNotchIslandSection: LocalizedStringResource {
+        LocalizedStringResource("settings.notchIsland.section", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings toggle to show health status on notch ears
+     
+     Localized string for key “settings.notchIsland.showEars” in table “Localizable.xcstrings”.
+     */
+    static var settingsNotchIslandShowEars: LocalizedStringResource {
+        LocalizedStringResource("settings.notchIsland.showEars", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings toggle to show health metrics in Notch Island
+     
+     Localized string for key “settings.notchIsland.showMetrics” in table “Localizable.xcstrings”.
+     */
+    static var settingsNotchIslandShowMetrics: LocalizedStringResource {
+        LocalizedStringResource("settings.notchIsland.showMetrics", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings toggle to show quick controls in Notch Island
+     
+     Localized string for key “settings.notchIsland.showQuickControls” in table “Localizable.xcstrings”.
+     */
+    static var settingsNotchIslandShowQuickControls: LocalizedStringResource {
+        LocalizedStringResource("settings.notchIsland.showQuickControls", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Settings toggle to show recent problem nodes in Notch Island
+     
+     Localized string for key “settings.notchIsland.showRecentProblems” in table “Localizable.xcstrings”.
+     */
+    static var settingsNotchIslandShowRecentProblems: LocalizedStringResource {
+        LocalizedStringResource("settings.notchIsland.showRecentProblems", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
