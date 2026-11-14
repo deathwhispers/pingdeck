@@ -33,8 +33,9 @@ public struct NotchGeometry: Equatable, Sendable {
         safeAreaTopInset: CGFloat,
         auxiliaryTopLeft: CGRect?,
         auxiliaryTopRight: CGRect?,
-        expandedHeight: CGFloat = 200,
-        expandedWidth: CGFloat = 380
+        expandedHeight: CGFloat = 220,
+        expandedWidth: CGFloat = 380,
+        showEars: Bool = false
     ) -> NotchGeometry {
         let hasPhysicalNotch: Bool
         let notchX: CGFloat
@@ -62,9 +63,12 @@ public struct NotchGeometry: Equatable, Sendable {
         let resolvedExpandedHeight = max(expandedHeight, notchHeight)
         let expandedSize = CGSize(width: resolvedExpandedWidth, height: resolvedExpandedHeight)
 
-        let collapsedPanelFrame = CGRect(x: notchX, y: notchY, width: notchWidth, height: notchHeight)
+        let notchCenter = notchX + notchWidth / 2
+        let collapsedWidth = showEars ? resolvedExpandedWidth : notchWidth
+        let collapsedX = showEars ? (notchCenter - resolvedExpandedWidth / 2) : notchX
+        let collapsedPanelFrame = CGRect(x: collapsedX, y: notchY, width: collapsedWidth, height: notchHeight)
         let expandedPanelFrame = CGRect(
-            x: notchX + notchWidth / 2 - expandedSize.width / 2,
+            x: notchCenter - expandedSize.width / 2,
             y: screenFrame.maxY - expandedSize.height,
             width: expandedSize.width,
             height: expandedSize.height
@@ -72,7 +76,7 @@ public struct NotchGeometry: Equatable, Sendable {
 
         return NotchGeometry(
             hasPhysicalNotch: hasPhysicalNotch,
-            notchRect: collapsedPanelFrame,
+            notchRect: CGRect(x: notchX, y: notchY, width: notchWidth, height: notchHeight),
             expandedSize: expandedSize,
             collapsedPanelFrame: collapsedPanelFrame,
             expandedPanelFrame: expandedPanelFrame
@@ -82,8 +86,9 @@ public struct NotchGeometry: Equatable, Sendable {
     /// 根据 `NSScreen` 实例自适应计算灵动岛几何布局
     public static func calculate(
         for screen: NSScreen,
-        expandedHeight: CGFloat = 200,
-        expandedWidth: CGFloat = 380
+        expandedHeight: CGFloat = 220,
+        expandedWidth: CGFloat = 380,
+        showEars: Bool = false
     ) -> NotchGeometry {
         calculate(
             screenFrame: screen.frame,
@@ -91,7 +96,8 @@ public struct NotchGeometry: Equatable, Sendable {
             auxiliaryTopLeft: screen.auxiliaryTopLeftArea,
             auxiliaryTopRight: screen.auxiliaryTopRightArea,
             expandedHeight: expandedHeight,
-            expandedWidth: expandedWidth
+            expandedWidth: expandedWidth,
+            showEars: showEars
         )
     }
 }

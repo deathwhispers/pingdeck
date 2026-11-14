@@ -143,4 +143,27 @@ final class NotchGeometryTests: XCTestCase {
         XCTAssertEqual(geometry.expandedPanelFrame.maxY, screen.frame.maxY)
         XCTAssertEqual(geometry.collapsedPanelFrame.maxY, screen.frame.maxY)
     }
+
+    func testPhysicalNotchWithShowEarsTrue() {
+        let screenFrame = CGRect(x: 0, y: 0, width: 1728, height: 1117)
+        let safeAreaTopInset: CGFloat = 34
+        let auxiliaryTopLeft = CGRect(x: 0, y: 1083, width: 778, height: 34)
+        let auxiliaryTopRight = CGRect(x: 950, y: 1083, width: 778, height: 34)
+
+        let geometry = NotchGeometry.calculate(
+            screenFrame: screenFrame,
+            safeAreaTopInset: safeAreaTopInset,
+            auxiliaryTopLeft: auxiliaryTopLeft,
+            auxiliaryTopRight: auxiliaryTopRight,
+            expandedHeight: 200,
+            expandedWidth: 380,
+            showEars: true
+        )
+
+        XCTAssertTrue(geometry.hasPhysicalNotch)
+        XCTAssertEqual(geometry.collapsedPanelFrame.width, 380)
+        XCTAssertEqual(geometry.collapsedPanelFrame.height, 34)
+        XCTAssertEqual(geometry.collapsedPanelFrame.midX, geometry.expandedPanelFrame.midX)
+        XCTAssertEqual(geometry.collapsedPanelFrame.maxY, screenFrame.maxY)
+    }
 }

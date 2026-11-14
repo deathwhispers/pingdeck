@@ -4753,6 +4753,30 @@
         }
       }
     },
+    "settings.notchIsland.showEars": {
+      "comment": "Settings toggle to show health status on notch ears",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刘海双耳常显状态指标 (在线 / 离线)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Status on Notch Ears"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ノッチ左右にステータス常時表示"
+          }
+        }
+      }
+    },
     "settings.notchIsland.showMetrics": {
       "comment": "Settings toggle to show health metrics in Notch Island",
       "extractionState": "manual",

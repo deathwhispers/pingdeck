@@ -52,6 +52,7 @@ final class ConfigSerializationTests: XCTestCase {
 
         let settings = try JSONDecoder().decode(PingSettings.self, from: legacyJSON)
         XCTAssertEqual(settings.notchIsland.enabled, true)
+        XCTAssertEqual(settings.notchIsland.showEars, true)
         XCTAssertEqual(settings.notchIsland.showMetrics, true)
         XCTAssertEqual(settings.notchIsland.showRecentProblems, true)
         XCTAssertEqual(settings.notchIsland.showQuickControls, true)

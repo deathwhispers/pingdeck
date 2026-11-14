@@ -137,6 +137,10 @@ struct SettingsSheet: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
+                    Toggle(isOn: $model.settings.notchIsland.showEars) {
+                        Text(L10n.settingsNotchIslandShowEars)
+                    }
+
                     Toggle(isOn: $model.settings.notchIsland.showMetrics) {
                         Text(L10n.settingsNotchIslandShowMetrics)
                     }

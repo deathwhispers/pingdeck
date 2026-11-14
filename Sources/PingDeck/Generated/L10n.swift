@@ -1161,6 +1161,15 @@ enum L10n {
     }
 
     /**
+     Settings toggle to show health status on notch ears
+     
+     Localized string for key “settings.notchIsland.showEars” in table “Localizable.xcstrings”.
+     */
+    static var settingsNotchIslandShowEars: LocalizedStringResource {
+        LocalizedStringResource("settings.notchIsland.showEars", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Settings toggle to show health metrics in Notch Island
      
      Localized string for key “settings.notchIsland.showMetrics” in table “Localizable.xcstrings”.

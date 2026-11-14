@@ -2,11 +2,43 @@ import AppKit
 import SwiftUI
 import PingCore
 
-/// 灵动岛 SwiftUI 展开视图，提供黑晶流线风格卡片、核心指标、异常速览与快捷控制
+/// 仅给左、底、右三边绘制描边，顶部平直贴顶无描边，避免在刘海上方出现多余白线
+struct NotchIslandUStroke: Shape {
+    let hasPhysicalNotch: Bool
+    let cornerRadius: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        if !hasPhysicalNotch {
+            return RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).path(in: rect)
+        }
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY - cornerRadius))
+        path.addArc(
+            tangent1End: CGPoint(x: rect.minX, y: rect.maxY),
+            tangent2End: CGPoint(x: rect.minX + cornerRadius, y: rect.maxY),
+            radius: cornerRadius
+        )
+        path.addLine(to: CGPoint(x: rect.maxX - cornerRadius, y: rect.maxY))
+        path.addArc(
+            tangent1End: CGPoint(x: rect.maxX, y: rect.maxY),
+            tangent2End: CGPoint(x: rect.maxX, y: rect.maxY - cornerRadius),
+            radius: cornerRadius
+        )
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        return path
+    }
+}
+
+/// 灵动岛 SwiftUI 视图：覆盖物理刘海与顶部菜单栏，提供双耳常显与悬停展开面板
 @MainActor
 public struct NotchIslandView: View {
     @ObservedObject var controller: NotchWindowController
     @ObservedObject var model: PingDeckViewModel
+
+    private var geometry: NotchGeometry {
+        controller.currentGeometry()
+    }
 
     @MainActor
     init(controller: NotchWindowController, model: PingDeckViewModel) {
@@ -25,6 +57,9 @@ public struct NotchIslandView: View {
             if controller.isExpanded {
                 expandedCard
                     .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
+            } else if model.settings.notchIsland.showEars {
+                collapsedEarsBar
+                    .transition(.opacity)
             } else {
                 Color.black.opacity(0.001)
                     .contentShape(Rectangle())
@@ -34,7 +69,73 @@ public struct NotchIslandView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.78), value: controller.isExpanded)
     }
 
-    // MARK: - Expanded Card Container
+    // MARK: - Collapsed Ears Bar (静息态：覆盖菜单栏，左右双耳显示在线/离线数字)
+
+    private var collapsedEarsBar: some View {
+        HStack(alignment: .center) {
+            // 左耳：在线数
+            HStack(spacing: 5) {
+                Circle()
+                    .fill(Color.green)
+                    .frame(width: 6, height: 6)
+                Text("\(model.aliveCount)")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .monospacedDigit()
+            }
+            .padding(.leading, 14)
+
+            Spacer()
+
+            // 物理刘海屏幕下留出刘海摄像头的黑色遮盖区域
+            if geometry.hasPhysicalNotch {
+                Spacer()
+                    .frame(width: max(0, geometry.notchRect.width - 100))
+            }
+
+            Spacer()
+
+            // 右耳：离线数
+            HStack(spacing: 5) {
+                Circle()
+                    .fill(model.problemCount > 0 ? Color.red : Color.secondary.opacity(0.6))
+                    .frame(width: 6, height: 6)
+                Text("\(model.problemCount)")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundStyle(model.problemCount > 0 ? Color.red : Color.white.opacity(0.8))
+                    .monospacedDigit()
+            }
+            .padding(.trailing, 14)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            UnevenRoundedRectangle(
+                topLeadingRadius: geometry.hasPhysicalNotch ? 0 : 16,
+                bottomLeadingRadius: 14,
+                bottomTrailingRadius: 14,
+                topTrailingRadius: geometry.hasPhysicalNotch ? 0 : 16,
+                style: .continuous
+            )
+            .fill(Color.black)
+        )
+        .overlay(
+            NotchIslandUStroke(hasPhysicalNotch: geometry.hasPhysicalNotch, cornerRadius: 14)
+                .stroke(Color.white.opacity(0.18), lineWidth: 1)
+        )
+        .clipShape(
+            UnevenRoundedRectangle(
+                topLeadingRadius: geometry.hasPhysicalNotch ? 0 : 16,
+                bottomLeadingRadius: 14,
+                bottomTrailingRadius: 14,
+                topTrailingRadius: geometry.hasPhysicalNotch ? 0 : 16,
+                style: .continuous
+            )
+        )
+        .contentShape(Rectangle())
+        .preferredColorScheme(.dark)
+    }
+
+    // MARK: - Expanded Card Container (展开态：纯黑背景从刘海向下延展为大卡片)
 
     private var expandedCard: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -58,24 +159,42 @@ public struct NotchIslandView: View {
 
             Spacer(minLength: 0)
         }
-        .padding(12)
+        .padding(.horizontal, 14)
+        .padding(.bottom, 12)
+        .padding(.top, geometry.hasPhysicalNotch ? 4 : 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.black.opacity(0.88))
+            UnevenRoundedRectangle(
+                topLeadingRadius: geometry.hasPhysicalNotch ? 0 : 22,
+                bottomLeadingRadius: 22,
+                bottomTrailingRadius: 22,
+                topTrailingRadius: geometry.hasPhysicalNotch ? 0 : 22,
+                style: .continuous
+            )
+            .fill(Color.black)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color.white.opacity(0.16), lineWidth: 1)
+            NotchIslandUStroke(hasPhysicalNotch: geometry.hasPhysicalNotch, cornerRadius: 22)
+                .stroke(Color.white.opacity(0.18), lineWidth: 1)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .clipShape(
+            UnevenRoundedRectangle(
+                topLeadingRadius: geometry.hasPhysicalNotch ? 0 : 22,
+                bottomLeadingRadius: 22,
+                bottomTrailingRadius: 22,
+                topTrailingRadius: geometry.hasPhysicalNotch ? 0 : 22,
+                style: .continuous
+            )
+        )
+        .shadow(color: Color.black.opacity(0.55), radius: 18, x: 0, y: 12)
         .preferredColorScheme(.dark)
     }
 
-    // MARK: - Header
+    // MARK: - Header (与物理刘海无缝融合的首行：左侧 Logo，中间刘海避让，右侧图钉)
 
     private var headerView: some View {
         HStack(alignment: .center) {
+            // 左侧：PingDeck 标识与在线绿点
             HStack(spacing: 6) {
                 Image(systemName: "antenna.radiowaves.left.and.right")
                     .font(.system(size: 11, weight: .semibold))
@@ -92,19 +211,29 @@ public struct NotchIslandView: View {
 
             Spacer()
 
+            // 物理刘海屏幕下留出刘海中央摄像头的黑色遮盖区域
+            if geometry.hasPhysicalNotch {
+                Spacer()
+                    .frame(width: max(0, geometry.notchRect.width - 120))
+            }
+
+            Spacer()
+
+            // 右侧：图钉固定按钮
             Button(action: {
                 controller.togglePin()
             }) {
                 Image(systemName: controller.isPinned ? "pin.fill" : "pin")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(controller.isPinned ? Color.orange : Color.white.opacity(0.75))
+                    .foregroundStyle(controller.isPinned ? Color.orange : Color.white.opacity(0.8))
                     .padding(5)
-                    .background(controller.isPinned ? Color.orange.opacity(0.2) : Color.white.opacity(0.1))
+                    .background(controller.isPinned ? Color.orange.opacity(0.2) : Color.white.opacity(0.12))
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
             .help(controller.isPinned ? String(localized: L10n.notchIslandUnpinHelp) : String(localized: L10n.notchIslandPinHelp))
         }
+        .frame(height: geometry.hasPhysicalNotch ? max(geometry.notchRect.height, 32) : 28)
     }
 
     // MARK: - Module 1: Metrics

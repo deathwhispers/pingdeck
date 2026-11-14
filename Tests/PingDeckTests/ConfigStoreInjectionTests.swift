@@ -87,6 +87,7 @@ final class NotchIslandSettingTests: XCTestCase {
         let model = PingDeckViewModel(configuration: AppConfiguration(), store: store)
 
         model.settings.notchIsland.enabled = false
+        model.settings.notchIsland.showEars = false
         model.settings.notchIsland.showMetrics = false
         model.settings.notchIsland.showRecentProblems = false
         model.settings.notchIsland.showQuickControls = false
@@ -94,6 +95,7 @@ final class NotchIslandSettingTests: XCTestCase {
 
         let saved = try XCTUnwrap(store.saved)
         XCTAssertEqual(saved.settings.notchIsland.enabled, false)
+        XCTAssertEqual(saved.settings.notchIsland.showEars, false)
         XCTAssertEqual(saved.settings.notchIsland.showMetrics, false)
         XCTAssertEqual(saved.settings.notchIsland.showRecentProblems, false)
         XCTAssertEqual(saved.settings.notchIsland.showQuickControls, false)

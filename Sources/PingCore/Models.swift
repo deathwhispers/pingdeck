@@ -228,17 +228,20 @@ public struct MenuBarSettings: Codable, Equatable, Sendable {
 /// 刘海灵动岛偏好设置
 public struct NotchIslandSettings: Codable, Equatable, Sendable {
     public var enabled: Bool
+    public var showEars: Bool
     public var showMetrics: Bool
     public var showRecentProblems: Bool
     public var showQuickControls: Bool
 
     public init(
         enabled: Bool = true,
+        showEars: Bool = true,
         showMetrics: Bool = true,
         showRecentProblems: Bool = true,
         showQuickControls: Bool = true
     ) {
         self.enabled = enabled
+        self.showEars = showEars
         self.showMetrics = showMetrics
         self.showRecentProblems = showRecentProblems
         self.showQuickControls = showQuickControls
@@ -246,6 +249,7 @@ public struct NotchIslandSettings: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case enabled
+        case showEars
         case showMetrics
         case showRecentProblems
         case showQuickControls
@@ -254,6 +258,7 @@ public struct NotchIslandSettings: Codable, Equatable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         enabled = (try? container.decodeIfPresent(Bool.self, forKey: .enabled)) ?? true
+        showEars = (try? container.decodeIfPresent(Bool.self, forKey: .showEars)) ?? true
         showMetrics = (try? container.decodeIfPresent(Bool.self, forKey: .showMetrics)) ?? true
         showRecentProblems = (try? container.decodeIfPresent(Bool.self, forKey: .showRecentProblems)) ?? true
         showQuickControls = (try? container.decodeIfPresent(Bool.self, forKey: .showQuickControls)) ?? true

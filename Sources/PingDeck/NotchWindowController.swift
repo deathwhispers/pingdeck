@@ -43,7 +43,7 @@ public final class NotchWindowController: NSObject, ObservableObject {
         setupObservers()
         updateLayout()
 
-        handleEnabledChanged(model.settings.notchIsland.enabled)
+        handleSettingsChanged(model.settings.notchIsland)
     }
 
     /// 停止控制器，隐藏并销毁面板，注销所有监听与定时器
@@ -79,14 +79,16 @@ public final class NotchWindowController: NSObject, ObservableObject {
     }
 
     public func currentGeometry() -> NotchGeometry {
+        let showEars = model?.settings.notchIsland.showEars ?? true
         if let screen = targetScreen() {
-            return NotchGeometry.calculate(for: screen)
+            return NotchGeometry.calculate(for: screen, showEars: showEars)
         }
         return NotchGeometry.calculate(
             screenFrame: CGRect(x: 0, y: 0, width: 1440, height: 900),
             safeAreaTopInset: 0,
             auxiliaryTopLeft: nil,
-            auxiliaryTopRight: nil
+            auxiliaryTopRight: nil,
+            showEars: showEars
         )
     }
 
@@ -108,7 +110,8 @@ public final class NotchWindowController: NSObject, ObservableObject {
             backing: .buffered,
             defer: false
         )
-        newPanel.level = .floating
+        // 浮窗层级严格置于系统菜单栏上方，确保纯黑背景能完全覆盖物理刘海与顶沿菜单栏
+        newPanel.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 2)
         newPanel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
         newPanel.isOpaque = false
         newPanel.backgroundColor = .clear
@@ -142,18 +145,18 @@ public final class NotchWindowController: NSObject, ObservableObject {
         cancellables.removeAll()
         if let model {
             model.$settings
-                .map(\.notchIsland.enabled)
+                .map(\.notchIsland)
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
-                .sink { [weak self] enabled in
-                    self?.handleEnabledChanged(enabled)
+                .sink { [weak self] settings in
+                    self?.handleSettingsChanged(settings)
                 }
                 .store(in: &cancellables)
         }
     }
 
-    private func handleEnabledChanged(_ enabled: Bool) {
-        if enabled {
+    private func handleSettingsChanged(_ settings: NotchIslandSettings) {
+        if settings.enabled {
             setupPanelIfNeeded()
             updateLayout()
             panel?.orderFrontRegardless()
