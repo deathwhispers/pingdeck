@@ -42,7 +42,7 @@ final class NotchWindowControllerTests: XCTestCase {
             return
         }
 
-        XCTAssertEqual(panel.level, .mainMenu)
+        XCTAssertEqual(panel.level, .floating)
         XCTAssertFalse(panel.isOpaque)
         XCTAssertEqual(panel.backgroundColor, .clear)
         XCTAssertFalse(panel.hasShadow)

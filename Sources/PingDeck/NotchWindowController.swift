@@ -3,7 +3,7 @@ import SwiftUI
 import Combine
 import PingCore
 
-/// 灵动岛无边框浮窗控制器与悬停防误触状态机
+/// 灵动岛无边框浮窗控制器与全局鼠标悬停/点击事件监听器
 @MainActor
 public final class NotchWindowController: NSObject, ObservableObject {
     public static let shared = NotchWindowController()
@@ -26,6 +26,8 @@ public final class NotchWindowController: NSObject, ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private var screenObserver: NSObjectProtocol?
+    private var globalEventMonitor: Any?
+    private var localEventMonitor: Any?
 
     // MARK: - Initialization
 
@@ -35,11 +37,12 @@ public final class NotchWindowController: NSObject, ObservableObject {
 
     // MARK: - Lifecycle
 
-    /// 启动控制器，创建并定位浮窗面板，监听屏幕与设置变动
+    /// 启动控制器，初始化浮窗与全局鼠标事件监听
     func start(with model: PingDeckViewModel) {
         self.model = model
 
         setupPanelIfNeeded()
+        setupEventMonitors()
         setupObservers()
         updateLayout()
 
@@ -53,6 +56,16 @@ public final class NotchWindowController: NSObject, ObservableObject {
 
         collapseTimer?.invalidate()
         collapseTimer = nil
+
+        if let globalEventMonitor {
+            NSEvent.removeMonitor(globalEventMonitor)
+            self.globalEventMonitor = nil
+        }
+
+        if let localEventMonitor {
+            NSEvent.removeMonitor(localEventMonitor)
+            self.localEventMonitor = nil
+        }
 
         if let screenObserver {
             NotificationCenter.default.removeObserver(screenObserver)
@@ -93,24 +106,22 @@ public final class NotchWindowController: NSObject, ObservableObject {
 
     public func updateLayout() {
         let geometry = currentGeometry()
-        let targetFrame = isExpanded ? geometry.expandedPanelFrame : geometry.collapsedPanelFrame
-        panel?.setFrame(targetFrame, display: true)
+        panel?.setFrame(geometry.expandedPanelFrame, display: true)
     }
 
     private func setupPanelIfNeeded() {
         guard panel == nil else { return }
 
         let geometry = currentGeometry()
-        let initialFrame = isExpanded ? geometry.expandedPanelFrame : geometry.collapsedPanelFrame
 
         let newPanel = NSPanel(
-            contentRect: initialFrame,
-            styleMask: [.borderless, .nonactivatingPanel],
+            contentRect: geometry.expandedPanelFrame,
+            styleMask: [.borderless, .nonactivatingPanel, .utilityWindow, .hudWindow],
             backing: .buffered,
             defer: false
         )
-        // 浮窗层级使用 .mainMenu，覆盖系统菜单栏背景的同时严格保证鼠标光标（Cursor）始终位于最顶层，不被浮窗遮挡
-        newPanel.level = .mainMenu
+        // 使用 .floating 层级（保证浮动在应用窗口上方，同时绝对不会覆盖系统鼠标光标）
+        newPanel.level = .floating
         newPanel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
         newPanel.isOpaque = false
         newPanel.backgroundColor = .clear
@@ -121,12 +132,14 @@ public final class NotchWindowController: NSObject, ObservableObject {
 
         if let model {
             let containerView = NotchIslandContainerView(controller: self, model: model)
-            let hostingView = NotchTrackingHostingView(rootView: AnyView(containerView), controller: self)
+            let hostingView = NSHostingView(rootView: AnyView(containerView))
             newPanel.contentView = hostingView
         }
 
         self.panel = newPanel
     }
+
+    // MARK: - Observers & Event Monitoring
 
     private func setupObservers() {
         if screenObserver == nil {
@@ -154,6 +167,24 @@ public final class NotchWindowController: NSObject, ObservableObject {
         }
     }
 
+    private func setupEventMonitors() {
+        if globalEventMonitor == nil {
+            globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDown]) { [weak self] event in
+                Task { @MainActor [weak self] in
+                    self?.handleMouseEvent(event)
+                }
+            }
+        }
+        if localEventMonitor == nil {
+            localEventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved, .leftMouseDown]) { [weak self] event in
+                Task { @MainActor [weak self] in
+                    self?.handleMouseEvent(event)
+                }
+                return event
+            }
+        }
+    }
+
     private func handleSettingsChanged(_ settings: NotchIslandSettings) {
         if settings.enabled {
             setupPanelIfNeeded()
@@ -169,9 +200,73 @@ public final class NotchWindowController: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - State Machine & Hover Tracking
+    // MARK: - Mouse Event Handling
+
+    private func handleMouseEvent(_ event: NSEvent) {
+        guard let model, model.settings.notchIsland.enabled else { return }
+        let geometry = currentGeometry()
+        let mouseLocation = NSEvent.mouseLocation
+
+        // 刘海/居中感应区：包含物理刘海及下方留出的 10pt 舒适感应区
+        let triggerRect = CGRect(
+            x: geometry.notchRect.minX - 10,
+            y: geometry.notchRect.minY - 10,
+            width: geometry.notchRect.width + 20,
+            height: geometry.notchRect.height + 14
+        )
+
+        // 展开面板实际覆盖区域（包含微小缓冲垫）
+        let cardRect = CGRect(
+            x: geometry.expandedPanelFrame.minX - 12,
+            y: geometry.expandedPanelFrame.minY - 12,
+            width: geometry.expandedPanelFrame.width + 24,
+            height: geometry.expandedPanelFrame.height + 16
+        )
+
+        if event.type == .leftMouseDown {
+            if !isExpanded && triggerRect.contains(mouseLocation) {
+                // 点击物理刘海区域：立刻瞬间展开
+                expand()
+                return
+            }
+            if isExpanded && !isPinned && !cardRect.contains(mouseLocation) {
+                // 点击卡片外部空白区域：立即收起
+                collapse()
+                return
+            }
+        }
+
+        if event.type == .mouseMoved {
+            if !isExpanded {
+                if triggerRect.contains(mouseLocation) {
+                    onMouseEnterTrigger()
+                } else {
+                    onMouseLeaveTrigger()
+                }
+            } else {
+                if cardRect.contains(mouseLocation) {
+                    collapseTimer?.invalidate()
+                    collapseTimer = nil
+                } else if !isPinned {
+                    onMouseLeaveCard()
+                }
+            }
+        }
+    }
 
     public func onMouseEnter() {
+        onMouseEnterTrigger()
+    }
+
+    public func onMouseLeave() {
+        if isExpanded {
+            onMouseLeaveCard()
+        } else {
+            onMouseLeaveTrigger()
+        }
+    }
+
+    private func onMouseEnterTrigger() {
         collapseTimer?.invalidate()
         collapseTimer = nil
 
@@ -188,15 +283,15 @@ public final class NotchWindowController: NSObject, ObservableObject {
         self.expandTimer = timer
     }
 
-    public func onMouseLeave() {
+    private func onMouseLeaveTrigger() {
         expandTimer?.invalidate()
         expandTimer = nil
+    }
 
-        guard !isPinned else { return }
-        guard isExpanded else { return }
+    private func onMouseLeaveCard() {
+        guard !isPinned, isExpanded else { return }
         guard collapseTimer == nil else { return }
 
-        collapseTimer?.invalidate()
         let timer = Timer(timeInterval: collapseDelay, repeats: false) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.collapse()
@@ -206,6 +301,8 @@ public final class NotchWindowController: NSObject, ObservableObject {
         self.collapseTimer = timer
     }
 
+    // MARK: - Expand & Collapse
+
     public func expand() {
         expandTimer?.invalidate()
         expandTimer = nil
@@ -213,14 +310,12 @@ public final class NotchWindowController: NSObject, ObservableObject {
         collapseTimer = nil
 
         guard !isExpanded else { return }
-        isExpanded = true
 
-        let geometry = currentGeometry()
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.28
-            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            panel?.animator().setFrame(geometry.expandedPanelFrame, display: true)
-        }
+        setupPanelIfNeeded()
+        updateLayout()
+        panel?.orderFrontRegardless()
+
+        isExpanded = true
     }
 
     public func collapse() {
@@ -232,12 +327,14 @@ public final class NotchWindowController: NSObject, ObservableObject {
         guard isExpanded else { return }
         isExpanded = false
 
-        let geometry = currentGeometry()
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.24
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            panel?.animator().setFrame(geometry.collapsedPanelFrame, display: true)
+        // 待 SwiftUI 弹簧收缩动画完成（约 350ms）后隐藏浮窗，完全释放菜单栏
+        let timer = Timer(timeInterval: 0.35, repeats: false) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                guard let self, !self.isExpanded else { return }
+                self.panel?.orderOut(nil)
+            }
         }
+        RunLoop.main.add(timer, forMode: .common)
     }
 
     public func togglePin() {
@@ -249,59 +346,7 @@ public final class NotchWindowController: NSObject, ObservableObject {
     }
 }
 
-// MARK: - Hosting & Container Views
-
-final class NotchTrackingHostingView: NSHostingView<AnyView> {
-    private var trackingArea: NSTrackingArea?
-    private weak var controller: NotchWindowController?
-
-    init(rootView: AnyView, controller: NotchWindowController) {
-        self.controller = controller
-        super.init(rootView: rootView)
-    }
-
-    @MainActor required dynamic init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    @MainActor required public init(rootView: AnyView) {
-        super.init(rootView: rootView)
-    }
-
-    override func updateTrackingAreas() {
-        super.updateTrackingAreas()
-        if let existing = trackingArea {
-            removeTrackingArea(existing)
-        }
-        let area = NSTrackingArea(
-            rect: bounds,
-            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
-            owner: self,
-            userInfo: nil
-        )
-        addTrackingArea(area)
-        trackingArea = area
-    }
-
-    override func mouseEntered(with event: NSEvent) {
-        super.mouseEntered(with: event)
-        controller?.onMouseEnter()
-    }
-
-    override func mouseExited(with event: NSEvent) {
-        super.mouseExited(with: event)
-        controller?.onMouseLeave()
-    }
-
-    override func mouseDown(with event: NSEvent) {
-        if let controller, !controller.isExpanded {
-            // 点击未展开的刘海区域直接立即展开
-            controller.expand()
-            return
-        }
-        super.mouseDown(with: event)
-    }
-}
+// MARK: - Container View
 
 struct NotchIslandContainerView: View {
     @ObservedObject var controller: NotchWindowController
