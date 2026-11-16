@@ -774,4 +774,48 @@ final class UnifiedAddTargetsTests: XCTestCase {
     }
 }
 
+final class ProbeSettingsTests: XCTestCase {
+    private func makeModel() -> PingDeckViewModel {
+        PingDeckViewModel(configuration: AppConfiguration(), store: InMemoryConfigStore())
+    }
+
+    func testApplyProbeSettingsUpdatesSettings() {
+        let model = makeModel()
+
+        model.applyProbeSettings(interval: 2.5, timeout: 3.5, packetSize: 1200)
+
+        XCTAssertEqual(model.settings.interval, 2.5)
+        XCTAssertEqual(model.settings.timeout, 3.5)
+        XCTAssertEqual(model.settings.packetSize, 1200)
+    }
+
+    func testApplyProbeSettingsClampsOutOfRangeValues() {
+        let model = makeModel()
+
+        model.applyProbeSettings(interval: 0.01, timeout: 99, packetSize: 1)
+
+        XCTAssertEqual(model.settings.interval, PingSettings.intervalRange.lowerBound)
+        XCTAssertEqual(model.settings.timeout, PingSettings.timeoutRange.upperBound)
+        XCTAssertEqual(model.settings.packetSize, PingSettings.packetSizeRange.lowerBound)
+
+        model.applyProbeSettings(interval: 99, timeout: 0.01, packetSize: 100_000)
+
+        XCTAssertEqual(model.settings.interval, PingSettings.intervalRange.upperBound)
+        XCTAssertEqual(model.settings.timeout, PingSettings.timeoutRange.lowerBound)
+        XCTAssertEqual(model.settings.packetSize, PingSettings.packetSizeRange.upperBound)
+    }
+
+    func testApplyProbeSettingsPersists() {
+        let store = InMemoryConfigStore()
+        let model = PingDeckViewModel(configuration: AppConfiguration(), store: store)
+
+        model.applyProbeSettings(interval: 3, timeout: 4, packetSize: 900)
+        XCTAssertTrue(model.saveNow())
+
+        XCTAssertEqual(store.saved?.settings.interval, 3)
+        XCTAssertEqual(store.saved?.settings.timeout, 4)
+        XCTAssertEqual(store.saved?.settings.packetSize, 900)
+    }
+}
+
 

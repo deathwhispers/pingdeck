@@ -34,10 +34,17 @@ public final class PingProcess {
     public struct Configuration: Sendable {
         public var interval: TimeInterval
         public var timeout: TimeInterval
+        /// ICMP 包载荷大小（字节）
+        public var packetSize: Int
 
-        public init(interval: TimeInterval = 1.0, timeout: TimeInterval = 2.0) {
+        public init(
+            interval: TimeInterval = 1.0,
+            timeout: TimeInterval = 2.0,
+            packetSize: Int = PingSettings.defaultPacketSize
+        ) {
             self.interval = interval
             self.timeout = timeout
+            self.packetSize = PingSettings.clampPacketSize(packetSize)
         }
     }
 
@@ -70,6 +77,17 @@ public final class PingProcess {
         return nil
     }
 
+    /// 构造 ping 命令参数；独立成静态方法便于测试
+    public static func arguments(host: String, configuration: Configuration) -> [String] {
+        // 只使用 macOS ping 稳定支持的 -i / -s；超时判定由 icmp_seq 号推算，
+        // 不依赖 -W/-t 这类在不同 BSD 版本间语义不一致的选项
+        [
+            "-i", String(format: "%.2f", configuration.interval),
+            "-s", String(configuration.packetSize),
+            host,
+        ]
+    }
+
     public func start() throws {
         let isIPv6 = host.contains(":")
         guard let executable = Self.executableURL(forIPv6: isIPv6) else {
@@ -78,12 +96,7 @@ public final class PingProcess {
 
         let process = Process()
         process.executableURL = executable
-        // 只使用 macOS ping 必定支持的 -i 参数；超时判定由 icmp_seq 号推算，
-        // 不依赖 -W/-t 这类在不同 BSD 版本间语义不一致的选项
-        process.arguments = [
-            "-i", String(format: "%.2f", configuration.interval),
-            host,
-        ]
+        process.arguments = Self.arguments(host: host, configuration: configuration)
         process.standardInput = FileHandle.nullDevice
 
         let outPipe = Pipe()

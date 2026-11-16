@@ -10,6 +10,10 @@ struct AddTargetsSheet: View {
     @State private var autoPrefillText = ""
     @State private var defaultGroup = ""
     @State private var defaultColorTag: TargetColorTag?
+    @State private var interval = PingSettings.default.interval
+    @State private var timeout = PingSettings.default.timeout
+    @State private var packetSize = PingSettings.default.packetSize
+    @State private var didPrefillProbeSettings = false
 
     private var trimmedDefaultGroup: String {
         defaultGroup.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -121,6 +125,10 @@ struct AddTargetsSheet: View {
                 }
             }
 
+            Divider()
+
+            probeSettingsSection
+
             Text(L10n.importDescription)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -151,6 +159,12 @@ struct AddTargetsSheet: View {
             autoPrefillText = model.targets.isEmpty ? "" : model.exportTargetsAsEditableText()
             if text.isEmpty {
                 text = autoPrefillText
+            }
+            if !didPrefillProbeSettings {
+                interval = PingSettings.clampInterval(model.settings.interval)
+                timeout = PingSettings.clampTimeout(model.settings.timeout)
+                packetSize = PingSettings.clampPacketSize(model.settings.packetSize)
+                didPrefillProbeSettings = true
             }
         }
         .onChange(of: mode) { _, newMode in
@@ -237,7 +251,79 @@ struct AddTargetsSheet: View {
         }
     }
 
+    private var probeSettingsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(L10n.probeSection)
+                    .font(.headline)
+                Spacer()
+                Button(String(localized: L10n.probeResetDefaults)) {
+                    resetProbeSettings()
+                }
+                .font(.caption)
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+            }
+
+            HStack(alignment: .bottom, spacing: 20) {
+                probeSlider(
+                    title: L10n.probeInterval,
+                    valueText: L10n.unitSecondsDecimal(Float(interval)),
+                    value: $interval,
+                    range: PingSettings.intervalRange
+                )
+                probeSlider(
+                    title: L10n.probeTimeout,
+                    valueText: L10n.unitSecondsDecimal(Float(timeout)),
+                    value: $timeout,
+                    range: PingSettings.timeoutRange
+                )
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.probePacketSize)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    TextField("", value: $packetSize, format: .number)
+                        .textFieldStyle(.roundedBorder)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 90)
+                }
+            }
+
+            Text(L10n.probeHint)
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+    }
+
+    private func probeSlider(
+        title: LocalizedStringResource,
+        valueText: LocalizedStringResource,
+        value: Binding<Double>,
+        range: ClosedRange<Double>
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text(valueText)
+                    .font(.caption)
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+            }
+            Slider(value: value, in: range, step: 0.5)
+        }
+    }
+
+    private func resetProbeSettings() {
+        interval = PingSettings.default.interval
+        timeout = PingSettings.default.timeout
+        packetSize = PingSettings.default.packetSize
+    }
+
     private func importAndStart() {
+        model.applyProbeSettings(interval: interval, timeout: timeout, packetSize: packetSize)
         let result = model.importTargetsAndStart(
             text,
             mode: mode,

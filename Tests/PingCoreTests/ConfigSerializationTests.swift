@@ -76,6 +76,62 @@ final class ConfigSerializationTests: XCTestCase {
         XCTAssertEqual(settings.menuBar.closeBehavior, .ask)
     }
 
+    /// 旧配置没有 packetSize 字段时回落到默认 56 字节
+    func testPingSettingsDefaultsPacketSizeWhenMissing() throws {
+        let json = """
+        {
+          "interval": 1.0,
+          "timeout": 2.0,
+          "maxConcurrent": 16,
+          "rotationInterval": 30.0
+        }
+        """.data(using: .utf8)!
+
+        let settings = try JSONDecoder().decode(PingSettings.self, from: json)
+        XCTAssertEqual(settings.packetSize, PingSettings.defaultPacketSize)
+    }
+
+    func testPingSettingsClampsOutOfRangePacketSizeOnDecode() throws {
+        func decode(packetSize: Int) throws -> PingSettings {
+            let json = """
+            {
+              "interval": 1.0,
+              "timeout": 2.0,
+              "packetSize": \(packetSize),
+              "maxConcurrent": 16,
+              "rotationInterval": 30.0
+            }
+            """.data(using: .utf8)!
+            return try JSONDecoder().decode(PingSettings.self, from: json)
+        }
+
+        XCTAssertEqual(try decode(packetSize: 1).packetSize, PingSettings.packetSizeRange.lowerBound)
+        XCTAssertEqual(try decode(packetSize: 100_000).packetSize, PingSettings.packetSizeRange.upperBound)
+    }
+
+    func testPingProcessArgumentsIncludePacketSize() {
+        let configuration = PingProcess.Configuration(interval: 0.5, timeout: 2, packetSize: 1200)
+        let arguments = PingProcess.arguments(host: "1.1.1.1", configuration: configuration)
+
+        XCTAssertEqual(arguments.first, "-i")
+        guard let sizeIndex = arguments.firstIndex(of: "-s") else {
+            return XCTFail("参数中缺少 -s：\(arguments)")
+        }
+        XCTAssertEqual(arguments[sizeIndex + 1], "1200")
+        XCTAssertEqual(arguments.last, "1.1.1.1")
+    }
+
+    func testPingProcessConfigurationClampsPacketSize() {
+        XCTAssertEqual(
+            PingProcess.Configuration(packetSize: 1).packetSize,
+            PingSettings.packetSizeRange.lowerBound
+        )
+        XCTAssertEqual(
+            PingProcess.Configuration(packetSize: 100_000).packetSize,
+            PingSettings.packetSizeRange.upperBound
+        )
+    }
+
     func testTargetWithGroupAndColorTagRoundTrip() throws {
         let target = PingTarget(
             host: "10.0.0.1",
