@@ -605,6 +605,36 @@ final class PingDeckViewModel: ObservableObject {
         return result
     }
 
+    /// 按导入方式应用目标并立即开始探测。
+    /// 替换会丢弃现有目标与结果；追加保留现有目标、结果与历史记录。
+    @discardableResult
+    func importTargetsAndStart(
+        _ text: String,
+        mode: ImportMode,
+        defaultGroup: String = "",
+        defaultColorTag: TargetColorTag? = nil
+    ) -> BulkImportParser.Result {
+        switch mode {
+        case .replace:
+            return replaceAllTargetsAndStart(
+                text,
+                defaultGroup: defaultGroup,
+                defaultColorTag: defaultColorTag
+            )
+        case .append:
+            let result = importTargets(
+                text,
+                mode: .append,
+                defaultGroup: defaultGroup,
+                defaultColorTag: defaultColorTag
+            )
+            if !result.entries.isEmpty {
+                start()
+            }
+            return result
+        }
+    }
+
     // MARK: - 运行控制
 
     func start() {

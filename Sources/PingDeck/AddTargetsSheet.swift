@@ -1,10 +1,13 @@
 import SwiftUI
 import PingCore
 
-/// 添加目标弹窗：支持单行、多行、网段、带备注/分组/颜色标签全量录入并立即重新开跑
+/// 添加目标弹窗：支持单行、多行、网段、带备注/分组/颜色标签录入，
+/// 可选择追加到现有列表或整体替换，并立即开始探测
 struct AddTargetsSheet: View {
     @EnvironmentObject private var model: PingDeckViewModel
     @State private var text: String = ""
+    @State private var mode: ImportMode = .replace
+    @State private var autoPrefillText = ""
     @State private var defaultGroup = ""
     @State private var defaultColorTag: TargetColorTag?
 
@@ -15,7 +18,7 @@ struct AddTargetsSheet: View {
     private var preview: BulkImportParser.Result {
         model.previewBulkImport(
             text,
-            mode: .replace,
+            mode: mode,
             defaultGroup: trimmedDefaultGroup,
             defaultColorTag: defaultColorTag
         )
@@ -38,6 +41,8 @@ struct AddTargetsSheet: View {
                     .foregroundStyle(.secondary)
                 }
             }
+
+            modeSection
 
             // 统一设置默认分组与默认颜色标签
             HStack(spacing: 16) {
@@ -143,16 +148,65 @@ struct AddTargetsSheet: View {
         .padding(20)
         .frame(width: 560)
         .onAppear {
-            if text.isEmpty && !model.targets.isEmpty {
-                text = model.exportTargetsAsEditableText()
+            autoPrefillText = model.targets.isEmpty ? "" : model.exportTargetsAsEditableText()
+            if text.isEmpty {
+                text = autoPrefillText
             }
+        }
+        .onChange(of: mode) { _, newMode in
+            applyModeChange(to: newMode)
         }
     }
 
+    private var modeSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 10) {
+                Text(L10n.importMode)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Picker("", selection: $mode) {
+                    ForEach(ImportMode.allCases) { item in
+                        Text(item.title).tag(item)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+                Spacer()
+            }
+            Text(modeDescription)
+                .font(.caption)
+                .foregroundStyle(mode == .replace && !model.targets.isEmpty ? Color.orange : Color.secondary)
+        }
+    }
+
+    private var modeDescription: String {
+        switch mode {
+        case .append:
+            return String(localized: L10n.importModeAppendDescription(model.targets.count))
+        case .replace:
+            if model.targets.isEmpty {
+                return String(localized: L10n.importModeReplaceDescriptionEmpty)
+            }
+            return String(localized: L10n.importModeReplaceDescriptionWithCount(model.targets.count))
+        }
+    }
+
+    /// 切换导入方式时同步编辑区回显：追加从空白开始，替换恢复现有目标列表；
+    /// 用户手动修改过的内容保持不变
+    private func applyModeChange(to newMode: ImportMode) {
+        guard text.isEmpty || text == autoPrefillText else { return }
+        text = newMode == .append ? "" : autoPrefillText
+    }
+
     private var confirmTitle: String {
-        preview.entries.isEmpty
-            ? String(localized: L10n.commonSave)
-            : "\(String(localized: L10n.commonSave)) (\(preview.entries.count))"
+        guard !preview.entries.isEmpty else { return String(localized: L10n.commonSave) }
+        switch mode {
+        case .append:
+            return String(localized: L10n.importConfirmAppend(preview.entries.count))
+        case .replace:
+            return String(localized: L10n.importConfirmReplace(preview.entries.count))
+        }
     }
 
     @ViewBuilder
@@ -184,8 +238,9 @@ struct AddTargetsSheet: View {
     }
 
     private func importAndStart() {
-        let result = model.replaceAllTargetsAndStart(
+        let result = model.importTargetsAndStart(
             text,
+            mode: mode,
             defaultGroup: trimmedDefaultGroup,
             defaultColorTag: defaultColorTag
         )
