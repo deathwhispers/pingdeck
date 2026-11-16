@@ -1,6 +1,5 @@
 import SwiftUI
 import AppKit
-import UniformTypeIdentifiers
 import PingCore
 
 struct ContentView: View {
@@ -127,26 +126,12 @@ struct ContentView: View {
             .fixedSize()
             .help(String(localized: L10n.toolbarColumnsHelp))
 
-            Menu {
-                ForEach(ExportFormat.allCases, id: \.self) { format in
-                    Menu {
-                        Button(String(localized: L10n.toolbarExportAll(model.rows.count))) {
-                            export(entries: model.allEntries, format: format)
-                        }
-                        .disabled(model.rows.isEmpty)
-                        Button(String(localized: L10n.toolbarExportSelected(model.selection.count))) {
-                            export(entries: model.selectedEntries, format: format)
-                        }
-                        .disabled(model.selection.isEmpty)
-                    } label: {
-                        Text(format.displayName)
-                    }
-                }
+            Button {
+                ExportSavePanel.present(scope: .automatic, model: model)
             } label: {
-                Label(String(localized: L10n.toolbarExport), systemImage: "square.and.arrow.up")
+                Label(String(localized: L10n.toolbarSave), systemImage: "square.and.arrow.down")
             }
-            .menuStyle(.borderlessButton)
-            .fixedSize()
+            .disabled(model.rows.isEmpty)
             .help(String(localized: L10n.toolbarExportHelp))
 
             Button {
@@ -170,9 +155,16 @@ struct ContentView: View {
             Text(String(localized: L10n.statusBarTotalSent(model.totalSent)))
             Spacer()
             if !model.selection.isEmpty {
-                Text(String(localized: L10n.statusBarSelected(model.selection.count)))
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
+                HStack(spacing: 8) {
+                    Text(String(localized: L10n.statusBarSelected(model.selection.count)))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                    Button(String(localized: L10n.selectionClear)) {
+                        model.clearSelection()
+                    }
+                    .buttonStyle(.link)
+                    .help(String(localized: L10n.selectionClearHelp))
+                }
             }
             Text(statusSummary)
                 .foregroundStyle(.secondary)
@@ -212,64 +204,6 @@ struct ContentView: View {
                 columnCustomization[visibility: column.rawValue] = isOn ? .visible : .hidden
             }
         )
-    }
-
-    private var exportLabels: ExportLabels {
-        ExportLabels(
-            columnTitles: [
-                String(localized: L10n.exportColumnTarget),
-                String(localized: L10n.exportColumnNote),
-                String(localized: L10n.groupColumnTitle),
-                String(localized: L10n.colorTagColumnTitle),
-                String(localized: L10n.exportColumnStatus),
-                String(localized: L10n.exportColumnLastLatency),
-                String(localized: L10n.exportColumnAverageLatency),
-                String(localized: L10n.exportColumnMinLatency),
-                String(localized: L10n.exportColumnMaxLatency),
-                String(localized: L10n.exportColumnLossRate),
-                String(localized: L10n.exportColumnLastResponse),
-            ],
-            statusName: { $0.displayName },
-            summary: {
-                String(localized: L10n.exportSummary($0.targets, $0.alive, $0.problems, $0.totalSent))
-            },
-            markdownTitle: String(localized: L10n.exportMarkdownTitle),
-            exportedAtLabel: String(localized: L10n.exportMarkdownExportedAt)
-        )
-    }
-
-    private func export(entries: [ExportEntry], format: ExportFormat) {
-        guard !entries.isEmpty else { return }
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [Self.contentType(for: format)]
-        panel.nameFieldStringValue = ExportFile.filename(format: format)
-        panel.canCreateDirectories = true
-
-        panel.begin { response in
-            guard response == .OK, let url = panel.url else { return }
-            let data = ExportFile.data(format: format, entries: entries, labels: exportLabels)
-            do {
-                try data.write(to: url, options: .atomic)
-            } catch {
-                DispatchQueue.main.async {
-                    model.alert = AppAlert(
-                        title: String(localized: L10n.alertExportFailedTitle),
-                        message: error.localizedDescription
-                    )
-                }
-            }
-        }
-    }
-
-    /// 各格式对应的文件类型；markdown 与 xlsx 没有系统内建类型，按扩展名动态解析
-    private static func contentType(for format: ExportFormat) -> UTType {
-        switch format {
-        case .csv: return .commaSeparatedText
-        case .json: return .json
-        case .txt: return .plainText
-        case .markdown: return UTType(filenameExtension: "md") ?? .plainText
-        case .xlsx: return UTType(filenameExtension: "xlsx") ?? .data
-        }
     }
 }
 
