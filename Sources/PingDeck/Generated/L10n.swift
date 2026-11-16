@@ -531,15 +531,6 @@ enum L10n {
     }
 
     /**
-     Detail panel: color property
-     
-     Localized string for key “detail.property.color” in table “Localizable.xcstrings”.
-     */
-    static var detailPropertyColor: LocalizedStringResource {
-        LocalizedStringResource("detail.property.color", table: "Localizable", bundle: l10nBundleDescription)
-    }
-
-    /**
      Detail panel: group property
      
      Localized string for key “detail.property.group” in table “Localizable.xcstrings”.
@@ -600,6 +591,15 @@ enum L10n {
      */
     static var detailPropertySuccessFailure: LocalizedStringResource {
         LocalizedStringResource("detail.property.successFailure", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: color tag property
+     
+     Localized string for key “detail.property.tag” in table “Localizable.xcstrings”.
+     */
+    static var detailPropertyTag: LocalizedStringResource {
+        LocalizedStringResource("detail.property.tag", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**

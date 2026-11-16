@@ -91,7 +91,7 @@ struct TargetDetailPanel: View {
                 row.target.group.isEmpty ? String(localized: L10n.groupDefaultName) : row.target.group
             )
             HStack(spacing: 5) {
-                Text(L10n.detailPropertyColor)
+                Text(L10n.detailPropertyTag)
                     .foregroundStyle(.secondary)
                 if let tag = row.target.colorTag {
                     Circle()

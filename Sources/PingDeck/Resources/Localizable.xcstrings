@@ -5017,26 +5017,26 @@
         }
       }
     },
-    "detail.property.color": {
-      "comment": "Detail panel: color property",
+    "detail.property.tag": {
+      "comment": "Detail panel: color tag property",
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "颜色"
+            "value": "标签"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Color"
+            "value": "Tag"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "色"
+            "value": "タグ"
           }
         }
       }
