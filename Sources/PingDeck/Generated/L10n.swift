@@ -810,6 +810,15 @@ enum L10n {
     }
 
     /**
+     Save panel: file format picker label
+     
+     Localized string for key “export.format” in table “Localizable.xcstrings”.
+     */
+    static var exportFormat: LocalizedStringResource {
+        LocalizedStringResource("export.format", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Markdown export timestamp label
      
      Localized string for key “export.markdown.exportedAt” in table “Localizable.xcstrings”.
@@ -1881,15 +1890,6 @@ enum L10n {
     }
 
     /**
-     Toolbar export menu
-     
-     Localized string for key “toolbar.export” in table “Localizable.xcstrings”.
-     */
-    static var toolbarExport: LocalizedStringResource {
-        LocalizedStringResource("toolbar.export", table: "Localizable", bundle: l10nBundleDescription)
-    }
-
-    /**
      Toolbar export all items
      
      Localized string for key “toolbar.export.all” in table “Localizable.xcstrings”.
@@ -1899,7 +1899,7 @@ enum L10n {
     }
 
     /**
-     Toolbar export menu help
+     Toolbar: save results help text
      
      Localized string for key “toolbar.export.help” in table “Localizable.xcstrings”.
      */
@@ -1941,6 +1941,15 @@ enum L10n {
      */
     static var toolbarRefreshHelp: LocalizedStringResource {
         LocalizedStringResource("toolbar.refresh.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Toolbar: save results button
+     
+     Localized string for key “toolbar.save” in table “Localizable.xcstrings”.
+     */
+    static var toolbarSave: LocalizedStringResource {
+        LocalizedStringResource("toolbar.save", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**

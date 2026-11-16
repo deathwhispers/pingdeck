@@ -1681,26 +1681,26 @@
         }
       }
     },
-    "toolbar.export": {
-      "comment": "Toolbar export menu",
+    "toolbar.save": {
+      "comment": "Toolbar: save results button",
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "导出"
+            "value": "保存…"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Export"
+            "value": "Save…"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "エクスポート"
+            "value": "保存…"
           }
         }
       }
@@ -1754,25 +1754,25 @@
       }
     },
     "toolbar.export.help": {
-      "comment": "Toolbar export menu help",
+      "comment": "Toolbar: save results help text",
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "导出结果：支持 CSV / JSON / TXT / Markdown / Excel，可选择导出全部或仅选中项"
+            "value": "保存结果（⌘S）：未选中时保存全部，有选中时只保存选中项；可在保存面板选择 CSV / JSON / TXT / Markdown / Excel"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Export results as CSV / JSON / TXT / Markdown / Excel; choose all or selected items"
+            "value": "Save results (⌘S): saves all targets, or only the selection when there is one; choose CSV / JSON / TXT / Markdown / Excel in the save panel"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "結果を CSV / JSON / TXT / Markdown / Excel でエクスポート。すべてまたは選択項目を選べます"
+            "value": "結果を保存（⌘S）：選択がない場合はすべて、ある場合は選択項目のみを保存します。保存パネルで CSV / JSON / TXT / Markdown / Excel を選択できます"
           }
         }
       }
@@ -4941,6 +4941,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld 回のプローブ"
+          }
+        }
+      }
+    },
+    "export.format": {
+      "comment": "Save panel: file format picker label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "格式"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Format"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "フォーマット"
           }
         }
       }

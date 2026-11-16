@@ -111,6 +111,26 @@ struct PingDeckApp: App {
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }
+            // 文件菜单：保存结果（⌘S，自动按选中决定范围）与显式的全部/所选导出
+            CommandGroup(replacing: .saveItem) {
+                Button(String(localized: L10n.toolbarSave)) {
+                    ExportSavePanel.present(scope: .automatic, model: model)
+                }
+                .keyboardShortcut("s", modifiers: .command)
+                .disabled(model.rows.isEmpty)
+
+                Divider()
+
+                Button(String(localized: L10n.toolbarExportAll(model.rows.count))) {
+                    ExportSavePanel.present(scope: .all, model: model)
+                }
+                .disabled(model.rows.isEmpty)
+
+                Button(String(localized: L10n.toolbarExportSelected(model.selection.count))) {
+                    ExportSavePanel.present(scope: .selection, model: model)
+                }
+                .disabled(model.selection.isEmpty)
+            }
         }
 
         MenuBarExtra {
