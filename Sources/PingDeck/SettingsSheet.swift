@@ -44,34 +44,6 @@ struct SettingsSheet: View {
                     .foregroundStyle(.tertiary)
             }
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(L10n.settingsInterval)
-                    Spacer()
-                    Text(L10n.unitSecondsDecimal(Float(model.settings.interval)))
-                        .foregroundStyle(.secondary)
-                        .monospacedDigit()
-                }
-                Slider(value: $model.settings.interval, in: 0.5...10, step: 0.5)
-                Text(L10n.settingsIntervalHint)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(L10n.settingsTimeout)
-                    Spacer()
-                    Text(L10n.unitSecondsDecimal(Float(model.settings.timeout)))
-                        .foregroundStyle(.secondary)
-                        .monospacedDigit()
-                }
-                Slider(value: $model.settings.timeout, in: 1...10, step: 0.5)
-                Text(L10n.settingsTimeoutHint)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
-
             Stepper(
                 value: $model.settings.maxConcurrent,
                 in: 1...PingSettings.maxConcurrentLimit

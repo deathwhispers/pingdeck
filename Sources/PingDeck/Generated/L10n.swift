@@ -1188,6 +1188,60 @@ enum L10n {
     }
 
     /**
+     Add targets: probe settings apply scope hint
+     
+     Localized string for key “probe.hint” in table “Localizable.xcstrings”.
+     */
+    static var probeHint: LocalizedStringResource {
+        LocalizedStringResource("probe.hint", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Add targets: probe interval label
+     
+     Localized string for key “probe.interval” in table “Localizable.xcstrings”.
+     */
+    static var probeInterval: LocalizedStringResource {
+        LocalizedStringResource("probe.interval", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Add targets: ICMP packet size label
+     
+     Localized string for key “probe.packetSize” in table “Localizable.xcstrings”.
+     */
+    static var probePacketSize: LocalizedStringResource {
+        LocalizedStringResource("probe.packetSize", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Add targets: reset probe settings to defaults
+     
+     Localized string for key “probe.resetDefaults” in table “Localizable.xcstrings”.
+     */
+    static var probeResetDefaults: LocalizedStringResource {
+        LocalizedStringResource("probe.resetDefaults", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Add targets: probe settings section title
+     
+     Localized string for key “probe.section” in table “Localizable.xcstrings”.
+     */
+    static var probeSection: LocalizedStringResource {
+        LocalizedStringResource("probe.section", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Add targets: packet timeout label
+     
+     Localized string for key “probe.timeout” in table “Localizable.xcstrings”.
+     */
+    static var probeTimeout: LocalizedStringResource {
+        LocalizedStringResource("probe.timeout", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      IP range parsing: CIDR host bits set
      
      Localized string for key “range.cidrNotNetworkAddress” in table “Localizable.xcstrings”.
@@ -1314,24 +1368,6 @@ enum L10n {
     }
 
     /**
-     Settings: probe interval label
-     
-     Localized string for key “settings.interval” in table “Localizable.xcstrings”.
-     */
-    static var settingsInterval: LocalizedStringResource {
-        LocalizedStringResource("settings.interval", table: "Localizable", bundle: l10nBundleDescription)
-    }
-
-    /**
-     Settings: interval hint
-     
-     Localized string for key “settings.interval.hint” in table “Localizable.xcstrings”.
-     */
-    static var settingsIntervalHint: LocalizedStringResource {
-        LocalizedStringResource("settings.interval.hint", table: "Localizable", bundle: l10nBundleDescription)
-    }
-
-    /**
      Settings: language picker label
      
      Localized string for key “settings.language” in table “Localizable.xcstrings”.
@@ -1455,24 +1491,6 @@ enum L10n {
      */
     static var settingsRotationHint: LocalizedStringResource {
         LocalizedStringResource("settings.rotation.hint", table: "Localizable", bundle: l10nBundleDescription)
-    }
-
-    /**
-     Settings: packet timeout label
-     
-     Localized string for key “settings.timeout” in table “Localizable.xcstrings”.
-     */
-    static var settingsTimeout: LocalizedStringResource {
-        LocalizedStringResource("settings.timeout", table: "Localizable", bundle: l10nBundleDescription)
-    }
-
-    /**
-     Settings: timeout hint
-     
-     Localized string for key “settings.timeout.hint” in table “Localizable.xcstrings”.
-     */
-    static var settingsTimeoutHint: LocalizedStringResource {
-        LocalizedStringResource("settings.timeout.hint", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**

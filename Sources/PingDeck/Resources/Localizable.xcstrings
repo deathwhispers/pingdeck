@@ -2401,6 +2401,150 @@
         }
       }
     },
+    "probe.section": {
+      "comment": "Add targets: probe settings section title",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "探测参数"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probe Parameters"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プローブ設定"
+          }
+        }
+      }
+    },
+    "probe.interval": {
+      "comment": "Add targets: probe interval label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发包间隔"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probe Interval"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "送信間隔"
+          }
+        }
+      }
+    },
+    "probe.timeout": {
+      "comment": "Add targets: packet timeout label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "单包超时"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Packet Timeout"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パケットタイムアウト"
+          }
+        }
+      }
+    },
+    "probe.packetSize": {
+      "comment": "Add targets: ICMP packet size label",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "包大小（字节）"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Packet Size (bytes)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パケットサイズ（バイト）"
+          }
+        }
+      }
+    },
+    "probe.resetDefaults": {
+      "comment": "Add targets: reset probe settings to defaults",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复默认"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Defaults"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デフォルトに戻す"
+          }
+        }
+      }
+    },
+    "probe.hint": {
+      "comment": "Add targets: probe settings apply scope hint",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "探测参数对所有目标生效，并保存为下次的默认值。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These probe settings apply to all targets and are saved as the next defaults."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これらのプローブ設定はすべての対象に適用され、次回の既定値として保存されます。"
+          }
+        }
+      }
+    },
     "settings.title": {
       "comment": "Settings sheet title",
       "extractionState": "manual",
@@ -2469,102 +2613,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "システムの外観に合わせて自動的に切り替わります。"
-          }
-        }
-      }
-    },
-    "settings.interval": {
-      "comment": "Settings: probe interval label",
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "发包间隔"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Probe Interval"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "送信間隔"
-          }
-        }
-      }
-    },
-    "settings.interval.hint": {
-      "comment": "Settings: interval hint",
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "间隔越小数据越实时，CPU 与网络占用越高"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shorter intervals give fresher data but use more CPU and network."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "間隔が短いほどリアルタイム性が上がりますが、CPU とネットワークの負荷も高くなります。"
-          }
-        }
-      }
-    },
-    "settings.timeout": {
-      "comment": "Settings: packet timeout label",
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "单包超时"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Packet Timeout"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "パケットタイムアウト"
-          }
-        }
-      }
-    },
-    "settings.timeout.hint": {
-      "comment": "Settings: timeout hint",
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "超过该时间没有收到回包，状态显示为超时"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "If no reply arrives within this time, the target is marked as timed out."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "この時間内に応答がない場合、タイムアウトとして表示されます。"
           }
         }
       }

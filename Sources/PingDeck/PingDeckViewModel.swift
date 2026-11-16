@@ -581,6 +581,15 @@ final class PingDeckViewModel: ObservableObject {
         return result
     }
 
+    /// 应用添加目标时选择的探测参数；越界值会被收敛到允许范围
+    func applyProbeSettings(interval: Double, timeout: Double, packetSize: Int) {
+        var updated = settings
+        updated.interval = PingSettings.clampInterval(interval)
+        updated.timeout = PingSettings.clampTimeout(timeout)
+        updated.packetSize = PingSettings.clampPacketSize(packetSize)
+        settings = updated
+    }
+
     @discardableResult
     func applyLanguage(_ language: AppLanguage, relaunch shouldRelaunch: Bool) -> Bool {
         guard settings.language != language else { return true }
@@ -821,6 +830,7 @@ final class PingDeckViewModel: ObservableObject {
         PingEngine.Settings(
             interval: settings.interval,
             timeout: settings.timeout,
+            packetSize: settings.packetSize,
             maxConcurrent: settings.maxConcurrent,
             rotationInterval: settings.rotationInterval
         )
