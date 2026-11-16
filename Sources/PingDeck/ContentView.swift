@@ -23,6 +23,10 @@ struct ContentView: View {
             } else {
                 TargetsTableView(columnCustomization: $columnCustomization)
             }
+            if model.detailRow != nil {
+                Divider()
+                TargetDetailPanel()
+            }
             Divider()
             footerBar
         }
