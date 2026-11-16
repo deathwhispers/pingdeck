@@ -155,9 +155,16 @@ struct ContentView: View {
             Text(String(localized: L10n.statusBarTotalSent(model.totalSent)))
             Spacer()
             if !model.selection.isEmpty {
-                Text(String(localized: L10n.statusBarSelected(model.selection.count)))
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
+                HStack(spacing: 8) {
+                    Text(String(localized: L10n.statusBarSelected(model.selection.count)))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                    Button(String(localized: L10n.selectionClear)) {
+                        model.clearSelection()
+                    }
+                    .buttonStyle(.link)
+                    .help(String(localized: L10n.selectionClearHelp))
+                }
             }
             Text(statusSummary)
                 .foregroundStyle(.secondary)

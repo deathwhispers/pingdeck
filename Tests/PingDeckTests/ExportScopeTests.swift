@@ -45,4 +45,14 @@ final class ExportScopeTests: XCTestCase {
 
         XCTAssertTrue(ExportScope.selection.entries(in: model).isEmpty)
     }
+
+    /// 取消选中后应回到「保存全部」的默认范围
+    func testClearingSelectionRestoresAutomaticAllScope() {
+        let model = makeModel(["a.com", "b.com"])
+        model.selection = [model.targets[0].id]
+
+        model.clearSelection()
+
+        XCTAssertEqual(ExportScope.automatic.entries(in: model).count, 2)
+    }
 }

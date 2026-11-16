@@ -1760,19 +1760,19 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "保存结果（⌘S）：未选中时保存全部，有选中时只保存选中项；可在保存面板选择 CSV / JSON / TXT / Markdown / Excel"
+            "value": "保存结果（⌘S）：未选中时保存全部，有选中时只保存选中项（⇧⌘A 取消选中）；可在保存面板选择 CSV / JSON / TXT / Markdown / Excel"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Save results (⌘S): saves all targets, or only the selection when there is one; choose CSV / JSON / TXT / Markdown / Excel in the save panel"
+            "value": "Save results (⌘S): saves all targets, or only the selection when there is one (⇧⌘A to deselect); choose CSV / JSON / TXT / Markdown / Excel in the save panel"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "結果を保存（⌘S）：選択がない場合はすべて、ある場合は選択項目のみを保存します。保存パネルで CSV / JSON / TXT / Markdown / Excel を選択できます"
+            "value": "結果を保存（⌘S）：選択がない場合はすべて、ある場合は選択項目のみを保存します（⇧⌘A で選択解除）。保存パネルで CSV / JSON / TXT / Markdown / Excel を選択できます"
           }
         }
       }
@@ -1893,6 +1893,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "累計送信：%lld"
+          }
+        }
+      }
+    },
+    "selection.clear": {
+      "comment": "Clear current row selection",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消选中"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deselect"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選択を解除"
+          }
+        }
+      }
+    },
+    "selection.clear.help": {
+      "comment": "Clear current row selection help text",
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消全部选中（⇧⌘A）"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deselect all targets (⇧⌘A)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべての選択を解除（⇧⌘A）"
           }
         }
       }

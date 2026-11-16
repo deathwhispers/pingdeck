@@ -111,6 +111,15 @@ struct PingDeckApp: App {
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }
+            // 编辑菜单：取消选中，便于恢复「保存全部」的默认范围
+            CommandGroup(after: .pasteboard) {
+                Divider()
+                Button(String(localized: L10n.selectionClear)) {
+                    model.clearSelection()
+                }
+                .keyboardShortcut("a", modifiers: [.command, .shift])
+                .disabled(model.selection.isEmpty)
+            }
             // 文件菜单：保存结果（⌘S，自动按选中决定范围）与显式的全部/所选导出
             CommandGroup(replacing: .saveItem) {
                 Button(String(localized: L10n.toolbarSave)) {

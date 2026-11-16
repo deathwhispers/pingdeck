@@ -1242,6 +1242,24 @@ enum L10n {
     }
 
     /**
+     Clear current row selection
+     
+     Localized string for key “selection.clear” in table “Localizable.xcstrings”.
+     */
+    static var selectionClear: LocalizedStringResource {
+        LocalizedStringResource("selection.clear", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Clear current row selection help text
+     
+     Localized string for key “selection.clear.help” in table “Localizable.xcstrings”.
+     */
+    static var selectionClearHelp: LocalizedStringResource {
+        LocalizedStringResource("selection.clear.help", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Settings: appearance label
      
      Localized string for key “settings.appearance” in table “Localizable.xcstrings”.
