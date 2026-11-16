@@ -698,6 +698,30 @@ final class DetailHistoryTests: XCTestCase {
         XCTAssertFalse(model.detailExpanded)
     }
 
+    func testShowDetailSelectsRowAndExpands() {
+        let model = makeModel(["a.com", "b.com"])
+        let ids = model.targets.map(\.id)
+        model.selection = [ids[0]]
+
+        model.showDetail(for: ids[1])
+
+        XCTAssertEqual(model.selection, [ids[1]])
+        XCTAssertEqual(model.detailRow?.target.host, "b.com")
+        XCTAssertTrue(model.detailExpanded)
+    }
+
+    func testShowDetailFromMultiSelectionExpandsSingleRow() {
+        let model = makeModel(["a.com", "b.com"])
+        let ids = model.targets.map(\.id)
+        model.selection = Set(ids)
+
+        model.showDetail(for: ids[0])
+
+        XCTAssertEqual(model.selection, [ids[0]])
+        XCTAssertEqual(model.detailRow?.target.host, "a.com")
+        XCTAssertTrue(model.detailExpanded)
+    }
+
     func testClearSamplesOnlyClearsRequestedTarget() {
         let model = makeModel(["a.com", "b.com"])
         let first = model.targets[0].id

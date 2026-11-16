@@ -232,6 +232,13 @@ struct GroupedRowView: View {
         .padding(.vertical, 7)
         .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
         .contentShape(Rectangle())
+        .simultaneousGesture(
+            TapGesture(count: 2).onEnded {
+                withAnimation(.easeInOut(duration: 0.16)) {
+                    model.showDetail(for: row.id)
+                }
+            }
+        )
         .onTapGesture {
             if NSEvent.modifierFlags.contains(.command) {
                 if isSelected {

@@ -493,6 +493,12 @@ final class PingDeckViewModel: ObservableObject {
         detailExpanded.toggle()
     }
 
+    /// 双击表格行：选中该目标并直接展开明细面板
+    func showDetail(for id: UUID) {
+        selection = [id]
+        detailExpanded = true
+    }
+
     func clearSamples(for id: UUID) {
         samples[id] = []
         pendingSamples[id] = []

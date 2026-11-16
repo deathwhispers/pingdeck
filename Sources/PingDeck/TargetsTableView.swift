@@ -282,6 +282,13 @@ struct TargetsTableView: View {
                     maxWidth: .infinity,
                     alignment: frameAlignment
                 )
+                .simultaneousGesture(
+                    TapGesture(count: 2).onEnded {
+                        withAnimation(.easeInOut(duration: 0.16)) {
+                            model.showDetail(for: row.id)
+                        }
+                    }
+                )
         }
         .width(min: column.minWidth, ideal: column.idealWidth, max: column.maxWidth)
         .alignment(column.alignment)
