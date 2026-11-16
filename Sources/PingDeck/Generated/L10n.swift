@@ -387,6 +387,222 @@ enum L10n {
     }
 
     /**
+     Detail panel: clear history button
+     
+     Localized string for key “detail.clear” in table “Localizable.xcstrings”.
+     */
+    static var detailClear: LocalizedStringResource {
+        LocalizedStringResource("detail.clear", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail history column: latency
+     
+     Localized string for key “detail.column.latency” in table “Localizable.xcstrings”.
+     */
+    static var detailColumnLatency: LocalizedStringResource {
+        LocalizedStringResource("detail.column.latency", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail history column: message
+     
+     Localized string for key “detail.column.message” in table “Localizable.xcstrings”.
+     */
+    static var detailColumnMessage: LocalizedStringResource {
+        LocalizedStringResource("detail.column.message", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail history column: outcome
+     
+     Localized string for key “detail.column.outcome” in table “Localizable.xcstrings”.
+     */
+    static var detailColumnOutcome: LocalizedStringResource {
+        LocalizedStringResource("detail.column.outcome", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail history column: peer address
+     
+     Localized string for key “detail.column.peer” in table “Localizable.xcstrings”.
+     */
+    static var detailColumnPeer: LocalizedStringResource {
+        LocalizedStringResource("detail.column.peer", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail history column: sequence number
+     
+     Localized string for key “detail.column.seq” in table “Localizable.xcstrings”.
+     */
+    static var detailColumnSeq: LocalizedStringResource {
+        LocalizedStringResource("detail.column.seq", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail history column: time
+     
+     Localized string for key “detail.column.time” in table “Localizable.xcstrings”.
+     */
+    static var detailColumnTime: LocalizedStringResource {
+        LocalizedStringResource("detail.column.time", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail history column: TTL
+     
+     Localized string for key “detail.column.ttl” in table “Localizable.xcstrings”.
+     */
+    static var detailColumnTtl: LocalizedStringResource {
+        LocalizedStringResource("detail.column.ttl", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: empty history hint
+     
+     Localized string for key “detail.empty” in table “Localizable.xcstrings”.
+     */
+    static var detailEmpty: LocalizedStringResource {
+        LocalizedStringResource("detail.empty", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: number of recorded probes
+     
+     Localized string for key “detail.header.records” in table “Localizable.xcstrings”.
+     */
+    static func detailHeaderRecords(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("detail.header.records", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail property: no value
+     
+     Localized string for key “detail.none” in table “Localizable.xcstrings”.
+     */
+    static var detailNone: LocalizedStringResource {
+        LocalizedStringResource("detail.none", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail outcome: failure
+     
+     Localized string for key “detail.outcome.failure” in table “Localizable.xcstrings”.
+     */
+    static var detailOutcomeFailure: LocalizedStringResource {
+        LocalizedStringResource("detail.outcome.failure", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail outcome: reply
+     
+     Localized string for key “detail.outcome.reply” in table “Localizable.xcstrings”.
+     */
+    static var detailOutcomeReply: LocalizedStringResource {
+        LocalizedStringResource("detail.outcome.reply", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail outcome: timeout
+     
+     Localized string for key “detail.outcome.timeout” in table “Localizable.xcstrings”.
+     */
+    static var detailOutcomeTimeout: LocalizedStringResource {
+        LocalizedStringResource("detail.outcome.timeout", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail outcome: unreachable
+     
+     Localized string for key “detail.outcome.unreachable” in table “Localizable.xcstrings”.
+     */
+    static var detailOutcomeUnreachable: LocalizedStringResource {
+        LocalizedStringResource("detail.outcome.unreachable", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: average latency
+     
+     Localized string for key “detail.property.average” in table “Localizable.xcstrings”.
+     */
+    static var detailPropertyAverage: LocalizedStringResource {
+        LocalizedStringResource("detail.property.average", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: group property
+     
+     Localized string for key “detail.property.group” in table “Localizable.xcstrings”.
+     */
+    static var detailPropertyGroup: LocalizedStringResource {
+        LocalizedStringResource("detail.property.group", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: last failure time
+     
+     Localized string for key “detail.property.lastFailure” in table “Localizable.xcstrings”.
+     */
+    static var detailPropertyLastFailure: LocalizedStringResource {
+        LocalizedStringResource("detail.property.lastFailure", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: last response time
+     
+     Localized string for key “detail.property.lastResponse” in table “Localizable.xcstrings”.
+     */
+    static var detailPropertyLastResponse: LocalizedStringResource {
+        LocalizedStringResource("detail.property.lastResponse", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: loss rate
+     
+     Localized string for key “detail.property.loss” in table “Localizable.xcstrings”.
+     */
+    static var detailPropertyLoss: LocalizedStringResource {
+        LocalizedStringResource("detail.property.loss", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: maximum latency
+     
+     Localized string for key “detail.property.maximum” in table “Localizable.xcstrings”.
+     */
+    static var detailPropertyMaximum: LocalizedStringResource {
+        LocalizedStringResource("detail.property.maximum", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: minimum latency
+     
+     Localized string for key “detail.property.minimum” in table “Localizable.xcstrings”.
+     */
+    static var detailPropertyMinimum: LocalizedStringResource {
+        LocalizedStringResource("detail.property.minimum", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: success and failure counts
+     
+     Localized string for key “detail.property.successFailure” in table “Localizable.xcstrings”.
+     */
+    static var detailPropertySuccessFailure: LocalizedStringResource {
+        LocalizedStringResource("detail.property.successFailure", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
+     Detail panel: color tag property
+     
+     Localized string for key “detail.property.tag” in table “Localizable.xcstrings”.
+     */
+    static var detailPropertyTag: LocalizedStringResource {
+        LocalizedStringResource("detail.property.tag", table: "Localizable", bundle: l10nBundleDescription)
+    }
+
+    /**
      Target editor enabled toggle
      
      Localized string for key “editor.enabled” in table “Localizable.xcstrings”.

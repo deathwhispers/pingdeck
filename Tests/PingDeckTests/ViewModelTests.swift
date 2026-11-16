@@ -630,6 +630,113 @@ final class TargetGroupingAndTagsTests: XCTestCase {
     }
 }
 
+final class DetailHistoryTests: XCTestCase {
+    private func makeModel(_ hosts: [String]) -> PingDeckViewModel {
+        let configuration = AppConfiguration(targets: hosts.map { PingTarget(host: $0) })
+        return PingDeckViewModel(configuration: configuration, store: InMemoryConfigStore())
+    }
+
+    func testSamplesKeepOnlyLatest200() {
+        let model = makeModel(["a.com"])
+        let id = model.targets[0].id
+
+        for index in 0..<205 {
+            model.enqueueSample(
+                id: id,
+                sample: PingSample(seq: index, outcome: .reply, latencyMs: 1)
+            )
+        }
+        model.flushPendingUpdates()
+
+        let samples = model.samples(for: id)
+        XCTAssertEqual(samples.count, 200)
+        XCTAssertEqual(samples.first?.seq, 5)
+        XCTAssertEqual(samples.last?.seq, 204)
+    }
+
+    func testClearResultsClearsSamples() {
+        let model = makeModel(["a.com"])
+        let id = model.targets[0].id
+        model.enqueueSample(id: id, sample: PingSample(outcome: .timeout))
+        model.flushPendingUpdates()
+
+        model.clearResults()
+
+        XCTAssertTrue(model.samples(for: id).isEmpty)
+    }
+
+    func testRemovingTargetDropsSamples() {
+        let model = makeModel(["a.com", "b.com"])
+        let id = model.targets[0].id
+        model.enqueueSample(id: id, sample: PingSample(outcome: .timeout))
+        model.flushPendingUpdates()
+
+        model.removeTargets(ids: [id])
+
+        XCTAssertTrue(model.samples(for: id).isEmpty)
+    }
+
+    func testDetailRowRequiresSingleSelection() {
+        let model = makeModel(["a.com", "b.com"])
+        let ids = model.targets.map(\.id)
+
+        model.selection = Set(ids)
+        XCTAssertNil(model.detailRow)
+
+        model.selection = [ids[1]]
+        XCTAssertEqual(model.detailRow?.target.host, "b.com")
+    }
+
+    func testSelectionChangeCollapsesDetail() {
+        let model = makeModel(["a.com", "b.com"])
+        let ids = model.targets.map(\.id)
+        model.selection = [ids[0]]
+        model.detailExpanded = true
+
+        model.selection = Set(ids)
+
+        XCTAssertFalse(model.detailExpanded)
+    }
+
+    func testShowDetailSelectsRowAndExpands() {
+        let model = makeModel(["a.com", "b.com"])
+        let ids = model.targets.map(\.id)
+        model.selection = [ids[0]]
+
+        model.showDetail(for: ids[1])
+
+        XCTAssertEqual(model.selection, [ids[1]])
+        XCTAssertEqual(model.detailRow?.target.host, "b.com")
+        XCTAssertTrue(model.detailExpanded)
+    }
+
+    func testShowDetailFromMultiSelectionExpandsSingleRow() {
+        let model = makeModel(["a.com", "b.com"])
+        let ids = model.targets.map(\.id)
+        model.selection = Set(ids)
+
+        model.showDetail(for: ids[0])
+
+        XCTAssertEqual(model.selection, [ids[0]])
+        XCTAssertEqual(model.detailRow?.target.host, "a.com")
+        XCTAssertTrue(model.detailExpanded)
+    }
+
+    func testClearSamplesOnlyClearsRequestedTarget() {
+        let model = makeModel(["a.com", "b.com"])
+        let first = model.targets[0].id
+        let second = model.targets[1].id
+        model.enqueueSample(id: first, sample: PingSample(outcome: .timeout))
+        model.enqueueSample(id: second, sample: PingSample(outcome: .timeout))
+        model.flushPendingUpdates()
+
+        model.clearSamples(for: first)
+
+        XCTAssertTrue(model.samples(for: first).isEmpty)
+        XCTAssertEqual(model.samples(for: second).count, 1)
+    }
+}
+
 final class UnifiedAddTargetsTests: XCTestCase {
     private func makeModel(targets: [PingTarget] = []) -> PingDeckViewModel {
         let configuration = AppConfiguration(targets: targets)

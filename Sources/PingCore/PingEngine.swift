@@ -42,6 +42,8 @@ public final class PingEngine {
 
     /// 统计更新回调（在引擎内部队列上触发）
     public var onStats: ((UUID, PingStats) -> Void)?
+    /// 单次探测样本回调（在引擎内部队列上触发）
+    public var onSample: ((UUID, PingSample) -> Void)?
     /// 引擎级错误回调（例如无法启动 ping 进程）
     public var onError: ((PingEngineIssue) -> Void)?
 
@@ -239,7 +241,7 @@ public final class PingEngine {
     private func handleEventLocked(_ event: PingEvent, id: UUID) {
         var value = stats[id] ?? PingStats()
         switch event {
-        case .reply(let seq, let latency):
+        case .reply(let seq, let latency, _, _):
             value.recordSuccess(latency, at: Date(), seq: seq)
         case .timeout(let seq):
             value.recordTimeout(seq: seq)
@@ -254,6 +256,31 @@ public final class PingEngine {
         }
         stats[id] = value
         emitLocked(id)
+        if let sample = Self.sample(for: event) {
+            onSample?(id, sample)
+        }
+    }
+
+    /// 把解析器事件映射为界面展示用的探测样本
+    static func sample(for event: PingEvent) -> PingSample? {
+        switch event {
+        case .reply(let seq, let latency, let peer, let ttl):
+            return PingSample(
+                seq: seq,
+                outcome: .reply,
+                latencyMs: latency,
+                peerAddress: peer,
+                ttl: ttl
+            )
+        case .timeout(let seq):
+            return PingSample(seq: seq, outcome: .timeout)
+        case .unreachable(let text):
+            return PingSample(outcome: .unreachable, message: text)
+        case .failure(let text):
+            return PingSample(outcome: .failure, message: text)
+        case .info:
+            return nil
+        }
     }
 
     private func handleExitLocked(id: UUID, code: Int32, process: PingProcess) {
@@ -343,6 +370,7 @@ public final class PingEngine {
             value.status = .timeout
             stats[id] = value
             emitLocked(id)
+            onSample?(id, PingSample(outcome: .timeout))
         }
     }
 

@@ -106,8 +106,18 @@ enum ImportMode: String, CaseIterable, Identifiable {
 final class PingDeckViewModel: ObservableObject {
     @Published private(set) var targets: [PingTarget] = []
     @Published private(set) var stats: [UUID: PingStats] = [:]
+    /// 每个目标最近 200 条探测样本，仅内存保留
+    @Published private(set) var samples: [UUID: [PingSample]] = [:]
     @Published private(set) var isRunning = false
-    @Published var selection: Set<UUID> = []
+    @Published var selection: Set<UUID> = [] {
+        didSet {
+            if selection.count != 1 {
+                detailExpanded = false
+            }
+        }
+    }
+    /// 底部明细面板是否展开
+    @Published var detailExpanded = false
     /// 清空全部目标前的确认弹窗
     @Published var confirmingClearAllTargets = false
     @Published var sheet: AppSheet?
@@ -129,8 +139,10 @@ final class PingDeckViewModel: ObservableObject {
     private let languageDefaults: UserDefaults
     private let relaunch: () -> Void
     private var pendingStats: [UUID: PingStats] = [:]
+    private var pendingSamples: [UUID: [PingSample]] = [:]
     private var flushTimer: Timer?
     private var saveTimer: Timer?
+    static let sampleLimit = 200
     private lazy var timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "zh_CN")
@@ -155,6 +167,11 @@ final class PingDeckViewModel: ObservableObject {
         engine.onStats = { [weak self] id, value in
             DispatchQueue.main.async {
                 self?.enqueue(id: id, stats: value)
+            }
+        }
+        engine.onSample = { [weak self] id, sample in
+            DispatchQueue.main.async {
+                self?.enqueueSample(id: id, sample: sample)
             }
         }
         engine.onError = { [weak self] issue in
@@ -444,6 +461,9 @@ final class PingDeckViewModel: ObservableObject {
 
     private func applyTargets(_ updated: [PingTarget]) {
         targets = updated
+        let validIDs = Set(updated.map(\.id))
+        samples = samples.filter { validIDs.contains($0.key) }
+        pendingSamples = pendingSamples.filter { validIDs.contains($0.key) }
         engine.setTargets(updated)
         scheduleSave()
     }
@@ -457,6 +477,31 @@ final class PingDeckViewModel: ObservableObject {
 
     func clearSelection() {
         selection.removeAll()
+    }
+
+    /// 当前明细面板对应的目标；仅在恰好选中一个目标时存在
+    var detailRow: PingTableRow? {
+        guard selection.count == 1, let id = selection.first else { return nil }
+        return rows.first { $0.id == id }
+    }
+
+    func samples(for id: UUID) -> [PingSample] {
+        samples[id] ?? []
+    }
+
+    func toggleDetailExpanded() {
+        detailExpanded.toggle()
+    }
+
+    /// 双击表格行：选中该目标并直接展开明细面板
+    func showDetail(for id: UUID) {
+        selection = [id]
+        detailExpanded = true
+    }
+
+    func clearSamples(for id: UUID) {
+        samples[id] = []
+        pendingSamples[id] = []
     }
 
     /// 导出全部目标（不受选中影响）
@@ -691,6 +736,8 @@ final class PingDeckViewModel: ObservableObject {
     func clearResults() {
         engine.clearStats()
         stats = [:]
+        samples = [:]
+        pendingSamples.removeAll()
     }
 
     /// 供测试或内部更新目标的统计结果
@@ -705,6 +752,19 @@ final class PingDeckViewModel: ObservableObject {
         scheduleFlush()
     }
 
+    /// 引擎回调在主线程写入待发布样本，由 0.25 秒节流统一合并
+    func enqueueSample(id: UUID, sample: PingSample) {
+        pendingSamples[id, default: []].append(sample)
+        scheduleFlush()
+    }
+
+    /// 立即合并待发布的统计与样本（测试与内部清理使用）
+    func flushPendingUpdates() {
+        flushTimer?.invalidate()
+        flushTimer = nil
+        flushStats()
+    }
+
     private func scheduleFlush() {
         guard flushTimer == nil else { return }
         flushTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false) { [weak self] _ in
@@ -714,11 +774,22 @@ final class PingDeckViewModel: ObservableObject {
 
     private func flushStats() {
         flushTimer = nil
-        guard !pendingStats.isEmpty else { return }
+        guard !pendingStats.isEmpty || !pendingSamples.isEmpty else { return }
+
         for (id, value) in pendingStats {
             stats[id] = value
         }
         pendingStats.removeAll()
+
+        for (id, values) in pendingSamples {
+            var list = samples[id] ?? []
+            list.append(contentsOf: values)
+            if list.count > Self.sampleLimit {
+                list.removeFirst(list.count - Self.sampleLimit)
+            }
+            samples[id] = list
+        }
+        pendingSamples.removeAll()
     }
 
     // MARK: - 配置保存

@@ -4,12 +4,34 @@ import XCTest
 final class PingParserTests: XCTestCase {
     func testParsesReplyLine() {
         let event = PingLineParser.parse("64 bytes from 8.8.8.8: icmp_seq=0 ttl=118 time=13.163 ms")
-        XCTAssertEqual(event, .reply(seq: 0, latencyMs: 13.163))
+        XCTAssertEqual(
+            event,
+            .reply(seq: 0, latencyMs: 13.163, peerAddress: "8.8.8.8", ttl: 118)
+        )
     }
 
     func testParsesIPv6ReplyLine() {
         let event = PingLineParser.parse("64 bytes from 2001:4860:4860::8888: icmp_seq=2 hlim=52 time=8.001 ms")
-        XCTAssertEqual(event, .reply(seq: 2, latencyMs: 8.001))
+        XCTAssertEqual(
+            event,
+            .reply(seq: 2, latencyMs: 8.001, peerAddress: "2001:4860:4860::8888", ttl: 52)
+        )
+    }
+
+    func testParsesICMP6Sequence() {
+        let event = PingLineParser.parse("64 bytes from fe80::1%en0: icmp6_seq=7 ttl=64 time=0.300 ms")
+        XCTAssertEqual(
+            event,
+            .reply(seq: 7, latencyMs: 0.3, peerAddress: "fe80::1%en0", ttl: 64)
+        )
+    }
+
+    func testReplyWithoutPeerAndTTL() {
+        let event = PingLineParser.parse("64 bytes icmp_seq=1 time=1.5 ms")
+        XCTAssertEqual(
+            event,
+            .reply(seq: 1, latencyMs: 1.5, peerAddress: nil, ttl: nil)
+        )
     }
 
     func testParsesTimeoutLine() {
@@ -35,6 +57,43 @@ final class PingParserTests: XCTestCase {
     func testIgnoresStatisticsFooter() {
         let event = PingLineParser.parse("--- 8.8.8.8 ping statistics ---")
         XCTAssertEqual(event, .info("--- 8.8.8.8 ping statistics ---"))
+    }
+}
+
+final class PingEngineSampleTests: XCTestCase {
+    func testMapsReplyEventToSample() {
+        let sample = PingEngine.sample(
+            for: .reply(seq: 3, latencyMs: 12.5, peerAddress: "8.8.8.8", ttl: 118)
+        )
+
+        XCTAssertEqual(sample?.outcome, .reply)
+        XCTAssertEqual(sample?.seq, 3)
+        XCTAssertEqual(sample?.latencyMs, 12.5)
+        XCTAssertEqual(sample?.peerAddress, "8.8.8.8")
+        XCTAssertEqual(sample?.ttl, 118)
+    }
+
+    func testMapsTimeoutEventToSample() {
+        let sample = PingEngine.sample(for: .timeout(seq: 4))
+
+        XCTAssertEqual(sample?.outcome, .timeout)
+        XCTAssertEqual(sample?.seq, 4)
+        XCTAssertNil(sample?.latencyMs)
+    }
+
+    func testMapsUnreachableAndFailureMessages() {
+        XCTAssertEqual(
+            PingEngine.sample(for: .unreachable("No route to host"))?.message,
+            "No route to host"
+        )
+        XCTAssertEqual(
+            PingEngine.sample(for: .failure("cannot resolve"))?.message,
+            "cannot resolve"
+        )
+    }
+
+    func testIgnoresInfoEvent() {
+        XCTAssertNil(PingEngine.sample(for: .info("statistics")))
     }
 }
 
