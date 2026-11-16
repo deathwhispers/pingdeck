@@ -221,6 +221,42 @@ final class BulkImportModeTests: XCTestCase {
         XCTAssertTrue(result.rejected.isEmpty)
         XCTAssertEqual(model.targets.map { $0.host }, ["old.com"])
     }
+
+    /// 追加并开跑：保留现有目标，新一批目标使用本次录入的分组与标签
+    func testImportTargetsAndStartInAppendModeKeepsExistingAndAppliesBatchDefaults() {
+        let model = makeModel(["127.0.0.1"])
+
+        let result = model.importTargetsAndStart(
+            "127.0.0.2",
+            mode: .append,
+            defaultGroup: "Batch2",
+            defaultColorTag: .purple
+        )
+
+        XCTAssertEqual(result.entries.count, 1)
+        XCTAssertEqual(model.targets.map(\.host), ["127.0.0.1", "127.0.0.2"])
+        XCTAssertEqual(model.targets.last?.group, "Batch2")
+        XCTAssertEqual(model.targets.last?.colorTag, .purple)
+        XCTAssertTrue(model.isRunning)
+    }
+
+    /// 替换并开跑：丢弃现有目标，只保留本次录入内容
+    func testImportTargetsAndStartInReplaceModeDropsExisting() {
+        let model = makeModel(["127.0.0.1"])
+
+        let result = model.importTargetsAndStart(
+            "127.0.0.2",
+            mode: .replace,
+            defaultGroup: "Batch3",
+            defaultColorTag: .blue
+        )
+
+        XCTAssertEqual(result.entries.count, 1)
+        XCTAssertEqual(model.targets.map(\.host), ["127.0.0.2"])
+        XCTAssertEqual(model.targets.first?.group, "Batch3")
+        XCTAssertEqual(model.targets.first?.colorTag, .blue)
+        XCTAssertTrue(model.isRunning)
+    }
 }
 
 /// 启动时的目标同步
