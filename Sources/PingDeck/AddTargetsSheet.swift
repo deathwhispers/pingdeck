@@ -1,11 +1,10 @@
 import SwiftUI
 import PingCore
 
-/// 批量导入：每行一个目标，支持「目标」或「目标 备注」
-struct BulkImportSheet: View {
+/// 添加目标弹窗：支持单行、多行、网段、带备注/分组/颜色标签全量录入并立即重新开跑
+struct AddTargetsSheet: View {
     @EnvironmentObject private var model: PingDeckViewModel
-    @State private var text = ""
-    @State private var mode: ImportMode = .append
+    @State private var text: String = ""
     @State private var defaultGroup = ""
     @State private var defaultColorTag: TargetColorTag?
 
@@ -16,28 +15,29 @@ struct BulkImportSheet: View {
     private var preview: BulkImportParser.Result {
         model.previewBulkImport(
             text,
-            mode: mode,
+            mode: .replace,
             defaultGroup: trimmedDefaultGroup,
             defaultColorTag: defaultColorTag
         )
     }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(L10n.importTitle)
-                .font(.headline)
+    init() {}
 
-            Picker(String(localized: L10n.importMode), selection: $mode) {
-                ForEach(ImportMode.allCases) { item in
-                    Text(item.title).tag(item)
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Text(L10n.toolbarAdd)
+                    .font(.headline)
+                Spacer()
+                if !text.isEmpty {
+                    Button(String(localized: L10n.toolbarClear)) {
+                        text = ""
+                    }
+                    .font(.caption)
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
                 }
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-
-            Text(modeHint)
-                .font(.caption)
-                .foregroundStyle(mode == .replace && !model.targets.isEmpty ? .red : .secondary)
 
             // 统一设置默认分组与默认颜色标签
             HStack(spacing: 16) {
@@ -122,7 +122,7 @@ struct BulkImportSheet: View {
 
             TextEditor(text: $text)
                 .font(.system(.body, design: .monospaced))
-                .frame(height: 170)
+                .frame(height: 190)
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color.secondary.opacity(0.4))
@@ -133,31 +133,26 @@ struct BulkImportSheet: View {
             HStack {
                 Spacer()
                 Button(String(localized: L10n.commonCancel)) { model.closeSheet() }
-                Button(confirmTitle) { importNow() }
-                    .keyboardShortcut(.defaultAction)
-                    .disabled(preview.entries.isEmpty)
+                Button(confirmTitle) {
+                    importAndStart()
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(preview.entries.isEmpty)
             }
         }
         .padding(20)
-        .frame(width: 540)
-    }
-
-    private var modeHint: String {
-        switch mode {
-        case .append:
-            return String(localized: L10n.importModeAppendDescription(model.targets.count))
-        case .replace:
-            return model.targets.isEmpty
-                ? String(localized: L10n.importModeReplaceDescriptionEmpty)
-                : String(localized: L10n.importModeReplaceDescriptionWithCount(model.targets.count))
+        .frame(width: 560)
+        .onAppear {
+            if text.isEmpty && !model.targets.isEmpty {
+                text = model.exportTargetsAsEditableText()
+            }
         }
     }
 
     private var confirmTitle: String {
-        switch mode {
-        case .append: return String(localized: L10n.importConfirmAppend(preview.entries.count))
-        case .replace: return String(localized: L10n.importConfirmReplace(preview.entries.count))
-        }
+        preview.entries.isEmpty
+            ? String(localized: L10n.commonSave)
+            : "\(String(localized: L10n.commonSave)) (\(preview.entries.count))"
     }
 
     @ViewBuilder
@@ -182,16 +177,15 @@ struct BulkImportSheet: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(height: 70)
+                    .frame(height: 60)
                 }
             }
         }
     }
 
-    private func importNow() {
-        let result = model.importTargets(
+    private func importAndStart() {
+        let result = model.replaceAllTargetsAndStart(
             text,
-            mode: mode,
             defaultGroup: trimmedDefaultGroup,
             defaultColorTag: defaultColorTag
         )
