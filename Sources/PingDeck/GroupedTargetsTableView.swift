@@ -232,23 +232,30 @@ struct GroupedRowView: View {
         .padding(.vertical, 7)
         .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
         .contentShape(Rectangle())
-        .simultaneousGesture(
-            TapGesture(count: 2).onEnded {
-                withAnimation(.easeInOut(duration: 0.16)) {
-                    model.showDetail(for: row.id)
+        .gesture(
+            ExclusiveGesture(
+                TapGesture(count: 2).onEnded {
+                    withAnimation(.easeInOut(duration: 0.16)) {
+                        model.showDetail(for: row.id)
+                    }
+                },
+                TapGesture().onEnded {
+                    selectRow()
                 }
-            }
+            )
         )
-        .onTapGesture {
-            if NSEvent.modifierFlags.contains(.command) {
-                if isSelected {
-                    model.selection.remove(row.id)
-                } else {
-                    model.selection.insert(row.id)
-                }
+    }
+
+    /// 单击行：⌘ 点击切换选中，普通点击单选
+    private func selectRow() {
+        if NSEvent.modifierFlags.contains(.command) {
+            if isSelected {
+                model.selection.remove(row.id)
             } else {
-                model.selection = [row.id]
+                model.selection.insert(row.id)
             }
+        } else {
+            model.selection = [row.id]
         }
     }
 }

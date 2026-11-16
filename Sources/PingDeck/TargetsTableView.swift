@@ -282,18 +282,26 @@ struct TargetsTableView: View {
                     maxWidth: .infinity,
                     alignment: frameAlignment
                 )
-                .simultaneousGesture(
-                    TapGesture(count: 2).onEnded {
-                        withAnimation(.easeInOut(duration: 0.16)) {
-                            model.showDetail(for: row.id)
-                        }
+                .background {
+                    if column == .target {
+                        TableDoubleClickBridge(onDoubleClick: handleDoubleClick)
+                            .frame(width: 0, height: 0)
                     }
-                )
+                }
         }
         .width(min: column.minWidth, ideal: column.idealWidth, max: column.maxWidth)
         .alignment(column.alignment)
         .customizationID(column.rawValue)
         .disabledCustomizationBehavior(column.isRequired ? .visibility : [])
+    }
+
+    /// 双击当前表格中的第 index 行：选中并展开明细
+    private func handleDoubleClick(rowIndex: Int) {
+        let displayed = model.filteredRows
+        guard displayed.indices.contains(rowIndex) else { return }
+        withAnimation(.easeInOut(duration: 0.16)) {
+            model.showDetail(for: displayed[rowIndex].id)
+        }
     }
 
     private var sortOrder: Binding<[TargetRowComparator]> {
