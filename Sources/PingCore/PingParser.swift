@@ -3,7 +3,7 @@ import Foundation
 /// 从 ping 输出行中解析出的一条事件
 public enum PingEvent: Equatable, Sendable {
     /// 收到回包
-    case reply(seq: Int?, latencyMs: Double)
+    case reply(seq: Int?, latencyMs: Double, peerAddress: String?, ttl: Int?)
     /// 超时（丢包）
     case timeout(seq: Int?)
     /// 网络不可达
@@ -27,7 +27,12 @@ public enum PingLineParser {
         }
 
         if let latency = latency(in: line) {
-            return .reply(seq: sequence(in: line), latencyMs: latency)
+            return .reply(
+                seq: sequence(in: line),
+                latencyMs: latency,
+                peerAddress: peerAddress(in: line),
+                ttl: ttl(in: line)
+            )
         }
 
         let lower = line.lowercased()
@@ -61,8 +66,38 @@ public enum PingLineParser {
         return value
     }
 
+    /// 从 `64 bytes from <address>: ...` 中提取对端地址；IPv6 地址同样以冒号结尾
+    private static func peerAddress(in line: String) -> String? {
+        guard let range = line.range(of: "from ") else { return nil }
+        let tail = line[range.upperBound...]
+        let token = tail.prefix { !$0.isWhitespace }
+        let address = token.hasSuffix(":") ? token.dropLast() : token
+        return address.isEmpty ? nil : String(address)
+    }
+
+    /// IPv4 输出 `ttl=`，IPv6 输出 `hlim=`，两者都表示生存时间
+    private static func ttl(in line: String) -> Int? {
+        for key in ["ttl=", "hlim="] {
+            guard let range = line.range(of: key) else { continue }
+            let digits = line[range.upperBound...].prefix { $0.isNumber }
+            if let value = Int(digits) {
+                return value
+            }
+        }
+        return nil
+    }
+
     private static func sequence(in line: String) -> Int? {
-        guard let range = line.range(of: "icmp_seq") else { return nil }
+        let marker: String
+        if line.contains("icmp6_seq") {
+            marker = "icmp6_seq"
+        } else if line.contains("icmp_seq") {
+            marker = "icmp_seq"
+        } else {
+            return nil
+        }
+
+        guard let range = line.range(of: marker) else { return nil }
         var tail = line[range.upperBound...]
         tail = tail.drop(while: { $0 == " " || $0 == "=" })
         let digits = tail.prefix { $0.isNumber }

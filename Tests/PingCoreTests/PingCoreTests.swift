@@ -4,12 +4,34 @@ import XCTest
 final class PingParserTests: XCTestCase {
     func testParsesReplyLine() {
         let event = PingLineParser.parse("64 bytes from 8.8.8.8: icmp_seq=0 ttl=118 time=13.163 ms")
-        XCTAssertEqual(event, .reply(seq: 0, latencyMs: 13.163))
+        XCTAssertEqual(
+            event,
+            .reply(seq: 0, latencyMs: 13.163, peerAddress: "8.8.8.8", ttl: 118)
+        )
     }
 
     func testParsesIPv6ReplyLine() {
         let event = PingLineParser.parse("64 bytes from 2001:4860:4860::8888: icmp_seq=2 hlim=52 time=8.001 ms")
-        XCTAssertEqual(event, .reply(seq: 2, latencyMs: 8.001))
+        XCTAssertEqual(
+            event,
+            .reply(seq: 2, latencyMs: 8.001, peerAddress: "2001:4860:4860::8888", ttl: 52)
+        )
+    }
+
+    func testParsesICMP6Sequence() {
+        let event = PingLineParser.parse("64 bytes from fe80::1%en0: icmp6_seq=7 ttl=64 time=0.300 ms")
+        XCTAssertEqual(
+            event,
+            .reply(seq: 7, latencyMs: 0.3, peerAddress: "fe80::1%en0", ttl: 64)
+        )
+    }
+
+    func testReplyWithoutPeerAndTTL() {
+        let event = PingLineParser.parse("64 bytes icmp_seq=1 time=1.5 ms")
+        XCTAssertEqual(
+            event,
+            .reply(seq: 1, latencyMs: 1.5, peerAddress: nil, ttl: nil)
+        )
     }
 
     func testParsesTimeoutLine() {

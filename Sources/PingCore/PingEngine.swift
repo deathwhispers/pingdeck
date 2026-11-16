@@ -239,7 +239,7 @@ public final class PingEngine {
     private func handleEventLocked(_ event: PingEvent, id: UUID) {
         var value = stats[id] ?? PingStats()
         switch event {
-        case .reply(let seq, let latency):
+        case .reply(let seq, let latency, _, _):
             value.recordSuccess(latency, at: Date(), seq: seq)
         case .timeout(let seq):
             value.recordTimeout(seq: seq)
