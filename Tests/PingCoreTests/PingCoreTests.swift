@@ -60,6 +60,43 @@ final class PingParserTests: XCTestCase {
     }
 }
 
+final class PingEngineSampleTests: XCTestCase {
+    func testMapsReplyEventToSample() {
+        let sample = PingEngine.sample(
+            for: .reply(seq: 3, latencyMs: 12.5, peerAddress: "8.8.8.8", ttl: 118)
+        )
+
+        XCTAssertEqual(sample?.outcome, .reply)
+        XCTAssertEqual(sample?.seq, 3)
+        XCTAssertEqual(sample?.latencyMs, 12.5)
+        XCTAssertEqual(sample?.peerAddress, "8.8.8.8")
+        XCTAssertEqual(sample?.ttl, 118)
+    }
+
+    func testMapsTimeoutEventToSample() {
+        let sample = PingEngine.sample(for: .timeout(seq: 4))
+
+        XCTAssertEqual(sample?.outcome, .timeout)
+        XCTAssertEqual(sample?.seq, 4)
+        XCTAssertNil(sample?.latencyMs)
+    }
+
+    func testMapsUnreachableAndFailureMessages() {
+        XCTAssertEqual(
+            PingEngine.sample(for: .unreachable("No route to host"))?.message,
+            "No route to host"
+        )
+        XCTAssertEqual(
+            PingEngine.sample(for: .failure("cannot resolve"))?.message,
+            "cannot resolve"
+        )
+    }
+
+    func testIgnoresInfoEvent() {
+        XCTAssertNil(PingEngine.sample(for: .info("statistics")))
+    }
+}
+
 final class StatsTests: XCTestCase {
     func testAverageAndLossRate() {
         var stats = PingStats()
