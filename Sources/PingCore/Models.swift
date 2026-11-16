@@ -269,11 +269,36 @@ public struct NotchIslandSettings: Codable, Equatable, Sendable {
 public struct PingSettings: Codable, Sendable, Equatable {
     /// 最大并发数上限
     public static let maxConcurrentLimit = 512
+    /// 默认 ICMP 包大小（字节）
+    public static let defaultPacketSize = 56
+    /// 允许的 ICMP 包大小范围
+    public static let packetSizeRange = 8...65_500
+    /// 探测间隔可选范围（秒）
+    public static let intervalRange = 0.5...10.0
+    /// 单包超时可选范围（秒）
+    public static let timeoutRange = 1.0...10.0
+
+    /// 将任意包大小收敛到允许范围内
+    public static func clampPacketSize(_ value: Int) -> Int {
+        min(packetSizeRange.upperBound, max(packetSizeRange.lowerBound, value))
+    }
+
+    /// 将任意探测间隔收敛到可选范围内
+    public static func clampInterval(_ value: Double) -> Double {
+        min(intervalRange.upperBound, max(intervalRange.lowerBound, value))
+    }
+
+    /// 将任意单包超时收敛到可选范围内
+    public static func clampTimeout(_ value: Double) -> Double {
+        min(timeoutRange.upperBound, max(timeoutRange.lowerBound, value))
+    }
 
     /// 发包间隔（秒），macOS 下非 root 建议 >= 0.2
     public var interval: Double
     /// 单包等待超时（秒）
     public var timeout: Double
+    /// ICMP 包载荷大小（字节）
+    public var packetSize: Int
     /// 同时运行的 ping 进程上限
     public var maxConcurrent: Int
     /// 目标数超过并发上限时的轮换周期（秒），0 表示不轮换
@@ -289,6 +314,7 @@ public struct PingSettings: Codable, Sendable, Equatable {
 
     public init(interval: Double = 1.0,
                 timeout: Double = 2.0,
+                packetSize: Int = PingSettings.defaultPacketSize,
                 maxConcurrent: Int = 16,
                 rotationInterval: Double = 30,
                 appearance: AppearanceMode = .system,
@@ -297,6 +323,7 @@ public struct PingSettings: Codable, Sendable, Equatable {
                 notchIsland: NotchIslandSettings = NotchIslandSettings()) {
         self.interval = interval
         self.timeout = timeout
+        self.packetSize = PingSettings.clampPacketSize(packetSize)
         self.maxConcurrent = max(1, maxConcurrent)
         self.rotationInterval = max(0, rotationInterval)
         self.appearance = appearance
@@ -308,6 +335,7 @@ public struct PingSettings: Codable, Sendable, Equatable {
     private enum CodingKeys: String, CodingKey {
         case interval
         case timeout
+        case packetSize
         case maxConcurrent
         case rotationInterval
         case appearance
@@ -322,6 +350,8 @@ public struct PingSettings: Codable, Sendable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         interval = try container.decode(Double.self, forKey: .interval)
         timeout = try container.decode(Double.self, forKey: .timeout)
+        let storedPacketSize = (try? container.decodeIfPresent(Int.self, forKey: .packetSize)) ?? PingSettings.defaultPacketSize
+        packetSize = PingSettings.clampPacketSize(storedPacketSize)
         maxConcurrent = try container.decode(Int.self, forKey: .maxConcurrent)
         rotationInterval = try container.decode(Double.self, forKey: .rotationInterval)
         appearance = (try? container.decodeIfPresent(AppearanceMode.self, forKey: .appearance)) ?? .system

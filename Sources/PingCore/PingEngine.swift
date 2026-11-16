@@ -13,15 +13,18 @@ public final class PingEngine {
     public struct Settings: Sendable {
         public var interval: TimeInterval
         public var timeout: TimeInterval
+        public var packetSize: Int
         public var maxConcurrent: Int
         public var rotationInterval: TimeInterval
 
         public init(interval: TimeInterval = 1.0,
                     timeout: TimeInterval = 2.0,
+                    packetSize: Int = PingSettings.defaultPacketSize,
                     maxConcurrent: Int = 16,
                     rotationInterval: TimeInterval = 30) {
             self.interval = max(0.2, interval)
             self.timeout = max(0.5, timeout)
+            self.packetSize = PingSettings.clampPacketSize(packetSize)
             self.maxConcurrent = max(1, maxConcurrent)
             self.rotationInterval = max(0, rotationInterval)
         }
@@ -108,7 +111,9 @@ public final class PingEngine {
 
     public func updateSettings(_ newSettings: Settings) {
         queue.async {
-            let needsRestart = newSettings.interval != self.settings.interval || newSettings.timeout != self.settings.timeout
+            let needsRestart = newSettings.interval != self.settings.interval
+                || newSettings.timeout != self.settings.timeout
+                || newSettings.packetSize != self.settings.packetSize
             self.settings = newSettings
             guard self.running, needsRestart else { return }
             self.stopAllLocked()
@@ -205,7 +210,11 @@ public final class PingEngine {
     private func startProcessLocked(for target: PingTarget) {
         let process = PingProcess(
             host: target.host,
-            configuration: .init(interval: settings.interval, timeout: settings.timeout)
+            configuration: .init(
+                interval: settings.interval,
+                timeout: settings.timeout,
+                packetSize: settings.packetSize
+            )
         )
         process.onEvent = { [weak self] event in
             self?.queue.async { self?.handleEventLocked(event, id: target.id) }
