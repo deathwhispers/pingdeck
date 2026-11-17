@@ -909,57 +909,21 @@ enum L10n {
     }
 
     /**
-     Bulk import mode label
+     Add targets: append option checkbox
      
-     Localized string for key “import.mode” in table “Localizable.xcstrings”.
+     Localized string for key “import.mode.append.toggle” in table “Localizable.xcstrings”.
      */
-    static var importMode: LocalizedStringResource {
-        LocalizedStringResource("import.mode", table: "Localizable", bundle: l10nBundleDescription)
+    static var importModeAppendToggle: LocalizedStringResource {
+        LocalizedStringResource("import.mode.append.toggle", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**
-     Import mode: append
+     Add targets: append option checkbox with existing target count
      
-     Localized string for key “import.mode.append” in table “Localizable.xcstrings”.
+     Localized string for key “import.mode.append.toggle.withCount” in table “Localizable.xcstrings”.
      */
-    static var importModeAppend: LocalizedStringResource {
-        LocalizedStringResource("import.mode.append", table: "Localizable", bundle: l10nBundleDescription)
-    }
-
-    /**
-     Bulk import append mode description
-     
-     Localized string for key “import.mode.append.description” in table “Localizable.xcstrings”.
-     */
-    static func importModeAppendDescription(_ arg1: Int) -> LocalizedStringResource {
-        LocalizedStringResource("import.mode.append.description", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
-    }
-
-    /**
-     Import mode: replace
-     
-     Localized string for key “import.mode.replace” in table “Localizable.xcstrings”.
-     */
-    static var importModeReplace: LocalizedStringResource {
-        LocalizedStringResource("import.mode.replace", table: "Localizable", bundle: l10nBundleDescription)
-    }
-
-    /**
-     Bulk import replace mode description when no existing targets
-     
-     Localized string for key “import.mode.replace.description.empty” in table “Localizable.xcstrings”.
-     */
-    static var importModeReplaceDescriptionEmpty: LocalizedStringResource {
-        LocalizedStringResource("import.mode.replace.description.empty", table: "Localizable", bundle: l10nBundleDescription)
-    }
-
-    /**
-     Bulk import replace mode description with existing targets
-     
-     Localized string for key “import.mode.replace.description.withCount” in table “Localizable.xcstrings”.
-     */
-    static func importModeReplaceDescriptionWithCount(_ arg1: Int) -> LocalizedStringResource {
-        LocalizedStringResource("import.mode.replace.description.withCount", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
+    static func importModeAppendToggleWithCount(_ arg1: Int) -> LocalizedStringResource {
+        LocalizedStringResource("import.mode.append.toggle.withCount", defaultValue: "\(arg1, specifier: "%lld")", table: "Localizable", bundle: l10nBundleDescription)
     }
 
     /**

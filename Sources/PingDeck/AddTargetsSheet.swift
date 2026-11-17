@@ -6,7 +6,7 @@ import PingCore
 struct AddTargetsSheet: View {
     @EnvironmentObject private var model: PingDeckViewModel
     @State private var text: String = ""
-    @State private var mode: ImportMode = .replace
+    @State private var appendToExisting = false
     @State private var autoPrefillText = ""
     @State private var defaultGroup = ""
     @State private var defaultColorTag: TargetColorTag?
@@ -14,6 +14,10 @@ struct AddTargetsSheet: View {
     @State private var timeout = PingSettings.default.timeout
     @State private var packetSize = PingSettings.default.packetSize
     @State private var didPrefillProbeSettings = false
+
+    private var mode: ImportMode {
+        appendToExisting ? .append : .replace
+    }
 
     private var trimmedDefaultGroup: String {
         defaultGroup.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -167,43 +171,23 @@ struct AddTargetsSheet: View {
                 didPrefillProbeSettings = true
             }
         }
-        .onChange(of: mode) { _, newMode in
-            applyModeChange(to: newMode)
+        .onChange(of: appendToExisting) { _, newValue in
+            applyModeChange(to: newValue ? .append : .replace)
         }
     }
 
+    /// 单个复选框：默认关闭即整体替换，勾选后追加到现有目标之后
     private var modeSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 10) {
-                Text(L10n.importMode)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Picker("", selection: $mode) {
-                    ForEach(ImportMode.allCases) { item in
-                        Text(item.title).tag(item)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .fixedSize()
-                Spacer()
-            }
-            Text(modeDescription)
-                .font(.caption)
-                .foregroundStyle(mode == .replace && !model.targets.isEmpty ? Color.orange : Color.secondary)
+        Toggle(isOn: $appendToExisting) {
+            Text(
+                model.targets.isEmpty
+                    ? String(localized: L10n.importModeAppendToggle)
+                    : String(localized: L10n.importModeAppendToggleWithCount(model.targets.count))
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
-    }
-
-    private var modeDescription: String {
-        switch mode {
-        case .append:
-            return String(localized: L10n.importModeAppendDescription(model.targets.count))
-        case .replace:
-            if model.targets.isEmpty {
-                return String(localized: L10n.importModeReplaceDescriptionEmpty)
-            }
-            return String(localized: L10n.importModeReplaceDescriptionWithCount(model.targets.count))
-        }
+        .toggleStyle(.checkbox)
     }
 
     /// 切换导入方式时同步编辑区回显：追加从空白开始，替换恢复现有目标列表；
