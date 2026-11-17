@@ -3193,74 +3193,50 @@
         }
       }
     },
-    "import.mode": {
-      "comment": "Bulk import mode label",
+    "import.mode.append.toggle": {
+      "comment": "Add targets: append option checkbox",
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "导入方式"
+            "value": "追加到现有目标之后，保留其统计与明细"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Import Mode"
+            "value": "Append after the existing targets, keeping their stats and history"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "インポート方法"
+            "value": "既存のターゲットの後ろに追加し、統計と履歴を保持します"
           }
         }
       }
     },
-    "import.mode.append": {
-      "comment": "Import mode: append",
+    "import.mode.append.toggle.withCount": {
+      "comment": "Add targets: append option checkbox with existing target count",
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "追加"
+            "value": "追加到现有 %lld 个目标之后，保留其统计与明细"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Append"
+            "value": "Append after the existing %lld targets, keeping their stats and history"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "追加"
-          }
-        }
-      }
-    },
-    "import.mode.replace": {
-      "comment": "Import mode: replace",
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "替换"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Replace"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "置き換え"
+            "value": "既存の %lld 件のターゲットの後ろに追加し、統計と履歴を保持します"
           }
         }
       }
@@ -3285,78 +3261,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 行に 1 つのターゲットまたは範囲を「ターゲット」または「ターゲット メモ」の形式で入力します。10.0.0.0/24、10.0.0.1-10.0.0.254、10.0.0.1-254 に対応し、1 つの範囲は最大 1024 アドレスまでです。# で始まる行は無視され、重複または不正な行はスキップされて理由が表示されます。"
-          }
-        }
-      }
-    },
-    "import.mode.append.description": {
-      "comment": "Bulk import append mode description",
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保留现有 %lld 个目标，把导入的内容追加到末尾。"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep existing targets (%lld) and append the imported content."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "既存のターゲット（%lld 件）を保持し、インポート内容を末尾に追加します。"
-          }
-        }
-      }
-    },
-    "import.mode.replace.description.empty": {
-      "comment": "Bulk import replace mode description when no existing targets",
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "用导入的内容作为完整目标列表。"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Use the imported content as the complete target list."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "インポート内容をターゲット一覧として使用します。"
-          }
-        }
-      }
-    },
-    "import.mode.replace.description.withCount": {
-      "comment": "Bulk import replace mode description with existing targets",
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⚠️ 将丢弃现有 %lld 个目标（含备注与启用状态），只保留导入的内容。"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⚠️ Discard existing targets (%lld), including notes and enabled state; keep only the imported content."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⚠️ 既存のターゲット（%lld 件）とメモ・有効状態を破棄し、インポート内容のみを残します。"
           }
         }
       }

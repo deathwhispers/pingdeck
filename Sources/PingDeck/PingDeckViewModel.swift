@@ -87,20 +87,11 @@ struct AppAlert: Identifiable {
 }
 
 /// 批量导入时的处理方式
-enum ImportMode: String, CaseIterable, Identifiable {
+enum ImportMode {
     /// 保留现有目标，追加新目标
     case append
     /// 丢弃现有目标，用导入内容整体替换
     case replace
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .append: return String(localized: L10n.importModeAppend)
-        case .replace: return String(localized: L10n.importModeReplace)
-        }
-    }
 }
 
 final class PingDeckViewModel: ObservableObject {
